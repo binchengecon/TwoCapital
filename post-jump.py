@@ -1,3 +1,4 @@
+# Optimization of poat jump HJB
 #Required packages
 import os
 import sys
@@ -19,19 +20,11 @@ reporterror = True
 # petsc: matrix assembled in C
 # petsc4py: matrix assembled in Python
 # eigen: matrix assembled in C++
-# both: petsc+eigen
-# both=eigen+petsc
+# both: petsc+petsc4py
 #
 linearsolver = 'petsc'
 
-# Damage function choices
-damageSpec = 'Weighted'  # Choose among "High"(Weitzman), 'Low'(Nordhaus) and 'Weighted' (arithmeticAverage of the two)
-
-
 write_test = False
-# Ambiguity Averse Paramter
-# We stored solutions for ξp =  1 / 4000 to which we referred as "Ambiguity Averse" and ξp = 1000 as “Ambiguity Neutral” in the paper
-# Sensible choices are from 0.0002 to 4000, while for parameters input over 0.01 the final results won't alter as much
 if write_test:
     f = open("test-log.txt", 'a')
 
@@ -292,53 +285,10 @@ while FC_Err > tol and epoch < max_iter:
 
     D = delta * np.log(consumption)  - (gamma_1 + gamma_2 * Y_mat)* beta_f * eta * A_d * Kd_mat  - 0.5 * gamma_2 * (varsigma * eta * A_d * Kd_mat)**2
 
-    if linearsolver == 'eigen' or linearsolver == 'both':
-        start_eigen = time.time()
-        out_eigen = PDESolver(stateSpace, A, B_d, B_g, B_y, C_dd, C_gg, C_yy, D, v0, epsilon, -12,  solverType = 'False Transient')
-        out_comp = out_eigen[2].reshape(v0.shape,order = "F")
-        print("Eigen solver: {:3f}s".format(time.time() - start_eigen))
-        if epoch % 1 == 0 and reporterror:
-            v = np.array(out_eigen[2])
-            res = np.linalg.norm(out_eigen[3].dot(v) - out_eigen[4])
-            print("Eigen residual norm: {:g}; iterations: {}".format(res, out_eigen[0]))
-            PDE_rhs = A * v0 + B_d * dKd + B_g * dKg + B_y * dY + C_dd * ddKd + C_gg * ddKg + C_yy * ddY + D
-            PDE_Err = np.max(abs(PDE_rhs))
-            FC_Err = np.max(abs((out_comp - v0) / epsilon))
-            print("Epoch {:d} (Eigen): PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch, PDE_Err, FC_Err))
 
     if linearsolver == 'petsc4py':
         bpoint1 = time.time()
         # ==== original impl ====
-        # Transforming the 3-d coefficient matrix to 1-dimensional
-        # A = A.reshape(-1,1,order = 'F')
-        # B = np.hstack([B_r.reshape(-1,1,order = 'F'),B_f.reshape(-1,1,order = 'F'),B_k.reshape(-1,1,order = 'F')])
-        # C = np.hstack([C_rr.reshape(-1,1,order = 'F'), C_ff.reshape(-1,1,order = 'F'), C_kk.reshape(-1,1,order = 'F')])
-        # D = D.reshape(-1,1,order = 'F')
-        # v0 = v0.reshape(-1,1,order = 'F')
-        # B_r = B_r.ravel(order = 'F')
-        # B_f = B_f.ravel(order = 'F')
-        # B_k = B_k.ravel(order = 'F')
-        # D = D.ravel(order = 'F')
-        # v0 = v0.ravel(order = 'F')
-        # B_plus = np.maximum(B, np.zeros(B.shape))
-        # B_minus = np.minimum(B, np.zeros(B.shape))
-        # diag_0 = (A[:,0] - 1 / ε
-        #         + (I_LB_R * B[:,0] / -dVec[0] + I_UB_R * B[:,0] / dVec[0] - (1 - I_LB_R - I_UB_R) * (B_plus[:,0] - B_minus[:,0]) / dVec[0] + (I_LB_R * C[:,0] + I_UB_R * C[:,0] - 2 * (1 - I_LB_R - I_UB_R) * C[:,0]) / dVec[0] ** 2)
-        #         + (I_LB_F * B[:,1] / -dVec[1] + I_UB_F * B[:,1] / dVec[1] - (1 - I_LB_F - I_UB_F) * (B_plus[:,1] - B_minus[:,1]) / dVec[1] + (I_LB_F * C[:,1] + I_UB_F * C[:,1] - 2 * (1 - I_LB_F - I_UB_F) * C[:,1]) / dVec[1] ** 2)
-        #         + (I_LB_K * B[:,2] / -dVec[2] + I_UB_K * B[:,2] / dVec[2] - (1 - I_LB_K - I_UB_K) * (B_plus[:,2] - B_minus[:,2]) / dVec[2] + (I_LB_K * C[:,2] + I_UB_K * C[:,2] - 2 * (1 - I_LB_K - I_UB_K) * C[:,2]) / dVec[2] ** 2))
-        # diag_R = (I_LB_R * B[:,0] / dVec[0] + (1 - I_LB_R - I_UB_R) * B_plus[:,0] / dVec[0] - 2 * I_LB_R * C[:,0] / dVec[0] ** 2 + (1 - I_LB_R - I_UB_R) * C[:,0] / dVec[0] ** 2)
-        # diag_Rm = (I_UB_R * B[:,0] / -dVec[0] - (1 - I_LB_R - I_UB_R) * B_minus[:,0] / dVec[0] - 2 * I_UB_R * C[:,0] / dVec[0] ** 2 + (1 - I_LB_R - I_UB_R) * C[:,0] / dVec[0] ** 2)
-        # diag_F = (I_LB_F * B[:,1] / dVec[1] + (1 - I_LB_F - I_UB_F) * B_plus[:,1] / dVec[1] - 2 * I_LB_F * C[:,1] / dVec[1] ** 2 + (1 - I_LB_F - I_UB_F) * C[:,1] / dVec[1] ** 2)
-        # diag_Fm = (I_UB_F * B[:,1] / -dVec[1] - (1 - I_LB_F - I_UB_F) * B_minus[:,1] / dVec[1] - 2 * I_UB_F * C[:,1] / dVec[1] ** 2 + (1 - I_LB_F - I_UB_F) * C[:,1] / dVec[1] ** 2)
-        # diag_K = (I_LB_K * B[:,2] / dVec[2] + (1 - I_LB_K - I_UB_K) * B_plus[:,2] / dVec[2] - 2 * I_LB_K * C[:,2] / dVec[2] ** 2 + (1 - I_LB_K - I_UB_K) * C[:,2] / dVec[2] ** 2)
-        # diag_Km = (I_UB_K * B[:,2] / -dVec[2] - (1 - I_LB_K - I_UB_K) * B_minus[:,2] / dVec[2] - 2 * I_UB_K * C[:,2] / dVec[2] ** 2 + (1 - I_LB_K - I_UB_K) * C[:,2] / dVec[2] ** 2)
-        # diag_RR = I_LB_R * C[:,0] / dVec[0] ** 2
-        # diag_RRm = I_UB_R * C[:,0] / dVec[0] ** 2
-        # diag_FF = I_LB_F * C[:,1] / dVec[1] ** 2
-        # diag_FFm = I_UB_F * C[:,1] / dVec[1] ** 2
-        # diag_KK = I_LB_K * C[:,2] / dVec[2] ** 2
-        # diag_KKm = I_UB_K * C[:,2] / dVec[2] ** 2
-
         B_d_1d = B_d.ravel(order = 'F')
         B_g_1d = B_g.ravel(order = 'F')
         B_y_1d = B_y.ravel(order = 'F')
@@ -438,20 +388,6 @@ while FC_Err > tol and epoch < max_iter:
         # bpoint3 = time.time()
         # print("form rhs and workvector: {:.3f}s".format(bpoint3 - bpoint2))
 
-        # compare
-        # ai, aj, av = petsc_mat.getValuesCSR()
-        # A_sp = csr_matrix((av, aj, ai),shape=petsc_mat.size)
-        # A_diff =  np.max(np.abs(out_eigen[3] - A_sp))
-        # print("Coefficient matrix difference: {:.3f}".format(A_diff))
-        # b_diff = np.max(np.abs(out_eigen[4] - np.squeeze(b)))
-        # print("rhs difference: {:.3f}".format(b_diff))
-
-        # dump to files
-        # x.set(0)
-        # viewer = PETSc.Viewer().createBinary('TCRE_MacDougallEtAl2017_A.dat', 'w')
-        #petsc_mat.view(viewer)
-        #viewer = PETSc.Viewer().createBinary('TCRE_MacDougallEtAl2017_b.dat', 'w')
-        #petsc_rhs.view(viewer)
 
         # create linear solver
         start_ksp = time.time()
