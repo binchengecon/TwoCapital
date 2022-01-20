@@ -177,7 +177,7 @@ if smart_guess:
     ε = 0.2
 
 max_iter = 20_000
-file_iter = open("iter_c_compile.txt", "w")
+# file_iter = open("iter_c_compile.txt", "w")
 while FC_Err > tol and episode < max_iter:
     print("-----------------------------------")
     print("---------Episode {}---------------".format(episode))
@@ -398,35 +398,6 @@ while FC_Err > tol and episode < max_iter:
     if linearsolver == 'petsc4py':
         bpoint1 = time.time()
         # ==== original impl ====
-        # Transforming the 3-d coefficient matrix to 1-dimensional
-        # A = A.reshape(-1,1,order = 'F')
-        # B = np.hstack([B_r.reshape(-1,1,order = 'F'),B_f.reshape(-1,1,order = 'F'),B_k.reshape(-1,1,order = 'F')])
-        # C = np.hstack([C_rr.reshape(-1,1,order = 'F'), C_ff.reshape(-1,1,order = 'F'), C_kk.reshape(-1,1,order = 'F')])
-        # D = D.reshape(-1,1,order = 'F')
-        # v0 = v0.reshape(-1,1,order = 'F')
-        # B_r = B_r.ravel(order = 'F')
-        # B_f = B_f.ravel(order = 'F')
-        # B_k = B_k.ravel(order = 'F')
-        # D = D.ravel(order = 'F')
-        # v0 = v0.ravel(order = 'F')
-        # B_plus = np.maximum(B, np.zeros(B.shape))
-        # B_minus = np.minimum(B, np.zeros(B.shape))
-        # diag_0 = (A[:,0] - 1 / ε
-        #         + (I_LB_R * B[:,0] / -dVec[0] + I_UB_R * B[:,0] / dVec[0] - (1 - I_LB_R - I_UB_R) * (B_plus[:,0] - B_minus[:,0]) / dVec[0] + (I_LB_R * C[:,0] + I_UB_R * C[:,0] - 2 * (1 - I_LB_R - I_UB_R) * C[:,0]) / dVec[0] ** 2)
-        #         + (I_LB_F * B[:,1] / -dVec[1] + I_UB_F * B[:,1] / dVec[1] - (1 - I_LB_F - I_UB_F) * (B_plus[:,1] - B_minus[:,1]) / dVec[1] + (I_LB_F * C[:,1] + I_UB_F * C[:,1] - 2 * (1 - I_LB_F - I_UB_F) * C[:,1]) / dVec[1] ** 2)
-        #         + (I_LB_K * B[:,2] / -dVec[2] + I_UB_K * B[:,2] / dVec[2] - (1 - I_LB_K - I_UB_K) * (B_plus[:,2] - B_minus[:,2]) / dVec[2] + (I_LB_K * C[:,2] + I_UB_K * C[:,2] - 2 * (1 - I_LB_K - I_UB_K) * C[:,2]) / dVec[2] ** 2))
-        # diag_R = (I_LB_R * B[:,0] / dVec[0] + (1 - I_LB_R - I_UB_R) * B_plus[:,0] / dVec[0] - 2 * I_LB_R * C[:,0] / dVec[0] ** 2 + (1 - I_LB_R - I_UB_R) * C[:,0] / dVec[0] ** 2)
-        # diag_Rm = (I_UB_R * B[:,0] / -dVec[0] - (1 - I_LB_R - I_UB_R) * B_minus[:,0] / dVec[0] - 2 * I_UB_R * C[:,0] / dVec[0] ** 2 + (1 - I_LB_R - I_UB_R) * C[:,0] / dVec[0] ** 2)
-        # diag_F = (I_LB_F * B[:,1] / dVec[1] + (1 - I_LB_F - I_UB_F) * B_plus[:,1] / dVec[1] - 2 * I_LB_F * C[:,1] / dVec[1] ** 2 + (1 - I_LB_F - I_UB_F) * C[:,1] / dVec[1] ** 2)
-        # diag_Fm = (I_UB_F * B[:,1] / -dVec[1] - (1 - I_LB_F - I_UB_F) * B_minus[:,1] / dVec[1] - 2 * I_UB_F * C[:,1] / dVec[1] ** 2 + (1 - I_LB_F - I_UB_F) * C[:,1] / dVec[1] ** 2)
-        # diag_K = (I_LB_K * B[:,2] / dVec[2] + (1 - I_LB_K - I_UB_K) * B_plus[:,2] / dVec[2] - 2 * I_LB_K * C[:,2] / dVec[2] ** 2 + (1 - I_LB_K - I_UB_K) * C[:,2] / dVec[2] ** 2)
-        # diag_Km = (I_UB_K * B[:,2] / -dVec[2] - (1 - I_LB_K - I_UB_K) * B_minus[:,2] / dVec[2] - 2 * I_UB_K * C[:,2] / dVec[2] ** 2 + (1 - I_LB_K - I_UB_K) * C[:,2] / dVec[2] ** 2)
-        # diag_RR = I_LB_R * C[:,0] / dVec[0] ** 2
-        # diag_RRm = I_UB_R * C[:,0] / dVec[0] ** 2
-        # diag_FF = I_LB_F * C[:,1] / dVec[1] ** 2
-        # diag_FFm = I_UB_F * C[:,1] / dVec[1] ** 2
-        # diag_KK = I_LB_K * C[:,2] / dVec[2] ** 2
-        # diag_KKm = I_UB_K * C[:,2] / dVec[2] ** 2
 
         B_r_1d = B_r.ravel(order = 'F')
         B_f_1d = B_f.ravel(order = 'F')
@@ -454,12 +425,6 @@ while FC_Err > tol and episode < max_iter:
         # The transpose of matrix A_sp is the desired. Create the csc matrix so that it can be used directly as the transpose of the corresponding csr matrix.
         A_sp = spdiags(data, diags, len(diag_0), len(diag_0), format='csc')
         b = -v0_1d/ε - D_1d
-        # A_sp = spdiags(data, diags, len(diag_0), len(diag_0))
-        # A_sp = csr_matrix(A_sp.T)
-        # b = -v0/ε - D
-        # profiling
-        # bpoint4 = time.time()
-        # print("create matrix and rhs: {:.3f}s".format(bpoint4 - bpoint3))
         petsc_mat = PETSc.Mat().createAIJ(size=A_sp.shape, csr=(A_sp.indptr, A_sp.indices, A_sp.data))
         petsc_rhs = PETSc.Vec().createWithArray(b)
         x = petsc_mat.createVecRight()
@@ -467,12 +432,6 @@ while FC_Err > tol and episode < max_iter:
         # bpoint5 = time.time()
         # print("assemble: {:.3f}s".format(bpoint5 - bpoint4))
 
-        # dump to files
-        #x.set(0)
-        #viewer = PETSc.Viewer().createBinary('TCRE_MacDougallEtAl2017_A.dat', 'w')
-        #petsc_mat.view(viewer)
-        #viewer = PETSc.Viewer().createBinary('TCRE_MacDougallEtAl2017_b.dat', 'w')
-        #petsc_rhs.view(viewer)
 
         # create linear solver
         start_ksp = time.time()
@@ -493,18 +452,6 @@ while FC_Err > tol and episode < max_iter:
             PDE_Err = np.max(abs(PDE_rhs))
             FC_Err = np.max(abs((out_comp - v0)))
             print("Episode {:d} (PETSc): PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(episode, PDE_Err, FC_Err))
-            # profling
-            # bpoint7 = time.time()
-            # print("compute error: {:.3f}s".format(bpoint7 - bpoint6))
-        # if linearsolver == 'both':
-            # compare
-            # csr_mat = csr_mat*(-ε)
-            # b = b*(-ε)
-            # A_diff =  np.max(np.abs(out_eigen[3] - csr_mat))
-            #
-            # print("Coefficient matrix difference: {:.3f}".format(A_diff))
-            # b_diff = np.max(np.abs(out_eigen[4] - np.squeeze(b)))
-            # print("rhs difference: {:.3f}".format(b_diff))
 
     if linearsolver == 'petsc' or linearsolver == 'both':
         bpoint1 = time.time()
@@ -527,20 +474,6 @@ while FC_Err > tol and episode < max_iter:
         # bpoint3 = time.time()
         # print("form rhs and workvector: {:.3f}s".format(bpoint3 - bpoint2))
 
-        # compare
-        # ai, aj, av = petsc_mat.getValuesCSR()
-        # A_sp = csr_matrix((av, aj, ai),shape=petsc_mat.size)
-        # A_diff =  np.max(np.abs(out_eigen[3] - A_sp))
-        # print("Coefficient matrix difference: {:.3f}".format(A_diff))
-        # b_diff = np.max(np.abs(out_eigen[4] - np.squeeze(b)))
-        # print("rhs difference: {:.3f}".format(b_diff))
-
-        # dump to files
-        # x.set(0)
-        # viewer = PETSc.Viewer().createBinary('TCRE_MacDougallEtAl2017_A.dat', 'w')
-        #petsc_mat.view(viewer)
-        #viewer = PETSc.Viewer().createBinary('TCRE_MacDougallEtAl2017_b.dat', 'w')
-        #petsc_rhs.view(viewer)
 
         # create linear solver
         start_ksp = time.time()
