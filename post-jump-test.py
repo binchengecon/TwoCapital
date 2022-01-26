@@ -136,7 +136,7 @@ lowerLims = np.array([Kd_min, Kg_min, Y_min], dtype=np.float64)
 upperLims = np.array([Kd_max, Kg_max, Y_max], dtype=np.float64)
 
 
-v0 = np.log(Kd_mat + Kg_mat) - beta_f * Y_mat - beta_f * eta * A_d * Kd_mat
+v0 = np.log(Kd_mat * Kd_max + Kg_mat * Kg_max) - beta_f * Y_mat - beta_f * eta * A_d * Kd_mat * Kd_max
 # import pickle
 # data = pickle.load(open("data/res_13-1-37", "rb"))
 # v0 = data["v0"]
