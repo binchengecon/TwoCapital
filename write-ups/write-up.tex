@@ -139,8 +139,62 @@ FOC
 	i_g =& \frac{1}{\phi_g} - \frac{mc}{\phi_g v_g}
 \end{align*}
 
+\begin{gather*}
+	X = [\log K, L, Y]',  \quad \log K = \log(K_d + K_g), \quad  L = \log K_g - \log K_d\\
+	R = \frac{K_g}{K_d + K_g} = \frac{\exp(L)}{1 + \exp(L)} 
+\end{gather*}
 
-Preliminary results: set $i_d = i_g = 0$, no optimization
+\begin{align*}
+	\dif (K_{d} + K_g) =& \left([\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}] K_d + [\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}] K_g \right)\dif t+\left(\sigma_{d}K_d + \sigma_g K_g \right)\dif W\\
+		\dif K / K =&  \left([\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}] (1 - R) + [\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}] R \right) \dif t+\left(\sigma_{d}(1 - R)+ \sigma_g R \right)\dif W \\
+		\dif \log K =& \left([\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}] (1 - R) + [\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}] R - \frac{\mid\sigma_{d}(1 - R)+ \sigma_g R \mid
+		^2}{2} \right) \dif t\\
+		 &+\left(\sigma_{d}(1 - R)+ \sigma_g R \right)\dif W
+\end{align*}
+
+\begin{align*}
+	\dif L = \dif (\log K_g - \log K_d) = \left( (\alpha_g + i_d  - \frac{\phi_{g}}{2}i_g^2) -  (\alpha + i_d - \frac{\phi_d}{2} i_d^2)\right) \dif t  + (\sigma_g - \sigma_d) \dif W
+\end{align*}
+
+\begin{align*}
+ 	\dif Y = \eta A_d   (1 - R) K ( \beta_f \dif t +  \varsigma \dif W)
+\end{align*}
+
+\begin{align*}
+	\delta v(\log K, L,  Y; A_g') & =\max_{i_{g},i_{d} }\delta \log((A_d - i_d) (1 - R) + (A_g' - i_g)R  ) + \delta \log K \\
+	& +\left(\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\} (1 - R)+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\} R  - \frac{\mid\sigma_{d}(1 - R)+ \sigma_g R \mid
+		^2}{2}\right) v_k  \\
+	&+\frac{\mid \sigma_{d} (1 - R) + \sigma_g R\mid^2}{2}v_{kk}\\
+	&+ \left( (\alpha_g + i_g  - \frac{\phi_{g}}{2}i_g^2) -  (\alpha + i_d - \frac{\phi_d}{2} i_d^2)\right) v_l \\
+	& +\beta_{f} (\eta A_d (1 - R) K )v_{Y}+\frac{1}{2}\varsigma^{2}(\eta A_d  (1 - R) K)^{2}v{}_{YY} \\
+	&- [\{\gamma_{1}+\gamma_{2}Y_{t}\}\beta_{f}(\eta A_d(1 - R)K)+\frac{\gamma_2}{2}\varsigma^{2}(\eta A_d (1 - R) K)^{2}]
+\end{align*}
+
+
+\begin{align*}
+	\delta v(\log K, R,  Y; A_g') & =\max_{i_{g},i_{d} }\delta \log((A_d - i_d) (1 - R) + (A_g' - i_g)R  ) + \delta \log K \\
+	& +\left(\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\} (1 - R)+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\} R  - \frac{\mid\sigma_{d}(1 - R)+ \sigma_g R \mid
+		^2}{2}\right) v_k  \\
+	&+\frac{\mid \sigma_{d} (1 - R) + \sigma_g R\mid^2}{2}v_{kk}\\
+	&+ \left( (\alpha_g + i_g  - \frac{\phi_{g}}{2}i_g^2) -  (\alpha + i_d - \frac{\phi_d}{2} i_d^2)\right) \left[ R(1 - R)\right] v_r \\
+	& +\beta_{f} (\eta A_d (1 - R) K )v_{Y}+\frac{1}{2}\varsigma^{2}(\eta A_d  (1 - R) K)^{2}v{}_{YY} \\
+	&- [\{\gamma_{1}+\gamma_{2}Y_{t}\}\beta_{f}(\eta A_d(1 - R)K)+\frac{\gamma_2}{2}\varsigma^{2}(\eta A_d (1 - R) K)^{2}]
+\end{align*}
+
+FOC
+\begin{align*}
+	mc = \delta ((A_d - i_d) (1 - R) + (A_g' - i_g)R )^{-1}
+\end{align*}
+
+\begin{align*}
+	mc  =& (1 - \phi_d i_d) \left(( v_k - R v_r \right) &\Rightarrow i_d &= \frac{1}{\phi_d} \left[ 1 - \frac{ mc}{v_k  - R v_r }\right] \\
+	mc =& (1 - \phi_g i_g) \left(v_k + (1 - R) v_l\right) &\Rightarrow i_g &= \frac{1}{\phi_g}\left[1 - \frac{ mc}{v_k + (1 - R) v_r}\right]
+\end{align*}
+
+
+\subsection{tests}
+
+\subsubsection{Preliminary results: try $i_d = i_g = 0$, no optimization}
 
 \begin{figure}[H]
 	\centering
@@ -154,24 +208,33 @@ Preliminary results: set $i_d = i_g = 0$, no optimization
 \begin{subfigure}{0.45\textwidth}
 	\includegraphics[width=\textwidth]{../figures/v-Y.pdf}
 \end{subfigure}
-\caption{Results for value function}
+\caption{Results for value function, $i_d= 0, i_g=0$}
 \end{figure}
 
+\subsubsection{steady state}
+try set
+\begin{align*}
+	\alpha_d + i_d - \frac{\phi_d}{2} i_d^2 = 0 \Rightarrow i_d^* = 0.022\\
+	\alpha_g + i_g - \frac{\phi_g}{2} i_g^2 = 0 \Rightarrow i_g^* = 0.022
+\end{align*}
 
-%\begin{figure}[H]
-%	\centering
-%	\begin{subfigure}{0.4\textwidth}
-%		\includegraphics[width=\textwidth]{../figures/id-Kd.pdf}
-%	\end{subfigure}
-%	\hspace{\fill}
-%	\begin{subfigure}{0.4\textwidth}
-%		\includegraphics[width=\textwidth]{../figures/id-Kg.pdf}
-%	\end{subfigure}
-%	\begin{subfigure}{0.4\textwidth}
-%		\includegraphics[width=\textwidth]{../figures/id-Y.pdf}
-%	\end{subfigure}
-%	\caption{Results for dirty investment}
-%\end{figure}
+
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{0.4\textwidth}
+		\includegraphics[width=\textwidth]{../figures/v-Kd-stat.pdf}
+	\end{subfigure}
+	\hspace{\fill}
+	\begin{subfigure}{0.4\textwidth}
+		\includegraphics[width=\textwidth]{../figures/v-Kg-stat.pdf}
+	\end{subfigure}
+	\begin{subfigure}{0.4\textwidth}
+		\includegraphics[width=\textwidth]{../figures/v-Y-stat.pdf}
+	\end{subfigure}
+	\caption{Results for value function,  $i_d^* = 0.022, i_g^*=0.022$}
+\end{figure}
+
 %
 %\begin{figure}[H]
 %	\centering

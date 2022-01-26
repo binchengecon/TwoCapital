@@ -30,7 +30,7 @@ if write_test:
 
 
 current_time = datetime.now()
-filename =  "res" + '_' + "{:d}-{:d}-{:d}".format(current_time.day, current_time.hour, current_time.minute)
+filename =  "res-steady-invest" + '_' + "{:d}-{:d}-{:d}".format(current_time.day, current_time.hour, current_time.minute)
 
 if write_test:
     f.write("Script starts: {:d}/{:d}-{:d}:{:d}\n".format(current_time.month, current_time.day, current_time.hour, current_time.minute))
@@ -103,7 +103,7 @@ lam_max = 0.1
 hlam = 0.01
 
 # hR = 0.05
-hY  = 0.05 # make sure it is float instead of int
+hY  = 0.1 # make sure it is float instead of int
 hKd = 100.
 hKg = 100.
 
@@ -112,8 +112,10 @@ hKg = 100.
 Y = np.arange(Y_min, Y_max + hY, hY)
 nY = len(Y)
 Kd = np.arange(Kd_min, Kd_max + hKd, hKd)
+Kd = Kd / Kd_max
 nKd = len(Kd)
 Kg = np.arange(Kg_min, Kg_max + hKg, hKg)
+Kg = Kg / Kg_max
 nKg = len(Kg)
 lam = np.arange(lam_min, lam_max + hlam, hlam)
 nlam = len(lam)
@@ -142,10 +144,10 @@ v0 = np.log(Kd_mat + Kg_mat) - beta_f * Y_mat - beta_f * eta * A_d * Kd_mat
 FC_Err = 1
 epoch = 0
 tol = 1e-6
-epsilon = 0.001
+epsilon = 0.1
 fraction = 0.1
 
-max_iter = 40000
+max_iter = 20000
 # file_iter = open("iter_c_compile.txt", "w")
 while FC_Err > tol and epoch < max_iter:
     print("-----------------------------------")
@@ -158,7 +160,7 @@ while FC_Err > tol and epoch < max_iter:
     dKd = finiteDiff(v0,0,1,hKd)
     # dKd[dKd < 1e-8] = 1e-8
     dKg = finiteDiff(v0,1,1,hKg)
-    # dKg[dKg < 1e-8] = 1e-8
+    dKg[dKg < 1e-8] = 1e-8
     dY = finiteDiff(v0,2,1,hY)
     ######## second order
     ddKd = finiteDiff(v0,0,2,hKd)
@@ -175,13 +177,13 @@ while FC_Err > tol and epoch < max_iter:
     if epoch == 0:
         # i_d = np.zeros(Kd_mat.shape)
         # i_g = np.zeros(Kg_mat.shape)
-        consumption_0 = A_d * Kd_mat + A_g * Kg_mat
+        consumption_0 = A_d * Kd_mat * Kd_max + A_g * Kg_mat * Kg_max
         consumption = consumption_0
         mc = delta / consumption
-        i_d = 1 / phi_d - mc / phi_d / dKd
+        i_d = 1 / phi_d - mc / phi_d / dKd * Kd_max
         i_d[i_d < 0] = 0
         i_d[i_d > A_d] = A_d
-        i_g = 1 / phi_g - mc / phi_g / dKg
+        i_g = 1 / phi_g - mc / phi_g / dKg * Kg_max
         i_g[i_g < 0] = 0
         i_g[i_g > A_g] = A_g
     else:
@@ -194,14 +196,14 @@ while FC_Err > tol and epoch < max_iter:
         converge = False
         while not converge:
 
-            id_new = (1 / phi_d - mc / phi_d / dKd) * fraction + i_d * (1 - fraction)
+            id_new = (1 / phi_d - mc / phi_d / dKd * Kd_max) * fraction + i_d * (1 - fraction)
             id_new[id_new < 0] = 0
-            # id_new[id_new > A_d] = A_d
-            ig_new = (1 / phi_g - mc / phi_g / dKg) * fraction + i_g * (1 - fraction)
+            id_new[id_new > A_d] = A_d
+            ig_new = (1 / phi_g - mc / phi_g / dKg * Kg_max) * fraction + i_g * (1 - fraction)
             ig_new[ig_new < 0] = 0
-            # ig_new[ig_new > A_g] = A_g
+            ig_new[ig_new > A_g] = A_g
 
-            mc_new = fraction * delta / ((A_d -id_new) * Kd_mat + (A_g - ig_new) * Kg_mat) + mc * (1 - fraction)
+            mc_new = fraction * delta / ((A_d -id_new) * Kd_mat * Kd_max + (A_g - ig_new) * Kg_mat * Kg_max) + mc * (1 - fraction)
             i_d = id_new
             i_g = ig_new
             diff = np.max(np.abs(mc - mc_new) / fraction)
@@ -213,13 +215,16 @@ while FC_Err > tol and epoch < max_iter:
                 pass
             nums += 1
 
-        print(diff)
+        # print(diff)
+
     print(np.min(i_d), np.min(i_g))
+    # i_d = (1 / 8 - np.sqrt(0.68) / 8) * np.ones(Kd_mat.shape)
+    # i_g = (1 / 8 - np.sqrt(0.68) / 8) * np.ones(Kg_mat.shape)
     # i_d = np.zeros(Kd_mat.shape)
     # i_g = np.zeros(Kg_mat.shape)
     # i_d[i_d < 0] = 0
     # i_g[i_g < 0] = 0
-    consumption = ((A_d -i_d) * Kd_mat + (A_g - i_g) * Kg_mat)*fraction + consumption * (1 - fraction)
+    consumption = ((A_d -i_d) * Kd_mat * Kd_max + (A_g - i_g) * Kg_mat * Kg_max)*fraction + consumption * (1 - fraction)
     consumption[consumption < 1e-8] = 1e-8
     # i_d[i_d >= A_d] = A_d - 1e-8
     # i_g[i_g >= A_g] = A_g - 1e-8
@@ -233,7 +238,7 @@ while FC_Err > tol and epoch < max_iter:
         A = - delta * np.ones(Kd_mat.shape)
         C_dd = 0.5 * sigma_d**2 * Kd_mat**2
         C_gg = 0.5 * sigma_g**2 * Kg_mat**2
-        C_yy = 0.5 * (eta * varsigma * A_d * Kd_mat)** 2
+        C_yy = 0.5 * (eta * varsigma * A_d * Kd_mat * Kd_max)** 2
         if linearsolver == 'petsc4py' or linearsolver == 'petsc' or linearsolver == 'both':
             petsc_mat = PETSc.Mat().create()
             petsc_mat.setType('aij')
@@ -281,9 +286,9 @@ while FC_Err > tol and epoch < max_iter:
 
     B_d = (alpha_d + i_d - 0.5 * phi_d * i_d**2) * Kd_mat
     B_g = (alpha_g + i_g - 0.5 * phi_g * i_g**2) * Kg_mat
-    B_y = beta_f * eta * A_d * Kd_mat
+    B_y = beta_f * eta * A_d * Kd_mat * Kd_max
 
-    D = delta * np.log(consumption)  - (gamma_1 + gamma_2 * Y_mat)* beta_f * eta * A_d * Kd_mat  - 0.5 * gamma_2 * (varsigma * eta * A_d * Kd_mat)**2
+    D = delta * np.log(consumption)  - (gamma_1 + gamma_2 * Y_mat)* beta_f * eta * A_d * Kd_mat * Kd_max  - 0.5 * gamma_2 * (varsigma * eta * A_d * Kd_mat * Kd_max)**2
 
 
     if linearsolver == 'petsc4py':
@@ -426,7 +431,7 @@ if write_test:
     f.write("Fianal epoch {:d}: PDE Error: {:.10f}; False Transient Error: {:.10f}\n" .format(epoch -1, PDE_Err, FC_Err))
     f.write("--- Total running time: %s seconds ---\n" % (time.time() - start_time))
 
-exit()
+# exit()
 
 import pickle
 # filename = filename

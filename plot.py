@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 mpl.rcParams["savefig.bbox"] = "tight"
 
-with open("data/res_14-14-42", "rb") as file:
+with open("data/res_25-11-55", "rb") as file:
     data = pickle.load(file)
 
 Kd = data["Kd"]
@@ -15,40 +15,41 @@ i_d = data["i_d"]
 i_g = data["i_g"]
 v = data["v0"]
 
+print(v.shape)
 # fig 1
 plt.figure()
 plt.title("value function - dirty capital")
-plt.plot(Kd, v[:,25,20], label="$K_g = {:d}, Y = {:.2f}$".format(int(Kg[25]), Y[20]))
+plt.plot(Kd, v[:, 10,20], label="$K_g = {:d}, Y = {:.2f}$".format(int(Kg[10]), Y[20]))
 plt.xlabel("$K_d$")
 plt.ylabel("v")
 plt.legend()
-# plt.savefig("./figures/v-Kd.pdf")
+# plt.savefig("./figures/v-Kd-stat.pdf")
 plt.show()
 
 # fig 2
 plt.figure()
 plt.title("value function - green capital")
-plt.plot(Kg, v[25,:,20], label="$K_d = {:d}, Y = {:.2f}$".format(int(Kd[25]), Y[20]))
+plt.plot(Kg, v[10,:,20], label="$K_d = {:d}, Y = {:.2f}$".format(int(Kd[10]), Y[20]))
 plt.xlabel("$K_g$")
 plt.ylabel("v")
 plt.legend()
-# plt.savefig("./figures/v-Kg.pdf")
+# plt.savefig("./figures/v-Kg-stat.pdf")
 plt.show()
 
 # fig 3
 plt.figure()
 plt.title("value function - temperature")
-plt.plot(Y, v[25,25,:], label="$K_d = {:d}, K_g = {:d}$".format(int(Kd[25]), int(Kg[25])))
+plt.plot(Y, v[10,10,:], label="$K_d = {:d}, K_g = {:d}$".format(int(Kd[10]), int(Kg[10])))
 plt.xlabel("$Y$")
 plt.ylabel("v")
 plt.legend()
-# plt.savefig("./figures/v-Y.pdf")
+# plt.savefig("./figures/v-Y-stat.pdf")
 plt.show()
 
 # fig 1
 plt.figure()
 plt.title("dirty investment - dirty capital")
-plt.plot(Kd, i_d[:,25,20], label="$K_g = {:d}, Y = {:.2f}$".format(int(Kg[25]), Y[20]))
+plt.plot(Kd, i_d[:,10,10], label="$K_g = {:d}, Y = {:.2f}$".format(int(Kg[10]), Y[10]))
 plt.xlabel("$K_d$")
 plt.ylabel("$i_d$")
 plt.legend()
@@ -58,7 +59,7 @@ plt.show()
 # fig 2
 plt.figure()
 plt.title("dirty investment - green capital")
-plt.plot(Kg, i_d[25,:,20], label="$K_d = {:d}, Y = {:.2f}$".format(int(Kd[25]), Y[20]))
+plt.plot(Kg, i_d[10,:,10], label="$K_d = {:d}, Y = {:.2f}$".format(int(Kd[10]), Y[10]))
 plt.xlabel("$K_g$")
 plt.ylabel("$i_d$")
 plt.legend()
@@ -68,7 +69,7 @@ plt.show()
 # fig 3
 plt.figure()
 plt.title("dirty investment - temperature")
-plt.plot(Y, i_d[25,25,:], label="$K_d = {:d}, K_g = {:d}$".format(int(Kd[25]), int(Kg[25])))
+plt.plot(Y, i_d[10,10,:], label="$K_d = {:d}, K_g = {:d}$".format(int(Kd[10]), int(Kg[10])))
 plt.xlabel("$Y$")
 plt.ylabel("$i_d$")
 plt.legend()
@@ -79,7 +80,7 @@ plt.show()
 # fig 1
 plt.figure()
 plt.title("green investment - dirty capital")
-plt.plot(Kd, i_g[:,25,20], label="$K_g = {:d}, Y = {:.2f}$".format(int(Kg[25]), Y[20]))
+plt.plot(Kd, i_g[:,10,10], label="$K_g = {:d}, Y = {:.2f}$".format(int(Kg[10]), Y[10]))
 plt.xlabel("$K_d$")
 plt.ylabel("$i_g$")
 plt.legend()
@@ -89,7 +90,7 @@ plt.show()
 # fig 2
 plt.figure()
 plt.title("green investment - green capital")
-plt.plot(Kg, i_g[25,:,20], label="$K_d = {:d}, Y = {:.2f}$".format(int(Kd[25]), Y[20]))
+plt.plot(Kg, i_g[10,:,10], label="$K_d = {:d}, Y = {:.2f}$".format(int(Kd[10]), Y[10]))
 plt.xlabel("$K_g$")
 plt.ylabel("$i_g$")
 plt.legend()
@@ -99,7 +100,7 @@ plt.show()
 # fig 3
 plt.figure()
 plt.title("green investment - temperature")
-plt.plot(Y, i_g[25,25,:], label="$K_d = {:d}, K_g = {:d}$".format(int(Kd[25]), int(Kg[25])))
+plt.plot(Y, i_g[10,10,:], label="$K_d = {:d}, K_g = {:d}$".format(int(Kd[10]), int(Kg[10])))
 plt.xlabel("$Y$")
 plt.ylabel("$i_g$")
 plt.legend()
