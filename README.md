@@ -13,4 +13,4 @@ Repo for R&amp;D model
 
 Errors
 
-![Errors](fc-err.png)
+<img src="./fc-err.png" />
