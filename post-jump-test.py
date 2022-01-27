@@ -2,6 +2,7 @@
 #Required packages
 import os
 import sys
+import csv
 sys.path.append('./src')
 from supportfunctions import *
 sys.stdout.flush()
@@ -146,6 +147,11 @@ epoch = 0
 tol = 1e-6
 epsilon = 0.1
 fraction = 0.1
+
+csvfile = open("ResforCap.csv", "w")
+fieldnames = ["epoch", "iterations", "residual norm",  "PDE_Err", "FC_Err"]
+writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+writer.writeheader()
 
 max_iter = 20000
 # file_iter = open("iter_c_compile.txt", "w")
@@ -418,6 +424,14 @@ while FC_Err > tol and epoch < max_iter:
             print("Epoch {:d} (PETSc): PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch, PDE_Err, FC_Err))
     print("Epoch time: {:.4f}".format(time.time() - start_ep))
     # step 9: keep iterating until convergence
+    rowcontent = {
+        "epoch": epoch,
+        "iterations": num_iter,
+        "residual norm": ksp.getResidualNorm(),
+        "PDE_Err": PDE_Err,
+        "FC_Err": FC_Err
+    }
+    writer.writerow(rowcontent)
     id_star = i_d
     ig_star = i_g
     v0 = out_comp
