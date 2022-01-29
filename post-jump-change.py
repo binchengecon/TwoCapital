@@ -3,6 +3,7 @@
 import os
 import sys
 sys.path.append('./src')
+import csv
 from supportfunctions import *
 sys.stdout.flush()
 import petsc4py
@@ -142,9 +143,13 @@ v0 = Kd_mat - beta_f * Y_mat
 FC_Err = 1
 epoch = 0
 tol = 1e-8
-epsilon = 0.01
+epsilon = 0.3
 fraction = 0.01
 
+csvfile = open("ResForRatio.csv", "w")
+fieldnames = ["epoch", "iterations", "residual norm", "PDE_Err", "FC_Err"]
+writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+writer.writeheader()
 max_iter = 40000
 # file_iter = open("iter_c_compile.txt", "w")
 while FC_Err > tol and epoch < max_iter:
@@ -418,6 +423,14 @@ while FC_Err > tol and epoch < max_iter:
             print("Epoch {:d} (PETSc): PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch, PDE_Err, FC_Err))
     print("Epoch time: {:.4f}".format(time.time() - start_ep))
     # step 9: keep iterating until convergence
+    rowcontent = {
+        "epoch": epoch,
+        "iterations": num_iter,
+        "residual norm": ksp.getResidualNorm(),
+        "PDE_Err": PDE_Err,
+        "FC_Err": FC_Err
+    }
+    writer.writerow(rowcontent)
     id_star = i_d
     ig_star = i_g
     v0 = out_comp

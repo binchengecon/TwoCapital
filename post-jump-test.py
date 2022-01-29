@@ -145,13 +145,13 @@ v0 = np.log(Kd_mat * Kd_max + Kg_mat * Kg_max) - beta_f * Y_mat - beta_f * eta *
 FC_Err = 1
 epoch = 0
 tol = 1e-6
-epsilon = 0.1
-fraction = 0.1
+epsilon = 0.01
+fraction = 1
 
-csvfile = open("ResforCap.csv", "w")
-fieldnames = ["epoch", "iterations", "residual norm",  "PDE_Err", "FC_Err"]
-writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-writer.writeheader()
+# csvfile = open("ResforCap.csv", "w")
+# fieldnames = ["epoch", "iterations", "residual norm",  "PDE_Err", "FC_Err"]
+# writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+# writer.writeheader()
 
 max_iter = 20000
 # file_iter = open("iter_c_compile.txt", "w")
@@ -166,7 +166,7 @@ while FC_Err > tol and epoch < max_iter:
     dKd = finiteDiff(v0,0,1,hKd)
     # dKd[dKd < 1e-8] = 1e-8
     dKg = finiteDiff(v0,1,1,hKg)
-    dKg[dKg < 1e-8] = 1e-8
+    # dKg[dKg < 1e-8] = 1e-8
     dY = finiteDiff(v0,2,1,hY)
     ######## second order
     ddKd = finiteDiff(v0,0,2,hKd)
@@ -194,32 +194,38 @@ while FC_Err > tol and epoch < max_iter:
         i_g[i_g > A_g] = A_g
     else:
 
-        # consumption_new = (A_d - id_star) * Kd_mat + (A_g - ig_star) * Kg_mat
-        # consumption_new[consumption_new <= 1e-8] = 1e-8
-        # consumption_new[consumption_new > consumption_0] = consumption_0[consumption_new > consumption_0]
-        # mc = delta / consumption_new
-        nums = 0
-        converge = False
-        while not converge:
+        consumption_new = (A_d - id_star) * Kd_mat + (A_g - ig_star) * Kg_mat
+        consumption_new[consumption_new <= 1e-8] = 1e-8
+        consumption_new[consumption_new > consumption_0] = consumption_0[consumption_new > consumption_0]
+        mc = delta / consumption_new
+        i_d = (1 / phi_d - mc / phi_d / dKd * Kd_max) * fraction + i_d * (1 - fraction)
+        i_d[i_d < 0] = 0
+        i_d[i_d > A_d] = A_d
+        i_g = (1 / phi_g - mc / phi_g / dKg * Kg_max) * fraction + i_g * (1 - fraction)
+        i_g[i_g < 0] = 0
+        i_g[i_g > A_g] = A_g
+        # nums = 0
+        # converge = False
+        # while not converge:
 
-            id_new = (1 / phi_d - mc / phi_d / dKd * Kd_max) * fraction + i_d * (1 - fraction)
-            id_new[id_new < 0] = 0
-            id_new[id_new > A_d] = A_d
-            ig_new = (1 / phi_g - mc / phi_g / dKg * Kg_max) * fraction + i_g * (1 - fraction)
-            ig_new[ig_new < 0] = 0
-            ig_new[ig_new > A_g] = A_g
+            # id_new = (1 / phi_d - mc / phi_d / dKd * Kd_max) * fraction + i_d * (1 - fraction)
+            # id_new[id_new < 0] = 0
+            # id_new[id_new > A_d] = A_d
+            # ig_new = (1 / phi_g - mc / phi_g / dKg * Kg_max) * fraction + i_g * (1 - fraction)
+            # ig_new[ig_new < 0] = 0
+            # ig_new[ig_new > A_g] = A_g
 
-            mc_new = fraction * delta / ((A_d -id_new) * Kd_mat * Kd_max + (A_g - ig_new) * Kg_mat * Kg_max) + mc * (1 - fraction)
-            i_d = id_new
-            i_g = ig_new
-            diff = np.max(np.abs(mc - mc_new) / fraction)
-            if diff  < 1e-5 or nums > 4000:
-                converge = True
-                mc = mc_new
-            else:
-                mc = mc_new
-                pass
-            nums += 1
+            # mc_new = fraction * delta / ((A_d -id_new) * Kd_mat * Kd_max + (A_g - ig_new) * Kg_mat * Kg_max) + mc * (1 - fraction)
+            # i_d = id_new
+            # i_g = ig_new
+            # diff = np.max(np.abs(mc - mc_new) / fraction)
+            # if diff  < 1e-5 or nums > 4000:
+                # converge = True
+                # mc = mc_new
+            # else:
+                # mc = mc_new
+                # pass
+            # nums += 1
 
         # print(diff)
 
@@ -424,14 +430,14 @@ while FC_Err > tol and epoch < max_iter:
             print("Epoch {:d} (PETSc): PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch, PDE_Err, FC_Err))
     print("Epoch time: {:.4f}".format(time.time() - start_ep))
     # step 9: keep iterating until convergence
-    rowcontent = {
-        "epoch": epoch,
-        "iterations": num_iter,
-        "residual norm": ksp.getResidualNorm(),
-        "PDE_Err": PDE_Err,
-        "FC_Err": FC_Err
-    }
-    writer.writerow(rowcontent)
+    # rowcontent = {
+        # "epoch": epoch,
+        # "iterations": num_iter,
+        # "residual norm": ksp.getResidualNorm(),
+        # "PDE_Err": PDE_Err,
+        # "FC_Err": FC_Err
+    # }
+    # writer.writerow(rowcontent)
     id_star = i_d
     ig_star = i_g
     v0 = out_comp
@@ -445,7 +451,7 @@ if write_test:
     f.write("Fianal epoch {:d}: PDE Error: {:.10f}; False Transient Error: {:.10f}\n" .format(epoch -1, PDE_Err, FC_Err))
     f.write("--- Total running time: %s seconds ---\n" % (time.time() - start_time))
 
-# exit()
+exit()
 
 import pickle
 # filename = filename
