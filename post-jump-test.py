@@ -15,6 +15,8 @@ from scipy.sparse import coo_matrix
 from scipy.sparse import csr_matrix
 from datetime import datetime
 
+from numpy.linalg import matrix_rank, norm, cond
+
 reporterror = True
 # Linear solver choices
 # Chosse among petsc, petsc4py, eigen, both
@@ -23,7 +25,7 @@ reporterror = True
 # eigen: matrix assembled in C++
 # both: petsc+petsc4py
 #
-linearsolver = 'petsc'
+linearsolver = 'eigen'
 
 write_test = False
 if write_test:
@@ -31,7 +33,7 @@ if write_test:
 
 
 current_time = datetime.now()
-filename =  "res-steady-invest" + '_' + "{:d}-{:d}-{:d}".format(current_time.day, current_time.hour, current_time.minute)
+filename =  "res-eigen" + '_' + "{:d}-{:d}-{:d}".format(current_time.day, current_time.hour, current_time.minute)
 
 if write_test:
     f.write("Script starts: {:d}/{:d}-{:d}:{:d}\n".format(current_time.month, current_time.day, current_time.hour, current_time.minute))
@@ -67,30 +69,7 @@ y_bar = 2
 beta_f = 1.86 / 1000
 
 # Grids Specification
-
-# Coarse Grids
-# R_min = 0
-# R_max = 9
-# F_min = 0
-# F_max = 4000
-# K_min = 0
-# K_max = 18
-# nR = 4
-# nF = 4
-# nK = 4
-# R = np.linspace(R_min, R_max, nR)
-# F = np.linspace(F_min, F_max, nF)
-# K = np.linspace(K_min, K_max, nK)
-
-# hR = R[1] - R[0]
-# hF = F[1] - F[0]
-# hK = K[1] - K[0]
-
-# Dense Grids
-
-#R_min = 0
-#R_max = 9
-
+# temperature anomaly
 Y_min = 0.
 Y_max = 4.
 # range of capital
@@ -105,8 +84,8 @@ hlam = 0.01
 
 # hR = 0.05
 hY  = 0.1 # make sure it is float instead of int
-hKd = 100.
-hKg = 100.
+hKd = 200.
+hKg = 200.
 
 # R = np.arange(R_min, R_max + hR, hR)
 # nR = len(R)
@@ -129,6 +108,7 @@ if write_test:
 (Kd_mat, Kg_mat, Y_mat) = np.meshgrid(Kd, Kg, Y, indexing = 'ij')
 stateSpace = np.hstack([Kd_mat.reshape(-1,1,order = 'F'), Kg_mat.reshape(-1,1,order = 'F'), Y_mat.reshape(-1, 1, order='F')])
 
+print(Kd_mat.shape)
 # For PETSc
 Kd_mat_1d =Kd_mat.ravel(order='F')
 Kg_mat_1d = Kg_mat.ravel(order='F')
@@ -145,15 +125,15 @@ v0 = np.log(Kd_mat * Kd_max + Kg_mat * Kg_max) - beta_f * Y_mat - beta_f * eta *
 FC_Err = 1
 epoch = 0
 tol = 1e-6
-epsilon = 0.01
-fraction = 1
+epsilon = 0.1
+fraction = 0.1
 
-# csvfile = open("ResforCap.csv", "w")
-# fieldnames = ["epoch", "iterations", "residual norm",  "PDE_Err", "FC_Err"]
-# writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-# writer.writeheader()
+csvfile = open("ResforCap.csv", "w")
+fieldnames = ["epoch", "iterations", "residual norm",  "PDE_Err", "FC_Err", "A_rank", "A_norm", "A_cond", "b_rank", "b_norm", "b_cond"]
+writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+writer.writeheader()
 
-max_iter = 20000
+max_iter = 10000
 # file_iter = open("iter_c_compile.txt", "w")
 while FC_Err > tol and epoch < max_iter:
     print("-----------------------------------")
@@ -194,15 +174,15 @@ while FC_Err > tol and epoch < max_iter:
         i_g[i_g > A_g] = A_g
     else:
 
-        consumption_new = (A_d - id_star) * Kd_mat + (A_g - ig_star) * Kg_mat
+        consumption_new = (A_d - i_d) * Kd_mat + (A_g - i_g) * Kg_mat
         consumption_new[consumption_new <= 1e-8] = 1e-8
         consumption_new[consumption_new > consumption_0] = consumption_0[consumption_new > consumption_0]
         mc = delta / consumption_new
         i_d = (1 / phi_d - mc / phi_d / dKd * Kd_max) * fraction + i_d * (1 - fraction)
-        i_d[i_d < 0] = 0
+        i_d[i_d < -1] = -1
         i_d[i_d > A_d] = A_d
         i_g = (1 / phi_g - mc / phi_g / dKg * Kg_max) * fraction + i_g * (1 - fraction)
-        i_g[i_g < 0] = 0
+        i_g[i_g < -1] = -1
         i_g[i_g > A_g] = A_g
         # nums = 0
         # converge = False
@@ -236,7 +216,7 @@ while FC_Err > tol and epoch < max_iter:
     # i_g = np.zeros(Kg_mat.shape)
     # i_d[i_d < 0] = 0
     # i_g[i_g < 0] = 0
-    consumption = ((A_d -i_d) * Kd_mat * Kd_max + (A_g - i_g) * Kg_mat * Kg_max)*fraction + consumption * (1 - fraction)
+    consumption = (A_d -i_d) * Kd_mat * Kd_max + (A_g - i_g) * Kg_mat * Kg_max
     consumption[consumption < 1e-8] = 1e-8
     # i_d[i_d >= A_d] = A_d - 1e-8
     # i_g[i_g >= A_g] = A_g - 1e-8
@@ -278,7 +258,7 @@ while FC_Err > tol and epoch < max_iter:
                 diag_0_base = A_1d[:]
                 diag_0_base += (I_LB_d * C_dd_1d[:] + I_UB_d * C_dd_1d[:] - 2 * (1 - I_LB_d - I_UB_d) * C_dd_1d[:]) / dVec[0] ** 2
                 diag_0_base += (I_LB_g * C_gg_1d[:] + I_UB_g * C_gg_1d[:] - 2 * (1 - I_LB_g - I_UB_g) * C_gg_1d[:]) / dVec[1] ** 2
-                diag_0_base += (I_LB_K * C_kk_1d[:] + I_UB_K * C_kk_1d[:] - 2 * (1 - I_LB_K - I_UB_K) * C_kk_1d[:]) / dVec[2] ** 2
+                diag_0_base += (I_LB_y * C_yy_1d[:] + I_UB_y * C_yy_1d[:] - 2 * (1 - I_LB_y - I_UB_y) * C_yy_1d[:]) / dVec[2] ** 2
                 diag_d_base = - 2 * I_LB_d * C_dd_1d[:] / dVec[0] ** 2 + (1 - I_LB_d - I_UB_d) * C_dd_1d[:] / dVec[0] ** 2
                 diag_dm_base = - 2 * I_UB_d * C_dd_1d[:] / dVec[0] ** 2 + (1 - I_LB_d - I_UB_d) * C_dd_1d[:] / dVec[0] ** 2
                 diag_g_base = - 2 * I_LB_g * C_gg_1d[:] / dVec[1] ** 2 + (1 - I_LB_g - I_UB_g) * C_gg_1d[:] / dVec[1] ** 2
@@ -302,6 +282,19 @@ while FC_Err > tol and epoch < max_iter:
 
     D = delta * np.log(consumption)  - (gamma_1 + gamma_2 * Y_mat)* beta_f * eta * A_d * Kd_mat * Kd_max  - 0.5 * gamma_2 * (varsigma * eta * A_d * Kd_mat * Kd_max)**2
 
+    if linearsolver == 'eigen' or linearsolver == 'both':
+        start_eigen = time.time()
+        out_eigen = PDESolver(stateSpace, A, B_d, B_g, B_y, C_dd, C_gg, C_yy, D, v0, epsilon, solverType = 'False Transient')
+        out_comp = out_eigen[2].reshape(v0.shape,order = "F")
+        print("Eigen solver: {:3f}s".format(time.time() - start_eigen))
+        if epoch % 1 == 0 and reporterror:
+            v = np.array(out_eigen[2])
+            res = np.linalg.norm(out_eigen[3].dot(v) - out_eigen[4])
+            print("Eigen residual norm: {:g}; iterations: {}".format(res, out_eigen[0]))
+            PDE_rhs = A * v0 + B_d * dKd + B_g * dKg + B_y * dY + C_dd * ddKd + C_gg * ddKg + C_yy * ddY + D
+            PDE_Err = np.max(abs(PDE_rhs))
+            FC_Err = np.max(abs((out_comp - v0)))
+            print("Episode {:d} (Eigen): PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch, PDE_Err, FC_Err))
 
     if linearsolver == 'petsc4py':
         bpoint1 = time.time()
@@ -314,24 +307,32 @@ while FC_Err > tol and epoch < max_iter:
         # profiling
         # bpoint2 = time.time()
         # print("reshape: {:.3f}s".format(bpoint2 - bpoint1))
-        diag_0 = diag_0_base - 1 / epsilon + I_LB_R * B_r_1d[:] / -dVec[0] + I_UB_R * B_r_1d[:] / dVec[0] - (1 - I_LB_R - I_UB_R) * np.abs(B_r_1d[:]) / dVec[0] + I_LB_F * B_f_1d[:] / -dVec[1] + I_UB_F * B_f_1d[:] / dVec[1] - (1 - I_LB_F - I_UB_F) * np.abs(B_f_1d[:]) / dVec[1] + I_LB_K * B_k_1d[:] / -dVec[2] + I_UB_K * B_k_1d[:] / dVec[2] - (1 - I_LB_K - I_UB_K) * np.abs(B_k_1d[:]) / dVec[2]
-        diag_R = I_LB_R * B_r_1d[:] / dVec[0] + (1 - I_LB_R - I_UB_R) * B_r_1d.clip(min=0.0) / dVec[0] + diag_R_base
-        diag_Rm = I_UB_R * B_r_1d[:] / -dVec[0] - (1 - I_LB_R - I_UB_R) * B_r_1d.clip(max=0.0) / dVec[0] + diag_Rm_base
-        diag_F = I_LB_F * B_f_1d[:] / dVec[1] + (1 - I_LB_F - I_UB_F) * B_f_1d.clip(min=0.0) / dVec[1] + diag_F_base
-        diag_Fm = I_UB_F * B_f_1d[:] / -dVec[1] - (1 - I_LB_F - I_UB_F) * B_f_1d.clip(max=0.0) / dVec[1] + diag_Fm_base
-        diag_K = I_LB_K * B_k_1d[:] / dVec[2] + (1 - I_LB_K - I_UB_K) * B_k_1d.clip(min=0.0) / dVec[2] + diag_K_base
-        diag_Km = I_UB_K * B_k_1d[:] / -dVec[2] - (1 - I_LB_K - I_UB_K) * B_k_1d.clip(max=0.0) / dVec[2] + diag_Km_base
+        diag_0 = diag_0_base - 1 / epsilon + I_LB_d * B_d_1d[:] / -dVec[0] + I_UB_d * B_d_1d[:] / dVec[0] - (1 - I_LB_d - I_UB_d) * np.abs(B_d_1d[:]) / dVec[0] + I_LB_g * B_g_1d[:] / -dVec[1] + I_UB_g * B_g_1d[:] / dVec[1] - (1 - I_LB_g - I_UB_g) * np.abs(B_g_1d[:]) / dVec[1] + I_LB_y * B_y_1d[:] / -dVec[2] + I_UB_y * B_y_1d[:] / dVec[2] - (1 - I_LB_y - I_UB_y) * np.abs(B_y_1d[:]) / dVec[2]
+        diag_d = I_LB_d * B_d_1d[:] / dVec[0] + (1 - I_LB_d- I_UB_d) * B_d_1d.clip(min=0.0) / dVec[0] + diag_d_base
+        diag_dm = I_UB_d * B_d_1d[:] / -dVec[0] - (1 - I_LB_d - I_UB_d) * B_d_1d.clip(max=0.0) / dVec[0] + diag_dm_base
+        diag_g = I_LB_g * B_g_1d[:] / dVec[1] + (1 - I_LB_g - I_UB_g) * B_g_1d.clip(min=0.0) / dVec[1] + diag_g_base
+        diag_gm = I_UB_g * B_g_1d[:] / -dVec[1] - (1 - I_LB_g - I_UB_g) * B_g_1d.clip(max=0.0) / dVec[1] + diag_gm_base
+        diag_y = I_LB_y * B_y_1d[:] / dVec[2] + (1 - I_LB_y - I_UB_y) * B_y_1d.clip(min=0.0) / dVec[2] + diag_y_base
+        diag_ym = I_UB_y * B_y_1d[:] / -dVec[2] - (1 - I_LB_y - I_UB_y) * B_y_1d.clip(max=0.0) / dVec[2] + diag_ym_base
         # profiling
         # bpoint3 = time.time()
         # print("prepare: {:.3f}s".format(bpoint3 - bpoint2))
 
-        data = [diag_0, diag_R, diag_Rm, diag_RR, diag_RRm, diag_F, diag_Fm, diag_FF, diag_FFm, diag_K, diag_Km, diag_KK, diag_KKm]
+        data = [diag_0, diag_d, diag_dm, diag_dd, diag_ddm, diag_g, diag_gm, diag_gg, diag_ggm, diag_y, diag_ym, diag_yy, diag_yym]
         diags = np.array([0,-increVec[0],increVec[0],-2*increVec[0],2*increVec[0],
                         -increVec[1],increVec[1],-2*increVec[1],2*increVec[1],
                         -increVec[2],increVec[2],-2*increVec[2],2*increVec[2]])
         # The transpose of matrix A_sp is the desired. Create the csc matrix so that it can be used directly as the transpose of the corresponding csr matrix.
         A_sp = spdiags(data, diags, len(diag_0), len(diag_0), format='csc')
+        A_dense = A_sp.todense()
         b = -v0_1d/epsilon - D_1d
+        # A_rank = matrix_rank(A_dense)
+        b_rank = matrix_rank(b)
+        A_norm = norm(A_dense, ord=2)
+        b_norm = norm(b)
+        A_cond = cond(A_dense)
+        b_cond = cond(b)
+
         # A_sp = spdiags(data, diags, len(diag_0), len(diag_0))
         # A_sp = csr_matrix(A_sp.T)
         # b = -v0/ε - D
@@ -355,12 +356,12 @@ while FC_Err > tol and epoch < max_iter:
         # create linear solver
         start_ksp = time.time()
         ksp.setOperators(petsc_mat)
-        ksp.setTolerances(rtol=1e-12)
+        ksp.setTolerances(rtol=1e-6)
         ksp.solve(petsc_rhs, x)
         petsc_mat.destroy()
         petsc_rhs.destroy()
         x.destroy()
-        out_comp = np.array(ksp.getSolution()).reshape(R_mat.shape,order = "F")
+        out_comp = np.array(ksp.getSolution()).reshape(Kd_mat.shape,order = "F")
         end_ksp = time.time()
         # print("ksp solve: {:.3f}s".format(end_ksp - start_ksp))
         print("petsc4py total: {:.3f}s".format(end_ksp - bpoint1))
@@ -383,6 +384,20 @@ while FC_Err > tol and epoch < max_iter:
             # print("Coefficient matrix difference: {:.3f}".format(A_diff))
             # b_diff = np.max(np.abs(out_eigen[4] - np.squeeze(b)))
             # print("rhs difference: {:.3f}".format(b_diff))
+        rowcontent = {
+            "epoch": epoch,
+            "iterations": num_iter,
+            "residual norm": ksp.getResidualNorm(),
+            "PDE_Err": PDE_Err,
+            "FC_Err": FC_Err,
+            # "A_rank": A_rank,
+            "A_norm": A_norm,
+            "A_cond": A_cond,
+            "b_rank": b_rank,
+            "b_norm": b_norm,
+            "b_cond": b_cond
+        }
+        writer.writerow(rowcontent)
 
     if linearsolver == 'petsc' or linearsolver == 'both':
         bpoint1 = time.time()
@@ -400,16 +415,29 @@ while FC_Err > tol and epoch < max_iter:
         # petsc_mat.scale(-1./ε)
         # b = -v0_1d/ε - D_1d
         petsc_rhs = PETSc.Vec().createWithArray(b)
+        print(matrix_rank(petsc_rhs))
+        # print(matrix_rank(petsc_mat))
         x = petsc_mat.createVecRight()
         # profiling
         # bpoint3 = time.time()
         # print("form rhs and workvector: {:.3f}s".format(bpoint3 - bpoint2))
+        # x.set(0)
+        # viewer = PETSc.Viewer().createBinary('A.pickle', 'w')
+        # petsc_mat.view(viewer)
+        #viewer = PETSc.Viewer().createBinary('TCRE_MacDougallEtAl2017_b.dat', 'w')
+        #petsc_rhs.view(viewer)
+        ai, aj, av = petsc_mat.getValuesCSR()
+        print(type(x))
+        print(type(petsc_mat))
+        print(type(petsc_rhs))
+        # print(aj)
 
 
         # create linear solver
         start_ksp = time.time()
         ksp.setOperators(petsc_mat)
-        ksp.setTolerances(rtol=1e-12)
+        print(petsc_mat.norm())
+        ksp.setTolerances(rtol=1e-9)
         ksp.solve(petsc_rhs, x)
         # petsc_mat.destroy()
         petsc_rhs.destroy()
@@ -451,7 +479,7 @@ if write_test:
     f.write("Fianal epoch {:d}: PDE Error: {:.10f}; False Transient Error: {:.10f}\n" .format(epoch -1, PDE_Err, FC_Err))
     f.write("--- Total running time: %s seconds ---\n" % (time.time() - start_time))
 
-exit()
+# exit()
 
 import pickle
 # filename = filename

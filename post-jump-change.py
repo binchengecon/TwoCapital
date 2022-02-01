@@ -143,8 +143,8 @@ v0 = Kd_mat - beta_f * Y_mat
 FC_Err = 1
 epoch = 0
 tol = 1e-8
-epsilon = 0.3
-fraction = 0.01
+epsilon = 0.01
+fraction = 0.5
 
 csvfile = open("ResForRatio.csv", "w")
 fieldnames = ["epoch", "iterations", "residual norm", "PDE_Err", "FC_Err"]
@@ -194,36 +194,49 @@ while FC_Err > tol and epoch < max_iter:
         # i_g[i_g > A_g] = A_g
     else:
 
-        # consumption_new = (A_d - id_star) * Kd_mat + (A_g - ig_star) * Kg_mat
-        # consumption_new[consumption_new <= 1e-8] = 1e-8
+        consumption_new = (A_d - id_star) * Kd_mat + (A_g - ig_star) * Kg_mat
+        consumption_new[consumption_new <= 1e-8] = 1e-8
         # consumption_new[consumption_new > consumption_0] = consumption_0[consumption_new > consumption_0]
-        # mc = delta / consumption_new
-        nums = 0
-        converge = False
-        while not converge:
+        mc = delta / consumption_new
+        id_new = 1 / phi_d * (1 - mc / (dKd - Kg_mat * dKg )) * fraction + i_d * (1 - fraction)
+        id_new[id_new < 0] = 0
+        # id_new[id_new > A_d] = A_d- 1e-8
+        # id_new[id_new > 1/phi_d] = 1 / phi_d
+        ig_new = 1 / phi_g * (1 - mc / (dKd  + (1 - Kg_mat) * dKg)) * fraction + i_g * (1 - fraction)
+        ig_new[ig_new < 0] = 0
+        # ig_new[ig_new > A_g] = A_g
+        # ig_new[ig_new > 1 / phi_g] = 1 / phi_g
 
-            id_new = 1 / phi_d * (1 - mc / (dKd - Kg_mat * dKg )) * fraction + i_d * (1 - fraction)
-            id_new[id_new < 0] = 0
-            id_new[id_new > A_d] = A_d- 1e-8
-            # id_new[id_new > 1/phi_d] = 1 / phi_d
-            ig_new = 1 / phi_g * (1 - mc / (dKd  + (1 - Kg_mat) * dKg)) * fraction + i_g * (1 - fraction)
-            ig_new[ig_new < 0] = 0
-            # ig_new[ig_new > A_g] = A_g
-            ig_new[ig_new > 1 / phi_g] = 1 / phi_g
+        # mc_new = fraction * delta / ((A_d -id_new) * (1 - Kg_mat) + (A_g - ig_new) * Kg_mat) + mc * (1 - fraction)
+        i_d = id_new
+        i_g = ig_new
 
-            mc_new = fraction * delta / ((A_d -id_new) * (1 - Kg_mat) + (A_g - ig_new) * Kg_mat) + mc * (1 - fraction)
-            i_d = id_new
-            i_g = ig_new
-            diff = np.max(np.abs(mc - mc_new) / fraction)
-            if diff  < 1e-5 or nums > 10000:
-                converge = True
-                mc = mc_new
-            else:
-                mc = mc_new
-                pass
-            nums += 1
+        # nums = 0
+        # converge = False
+        # while not converge:
 
-        print(diff)
+            # id_new = 1 / phi_d * (1 - mc / (dKd - Kg_mat * dKg )) * fraction + i_d * (1 - fraction)
+            # id_new[id_new < 0] = 0
+            # id_new[id_new > A_d] = A_d- 1e-8
+            # # id_new[id_new > 1/phi_d] = 1 / phi_d
+            # ig_new = 1 / phi_g * (1 - mc / (dKd  + (1 - Kg_mat) * dKg)) * fraction + i_g * (1 - fraction)
+            # ig_new[ig_new < 0] = 0
+            # # ig_new[ig_new > A_g] = A_g
+            # ig_new[ig_new > 1 / phi_g] = 1 / phi_g
+
+            # mc_new = fraction * delta / ((A_d -id_new) * (1 - Kg_mat) + (A_g - ig_new) * Kg_mat) + mc * (1 - fraction)
+            # i_d = id_new
+            # i_g = ig_new
+            # diff = np.max(np.abs(mc - mc_new) / fraction)
+            # if diff  < 1e-5 or nums > 10000:
+                # converge = True
+                # mc = mc_new
+            # else:
+                # mc = mc_new
+                # pass
+            # nums += 1
+
+        # print(diff)
     print(np.min(i_d), np.min(i_g))
     # i_d = np.zeros(Kd_mat.shape)
     # i_g = np.zeros(Kg_mat.shape)
@@ -423,14 +436,14 @@ while FC_Err > tol and epoch < max_iter:
             print("Epoch {:d} (PETSc): PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch, PDE_Err, FC_Err))
     print("Epoch time: {:.4f}".format(time.time() - start_ep))
     # step 9: keep iterating until convergence
-    rowcontent = {
-        "epoch": epoch,
-        "iterations": num_iter,
-        "residual norm": ksp.getResidualNorm(),
-        "PDE_Err": PDE_Err,
-        "FC_Err": FC_Err
-    }
-    writer.writerow(rowcontent)
+    # rowcontent = {
+        # "epoch": epoch,
+        # "iterations": num_iter,
+        # "residual norm": ksp.getResidualNorm(),
+        # "PDE_Err": PDE_Err,
+        # "FC_Err": FC_Err
+    # }
+    # writer.writerow(rowcontent)
     id_star = i_d
     ig_star = i_g
     v0 = out_comp

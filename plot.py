@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 mpl.rcParams["savefig.bbox"] = "tight"
 
-with open("data/res_25-11-55", "rb") as file:
+with open("data/res-eigen_1-11-57", "rb") as file:
     data = pickle.load(file)
 
 Kd = data["Kd"]
