@@ -83,9 +83,9 @@ lam_max = 0.1
 hlam = 0.01
 
 # hR = 0.05
-hY  = 0.1 # make sure it is float instead of int
-hKd = 200.
-hKg = 200.
+hY  = 0.2 # make sure it is float instead of int
+hKd = 400.
+hKg = 400.
 
 # R = np.arange(R_min, R_max + hR, hR)
 # nR = len(R)
@@ -125,7 +125,7 @@ v0 = np.log(Kd_mat * Kd_max + Kg_mat * Kg_max) - beta_f * Y_mat - beta_f * eta *
 FC_Err = 1
 epoch = 0
 tol = 1e-6
-epsilon = 0.1
+epsilon = 0.5
 fraction = 0.1
 
 csvfile = open("ResforCap.csv", "w")
@@ -180,10 +180,10 @@ while FC_Err > tol and epoch < max_iter:
         mc = delta / consumption_new
         i_d = (1 / phi_d - mc / phi_d / dKd * Kd_max) * fraction + i_d * (1 - fraction)
         i_d[i_d < -1] = -1
-        i_d[i_d > A_d] = A_d
+        i_d[i_d > 1] = 1
         i_g = (1 / phi_g - mc / phi_g / dKg * Kg_max) * fraction + i_g * (1 - fraction)
         i_g[i_g < -1] = -1
-        i_g[i_g > A_g] = A_g
+        i_g[i_g > 1] = 1
         # nums = 0
         # converge = False
         # while not converge:

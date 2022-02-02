@@ -118,6 +118,9 @@ From this we can layer on different forms of uncertainty.
 
 \section{Post jump}
 
+
+\subsection{Desired model}
+
 Replace $E_d $ with $\eta A_d K_d$.
 We solve post jump HJB:
 
@@ -139,10 +142,17 @@ FOC
 	i_g =& \frac{1}{\phi_g} - \frac{mc}{\phi_g v_g}
 \end{align*}
 
+\subsection{Test HJB, possible transformation of state variables}
+
+\subsubsection{$\log K, L, Y$}
+
 \begin{gather*}
 	X = [\log K, L, Y]',  \quad \log K = \log(K_d + K_g), \quad  L = \log K_g - \log K_d\\
 	R = \frac{K_g}{K_d + K_g} = \frac{\exp(L)}{1 + \exp(L)} 
 \end{gather*}
+
+
+
 
 \begin{align*}
 	\dif (K_{d} + K_g) =& \left([\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}] K_d + [\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}] K_g \right)\dif t+\left(\sigma_{d}K_d + \sigma_g K_g \right)\dif W\\
@@ -171,6 +181,8 @@ FOC
 \end{align*}
 
 
+
+\subsubsection{$\log K, R, Y$}
 \begin{align*}
 	\delta v(\log K, R,  Y; A_g') & =\max_{i_{g},i_{d} }\delta \log((A_d - i_d) (1 - R) + (A_g' - i_g)R  ) + \delta \log K \\
 	& +\left(\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\} (1 - R)+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\} R  - \frac{\mid\sigma_{d}(1 - R)+ \sigma_g R \mid
@@ -180,6 +192,8 @@ FOC
 	& +\beta_{f} (\eta A_d (1 - R) K )v_{Y}+\frac{1}{2}\varsigma^{2}(\eta A_d  (1 - R) K)^{2}v{}_{YY} \\
 	&- [\{\gamma_{1}+\gamma_{2}Y_{t}\}\beta_{f}(\eta A_d(1 - R)K)+\frac{\gamma_2}{2}\varsigma^{2}(\eta A_d (1 - R) K)^{2}]
 \end{align*}
+
+
 
 FOC
 \begin{align*}
@@ -192,7 +206,7 @@ FOC
 \end{align*}
 
 
-\subsection{tests}
+\subsection{test results}
 
 \subsubsection{Preliminary results: try $i_d = i_g = 0$, no optimization}
 
