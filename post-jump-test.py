@@ -26,18 +26,15 @@ reporterror = True
 # both: petsc+petsc4py
 #
 linearsolver = 'eigen'
-
-write_test = False
-if write_test:
-    f = open("test-log.txt", 'a')
-
-
 current_time = datetime.now()
-filename =  "res-eigen" + '_' + "{:d}-{:d}-{:d}".format(current_time.day, current_time.hour, current_time.minute)
 
-if write_test:
-    f.write("Script starts: {:d}/{:d}-{:d}:{:d}\n".format(current_time.month, current_time.day, current_time.hour, current_time.minute))
-    f.write("Linear solver: " + linearsolver+ "\n" )
+log_name = linearsolver + "-log-" + "{:d}-{:d}-{:d}".format(current_time.day, current_time.hour, current_time.minute)
+sys.stdout = open("./logs/" + log_name, "a")
+
+filename =  "res-" + linearsolver  + '-' + "{:d}-{:d}-{:d}".format(current_time.day, current_time.hour, current_time.minute)
+
+print("Script starts: {:d}/{:d}-{:d}:{:d}".format(current_time.month, current_time.day, current_time.hour, current_time.minute))
+print("Linear solver: " + linearsolver)
 
 
 start_time = time.time()
@@ -83,9 +80,9 @@ lam_max = 0.1
 hlam = 0.01
 
 # hR = 0.05
-hY  = 0.2 # make sure it is float instead of int
-hKd = 400.
-hKg = 400.
+hY  = 0.1 # make sure it is float instead of int
+hKd = 100.
+hKg = 100.
 
 # R = np.arange(R_min, R_max + hR, hR)
 # nR = len(R)
@@ -101,8 +98,7 @@ lam = np.arange(lam_min, lam_max + hlam, hlam)
 nlam = len(lam)
 
 
-if write_test:
-    f.write("Grid dimension: [{}, {}, {}]\n".format(nKd, nKg, nY))
+print("Grid dimension: [{}, {}, {}]".format(nKd, nKg, nY))
 # Discretization of the state space for numerical PDE solution.
 ######## post jump, 3 states
 (Kd_mat, Kg_mat, Y_mat) = np.meshgrid(Kd, Kg, Y, indexing = 'ij')
@@ -125,13 +121,14 @@ v0 = np.log(Kd_mat * Kd_max + Kg_mat * Kg_max) - beta_f * Y_mat - beta_f * eta *
 FC_Err = 1
 epoch = 0
 tol = 1e-6
-epsilon = 0.5
+epsilon = 0.3
 fraction = 0.1
 
-csvfile = open("ResforCap.csv", "w")
-fieldnames = ["epoch", "iterations", "residual norm",  "PDE_Err", "FC_Err", "A_rank", "A_norm", "A_cond", "b_rank", "b_norm", "b_cond"]
-writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-writer.writeheader()
+
+# csvfile = open(".csv", "w")
+# fieldnames = ["epoch", "iterations", "residual norm",  "PDE_Err", "FC_Err", "A_rank", "A_norm", "A_cond", "b_rank", "b_norm", "b_cond"]
+# writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+# writer.writeheader()
 
 max_iter = 10000
 # file_iter = open("iter_c_compile.txt", "w")
@@ -180,10 +177,10 @@ while FC_Err > tol and epoch < max_iter:
         mc = delta / consumption_new
         i_d = (1 / phi_d - mc / phi_d / dKd * Kd_max) * fraction + i_d * (1 - fraction)
         i_d[i_d < -1] = -1
-        i_d[i_d > 1] = 1
+        i_d[i_d > A_d] = A_d
         i_g = (1 / phi_g - mc / phi_g / dKg * Kg_max) * fraction + i_g * (1 - fraction)
         i_g[i_g < -1] = -1
-        i_g[i_g > 1] = 1
+        i_g[i_g > A_g] = A_g
         # nums = 0
         # converge = False
         # while not converge:
@@ -324,7 +321,7 @@ while FC_Err > tol and epoch < max_iter:
                         -increVec[2],increVec[2],-2*increVec[2],2*increVec[2]])
         # The transpose of matrix A_sp is the desired. Create the csc matrix so that it can be used directly as the transpose of the corresponding csr matrix.
         A_sp = spdiags(data, diags, len(diag_0), len(diag_0), format='csc')
-        A_dense = A_sp.todense()
+        # A_dense = A_sp.todense()
         b = -v0_1d/epsilon - D_1d
         # A_rank = matrix_rank(A_dense)
         b_rank = matrix_rank(b)
@@ -384,20 +381,20 @@ while FC_Err > tol and epoch < max_iter:
             # print("Coefficient matrix difference: {:.3f}".format(A_diff))
             # b_diff = np.max(np.abs(out_eigen[4] - np.squeeze(b)))
             # print("rhs difference: {:.3f}".format(b_diff))
-        rowcontent = {
-            "epoch": epoch,
-            "iterations": num_iter,
-            "residual norm": ksp.getResidualNorm(),
-            "PDE_Err": PDE_Err,
-            "FC_Err": FC_Err,
-            # "A_rank": A_rank,
-            "A_norm": A_norm,
-            "A_cond": A_cond,
-            "b_rank": b_rank,
-            "b_norm": b_norm,
-            "b_cond": b_cond
-        }
-        writer.writerow(rowcontent)
+        # rowcontent = {
+            # "epoch": epoch,
+            # "iterations": num_iter,
+            # "residual norm": ksp.getResidualNorm(),
+            # "PDE_Err": PDE_Err,
+            # "FC_Err": FC_Err,
+            # # "A_rank": A_rank,
+            # "A_norm": A_norm,
+            # "A_cond": A_cond,
+            # "b_rank": b_rank,
+            # "b_norm": b_norm,
+            # "b_cond": b_cond
+        # }
+        # writer.writerow(rowcontent)
 
     if linearsolver == 'petsc' or linearsolver == 'both':
         bpoint1 = time.time()
@@ -427,7 +424,7 @@ while FC_Err > tol and epoch < max_iter:
         #viewer = PETSc.Viewer().createBinary('TCRE_MacDougallEtAl2017_b.dat', 'w')
         #petsc_rhs.view(viewer)
         ai, aj, av = petsc_mat.getValuesCSR()
-        print(type(x))
+        # print(type(x))
         print(type(petsc_mat))
         print(type(petsc_rhs))
         # print(aj)
@@ -475,9 +472,7 @@ if reporterror:
     print("Fianal epoch {:d}: PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch -1, PDE_Err, FC_Err))
 print("--- Total running time: %s seconds ---" % (time.time() - start_time))
 
-if write_test:
-    f.write("Fianal epoch {:d}: PDE Error: {:.10f}; False Transient Error: {:.10f}\n" .format(epoch -1, PDE_Err, FC_Err))
-    f.write("--- Total running time: %s seconds ---\n" % (time.time() - start_time))
+
 
 # exit()
 
