@@ -121,7 +121,7 @@ v0 = np.log(Kd_mat * Kd_max + Kg_mat * Kg_max) - beta_f * Y_mat - beta_f * eta *
 FC_Err = 1
 epoch = 0
 tol = 1e-6
-epsilon = 0.3
+epsilon = 0.1
 fraction = 0.1
 
 
@@ -281,7 +281,7 @@ while FC_Err > tol and epoch < max_iter:
 
     if linearsolver == 'eigen' or linearsolver == 'both':
         start_eigen = time.time()
-        out_eigen = PDESolver(stateSpace, A, B_d, B_g, B_y, C_dd, C_gg, C_yy, D, v0, epsilon, solverType = 'False Transient')
+        out_eigen = PDESolver(stateSpace, A, B_d, B_g, B_y, C_dd, C_gg, C_yy, D, v0, epsilon, tol=-9, solverType = 'False Transient')
         out_comp = out_eigen[2].reshape(v0.shape,order = "F")
         print("Eigen solver: {:3f}s".format(time.time() - start_eigen))
         if epoch % 1 == 0 and reporterror:
@@ -474,7 +474,7 @@ print("--- Total running time: %s seconds ---" % (time.time() - start_time))
 
 
 
-# exit()
+exit()
 
 import pickle
 # filename = filename

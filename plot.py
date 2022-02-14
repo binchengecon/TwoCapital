@@ -1,9 +1,35 @@
 import numpy as np
+import pandas as pd
 import pickle
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 mpl.rcParams["savefig.bbox"] = "tight"
+
+res = pd.read_csv("TestNorm.csv", header=0)
+plt.figure()
+plt.title("$\epsilon$ = 0.3, fraction = 1")
+plt.plot(res["epoch"], res["A_norm"])
+plt.xlabel("Episode")
+plt.ylabel("Norm of A")
+
+plt.figure()
+plt.title("$\epsilon$ = 0.3, fraction = 1")
+plt.plot(res["epoch"], res["b_norm"])
+plt.xlabel("Episode")
+plt.ylabel("Norm of b")
+
+plt.figure()
+plt.title("$\epsilon$ = 0.3, fraction = 1")
+plt.plot(res["epoch"], res["residual norm"])
+plt.xlabel("Episode")
+plt.ylabel("Residual norm")
+
+plt.figure()
+plt.title("$\epsilon$ = 0.3, fraction = 1")
+plt.plot(res["epoch"], res["iterations"])
+plt.xlabel("Episode")
+plt.ylabel("Number of iterations")
 
 with open("data/res-eigen_2-12-53", "rb") as file:
     data = pickle.load(file)
