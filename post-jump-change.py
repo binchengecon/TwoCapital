@@ -23,7 +23,7 @@ reporterror = True
 # eigen: matrix assembled in C++
 # both: petsc+petsc4py
 #
-linearsolver = 'petsc'
+linearsolver = 'eigen'
 
 write_test = False
 if write_test:
@@ -144,7 +144,7 @@ FC_Err = 1
 epoch = 0
 tol = 1e-8
 epsilon = 0.01
-fraction = 0.5
+fraction = 0.1
 
 csvfile = open("ResForRatio.csv", "w")
 fieldnames = ["epoch", "iterations", "residual norm", "PDE_Err", "FC_Err"]
@@ -199,11 +199,11 @@ while FC_Err > tol and epoch < max_iter:
         # consumption_new[consumption_new > consumption_0] = consumption_0[consumption_new > consumption_0]
         mc = delta / consumption_new
         id_new = 1 / phi_d * (1 - mc / (dKd - Kg_mat * dKg )) * fraction + i_d * (1 - fraction)
-        id_new[id_new < 0] = 0
+        id_new[id_new < -1] = -1
         # id_new[id_new > A_d] = A_d- 1e-8
         # id_new[id_new > 1/phi_d] = 1 / phi_d
         ig_new = 1 / phi_g * (1 - mc / (dKd  + (1 - Kg_mat) * dKg)) * fraction + i_g * (1 - fraction)
-        ig_new[ig_new < 0] = 0
+        ig_new[ig_new <-1] = -1
         # ig_new[ig_new > A_g] = A_g
         # ig_new[ig_new > 1 / phi_g] = 1 / phi_g
 
@@ -308,6 +308,19 @@ while FC_Err > tol and epoch < max_iter:
 
     D = delta * np.log(consumption) + delta * Kd_mat  - (gamma_1 + gamma_2 * Y_mat)* beta_f * eta * A_d * np.exp(Kd_mat) * (1 - Kg_mat)  - 0.5 * gamma_2 * (varsigma * eta * A_d * np.exp(Kd_mat) * (1 - Kg_mat) )**2
 
+    if linearsolver == 'eigen' or linearsolver == 'both':
+        start_eigen = time.time()
+        out_eigen = PDESolver(stateSpace, A, B_d, B_g, B_y, C_dd, C_gg, C_yy, D, v0, epsilon, solverType = 'False Transient')
+        out_comp = out_eigen[2].reshape(v0.shape,order = "F")
+        print("Eigen solver: {:3f}s".format(time.time() - start_eigen))
+        if epoch % 1 == 0 and reporterror:
+            v = np.array(out_eigen[2])
+            res = np.linalg.norm(out_eigen[3].dot(v) - out_eigen[4])
+            print("Eigen residual norm: {:g}; iterations: {}".format(res, out_eigen[0]))
+            PDE_rhs = A * v0 + B_d * dKd + B_g * dKg + B_y * dY + C_dd * ddKd + C_gg * ddKg + C_yy * ddY + D
+            PDE_Err = np.max(abs(PDE_rhs))
+            FC_Err = np.max(abs((out_comp - v0)))
+            print("Episode {:d} (Eigen): PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch, PDE_Err, FC_Err))
 
     if linearsolver == 'petsc4py':
         bpoint1 = time.time()

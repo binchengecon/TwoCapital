@@ -25,11 +25,11 @@ reporterror = True
 # eigen: matrix assembled in C++
 # both: petsc+petsc4py
 #
-linearsolver = 'eigen'
+linearsolver = 'petsc'
 current_time = datetime.now()
 
 log_name = linearsolver + "-log-" + "{:d}-{:d}-{:d}".format(current_time.day, current_time.hour, current_time.minute)
-sys.stdout = open("./logs/" + log_name, "a")
+# sys.stdout = open("./logs/" + log_name, "a")
 
 filename =  "res-" + linearsolver  + '-' + "{:d}-{:d}-{:d}".format(current_time.day, current_time.hour, current_time.minute)
 
@@ -61,6 +61,7 @@ eta = 0.17
 ###### damage
 gamma_1 = 0.00017675
 gamma_2 = 2. * 0.0022
+gamma_3 = 0
 
 y_bar = 2
 beta_f = 1.86 / 1000
@@ -97,7 +98,6 @@ nKg = len(Kg)
 lam = np.arange(lam_min, lam_max + hlam, hlam)
 nlam = len(lam)
 
-
 print("Grid dimension: [{}, {}, {}]".format(nKd, nKg, nY))
 # Discretization of the state space for numerical PDE solution.
 ######## post jump, 3 states
@@ -130,7 +130,7 @@ fraction = 0.1
 # writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 # writer.writeheader()
 
-max_iter = 10000
+max_iter = 20000
 # file_iter = open("iter_c_compile.txt", "w")
 while FC_Err > tol and epoch < max_iter:
     print("-----------------------------------")
@@ -164,11 +164,11 @@ while FC_Err > tol and epoch < max_iter:
         consumption = consumption_0
         mc = delta / consumption
         i_d = 1 / phi_d - mc / phi_d / dKd * Kd_max
-        i_d[i_d < 0] = 0
-        i_d[i_d > A_d] = A_d
+        # i_d[i_d < 0] = 0
+        # i_d[i_d > 1] = 1
         i_g = 1 / phi_g - mc / phi_g / dKg * Kg_max
-        i_g[i_g < 0] = 0
-        i_g[i_g > A_g] = A_g
+        # i_g[i_g < 0] = 0
+        # i_g[i_g > 1] = 1
     else:
 
         consumption_new = (A_d - i_d) * Kd_mat + (A_g - i_g) * Kg_mat
@@ -176,10 +176,10 @@ while FC_Err > tol and epoch < max_iter:
         consumption_new[consumption_new > consumption_0] = consumption_0[consumption_new > consumption_0]
         mc = delta / consumption_new
         i_d = (1 / phi_d - mc / phi_d / dKd * Kd_max) * fraction + i_d * (1 - fraction)
-        i_d[i_d < -1] = -1
+        i_d[i_d < 0] = 0
         i_d[i_d > A_d] = A_d
         i_g = (1 / phi_g - mc / phi_g / dKg * Kg_max) * fraction + i_g * (1 - fraction)
-        i_g[i_g < -1] = -1
+        i_g[i_g < 0] = 0
         i_g[i_g > A_g] = A_g
         # nums = 0
         # converge = False
@@ -277,7 +277,7 @@ while FC_Err > tol and epoch < max_iter:
     B_g = (alpha_g + i_g - 0.5 * phi_g * i_g**2) * Kg_mat
     B_y = beta_f * eta * A_d * Kd_mat * Kd_max
 
-    D = delta * np.log(consumption)  - (gamma_1 + gamma_2 * Y_mat)* beta_f * eta * A_d * Kd_mat * Kd_max  - 0.5 * gamma_2 * (varsigma * eta * A_d * Kd_mat * Kd_max)**2
+    D = delta * np.log(consumption)  - (gamma_1 + gamma_2 * Y_mat + gamma_3 * (Y_mat - 2) * (Y_mat > 2) )* beta_f * eta * A_d * Kd_mat * Kd_max  - 0.5 * (gamma_2 + gamma_3 * (Y_mat > 2)) * (varsigma * eta * A_d * Kd_mat * Kd_max)**2
 
     if linearsolver == 'eigen' or linearsolver == 'both':
         start_eigen = time.time()
@@ -290,7 +290,7 @@ while FC_Err > tol and epoch < max_iter:
             print("Eigen residual norm: {:g}; iterations: {}".format(res, out_eigen[0]))
             PDE_rhs = A * v0 + B_d * dKd + B_g * dKg + B_y * dY + C_dd * ddKd + C_gg * ddKg + C_yy * ddY + D
             PDE_Err = np.max(abs(PDE_rhs))
-            FC_Err = np.max(abs((out_comp - v0)))
+            FC_Err = np.max(abs((out_comp - v0)/ epsilon))
             print("Episode {:d} (Eigen): PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch, PDE_Err, FC_Err))
 
     if linearsolver == 'petsc4py':
@@ -324,11 +324,11 @@ while FC_Err > tol and epoch < max_iter:
         # A_dense = A_sp.todense()
         b = -v0_1d/epsilon - D_1d
         # A_rank = matrix_rank(A_dense)
-        b_rank = matrix_rank(b)
-        A_norm = norm(A_dense, ord=2)
-        b_norm = norm(b)
-        A_cond = cond(A_dense)
-        b_cond = cond(b)
+        # b_rank = matrix_rank(b)
+        # A_norm = norm(A_dense, ord=2)
+        # b_norm = norm(b)
+        # A_cond = cond(A_dense)
+        # b_cond = cond(b)
 
         # A_sp = spdiags(data, diags, len(diag_0), len(diag_0))
         # A_sp = csr_matrix(A_sp.T)
@@ -418,11 +418,11 @@ while FC_Err > tol and epoch < max_iter:
         # profiling
         # bpoint3 = time.time()
         # print("form rhs and workvector: {:.3f}s".format(bpoint3 - bpoint2))
-        # x.set(0)
-        # viewer = PETSc.Viewer().createBinary('A.pickle', 'w')
-        # petsc_mat.view(viewer)
-        #viewer = PETSc.Viewer().createBinary('TCRE_MacDougallEtAl2017_b.dat', 'w')
-        #petsc_rhs.view(viewer)
+        x.set(0)
+        viewer = PETSc.Viewer().createBinary('A.dat', 'w')
+        petsc_mat.view(viewer)
+        viewer = PETSc.Viewer().createBinary('TCRE_MacDougallEtAl2017_b.dat', 'w')
+        petsc_rhs.view(viewer)
         ai, aj, av = petsc_mat.getValuesCSR()
         # print(type(x))
         print(type(petsc_mat))
@@ -467,6 +467,7 @@ while FC_Err > tol and epoch < max_iter:
     ig_star = i_g
     v0 = out_comp
     epoch += 1
+
 if reporterror:
     print("===============================================")
     print("Fianal epoch {:d}: PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch -1, PDE_Err, FC_Err))

@@ -177,7 +177,7 @@ if smart_guess:
     ε = 0.2
 
 max_iter = 20_000
-# file_iter = open("iter_c_compile.txt", "w")
+file_iter = open("iter_c_compile.txt", "w")
 while FC_Err > tol and episode < max_iter:
     print("-----------------------------------")
     print("---------Episode {}---------------".format(episode))
