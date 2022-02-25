@@ -69,7 +69,7 @@ beta_f = 1.86 / 1000
 # Grids Specification
 # temperature anomaly
 Y_min = 0.
-Y_max = 4.
+Y_max = 5.
 # range of capital
 Kd_min = 200.
 Kd_max = 10000.
@@ -81,9 +81,9 @@ lam_max = 0.1
 hlam = 0.01
 
 # hR = 0.05
-hY  = 0.1 # make sure it is float instead of int
-hKd = 100.
-hKg = 100.
+hY  = 0.2 # make sure it is float instead of int
+hKd = 300.
+hKg = 300.
 
 # R = np.arange(R_min, R_max + hR, hR)
 # nR = len(R)
@@ -98,7 +98,16 @@ nKg = len(Kg)
 lam = np.arange(lam_min, lam_max + hlam, hlam)
 nlam = len(lam)
 
+<<<<<<< HEAD
+=======
+
+hY = Y[1] - Y[0]
+hKd = Kd[1] - Kd[0]
+hKg = Kg[1] - Kg[0]
+
+>>>>>>> e15f143 (edit post jump)
 print("Grid dimension: [{}, {}, {}]".format(nKd, nKg, nY))
+print("difference: [{}, {}, {}]".format(hKd, hKg, hY))
 # Discretization of the state space for numerical PDE solution.
 ######## post jump, 3 states
 (Kd_mat, Kg_mat, Y_mat) = np.meshgrid(Kd, Kg, Y, indexing = 'ij')
@@ -113,16 +122,18 @@ lowerLims = np.array([Kd_min, Kg_min, Y_min], dtype=np.float64)
 upperLims = np.array([Kd_max, Kg_max, Y_max], dtype=np.float64)
 
 
-v0 = np.log(Kd_mat * Kd_max + Kg_mat * Kg_max) - beta_f * Y_mat - beta_f * eta * A_d * Kd_mat * Kd_max
+# v0 =   np.log(Kd_mat * Kd_max + Kg_mat * Kg_max) - beta_f * eta * A_d * Kd_mat * Kd_max
+v0 =  np.log(Kd_mat * Kd_mat + Kg_mat * Kg_max)
+# v0 = np.zeros(Kd_mat.shape)
 # import pickle
 # data = pickle.load(open("data/res_13-1-37", "rb"))
 # v0 = data["v0"]
 ############# step up of optimization
 FC_Err = 1
 epoch = 0
-tol = 1e-6
-epsilon = 0.1
-fraction = 0.1
+tol = 1e-8
+epsilon = 10.
+fraction = 1
 
 
 # csvfile = open(".csv", "w")
@@ -141,20 +152,28 @@ while FC_Err > tol and epoch < max_iter:
     # Applying finite difference scheme to the value function
     ######## first order
     dKd = finiteDiff(v0,0,1,hKd)
-    # dKd[dKd < 1e-8] = 1e-8
+    dKd[dKd < 1e-15] = 1e-15
     dKg = finiteDiff(v0,1,1,hKg)
-    # dKg[dKg < 1e-8] = 1e-8
+    dKg[dKg < 1e-15] = 1e-15
     dY = finiteDiff(v0,2,1,hY)
+    dY[dY > -  1e-15] = -1e-15
     ######## second order
     ddKd = finiteDiff(v0,0,2,hKd)
     ddKg = finiteDiff(v0,1,2,hKg)
     ddY = finiteDiff(v0,2,2,hY)
+
+    # if epoch > 3000:
+        # epsilon = 0.01
     # if epoch > 2000:
-        # epsilon = 0.1
+        # epsilon = 0.3
     # elif epoch > 1000:
-        # epsilon = 0.2
+        # epsilon = 0.5
     # else:
         # pass
+
+    # if epoch > 50:
+        # epsilon = 0.01
+        # fraction = 0.01
 
     # update control
     if epoch == 0:
@@ -163,24 +182,40 @@ while FC_Err > tol and epoch < max_iter:
         consumption_0 = A_d * Kd_mat * Kd_max + A_g * Kg_mat * Kg_max
         consumption = consumption_0
         mc = delta / consumption
+<<<<<<< HEAD
         i_d = 1 / phi_d - mc / phi_d / dKd * Kd_max
         # i_d[i_d < 0] = 0
         # i_d[i_d > 1] = 1
         i_g = 1 / phi_g - mc / phi_g / dKg * Kg_max
+=======
+        i_d = 1 / phi_d - mc / phi_d / dKd
+        # i_d[i_d < 0] = 0
+        # i_d[i_d > 1] = 1
+        i_g = 1 / phi_g - mc / phi_g / dKg
+>>>>>>> e15f143 (edit post jump)
         # i_g[i_g < 0] = 0
         # i_g[i_g > 1] = 1
     else:
 
-        consumption_new = (A_d - i_d) * Kd_mat + (A_g - i_g) * Kg_mat
-        consumption_new[consumption_new <= 1e-8] = 1e-8
+        consumption_new = (A_d - i_d) * Kd_mat * Kd_max  + (A_g - i_g) * Kg_mat * Kg_max
+        consumption_new[consumption_new <= 1e-10] = 1e-10
         consumption_new[consumption_new > consumption_0] = consumption_0[consumption_new > consumption_0]
         mc = delta / consumption_new
+<<<<<<< HEAD
         i_d = (1 / phi_d - mc / phi_d / dKd * Kd_max) * fraction + i_d * (1 - fraction)
         i_d[i_d < 0] = 0
         i_d[i_d > A_d] = A_d
         i_g = (1 / phi_g - mc / phi_g / dKg * Kg_max) * fraction + i_g * (1 - fraction)
         i_g[i_g < 0] = 0
         i_g[i_g > A_g] = A_g
+=======
+        i_d = (1 / phi_d - mc / phi_d / dKd ) * fraction + i_d * (1 - fraction)
+        i_d[i_d < 1e-15] =  1e-15
+        i_d[i_d > A_d] = A_d - 1e-15
+        i_g = (1 / phi_g - mc / phi_g / dKg ) * fraction + i_g * (1 - fraction)
+        i_g[i_g < 1e-15] =  1e-15
+        i_g[i_g > A_g] = A_g - 1e-15
+>>>>>>> e15f143 (edit post jump)
         # nums = 0
         # converge = False
         # while not converge:
@@ -206,7 +241,11 @@ while FC_Err > tol and epoch < max_iter:
 
         # print(diff)
 
+    # i_d = np.zeros(Kd_mat.shape)
+    # i_g = np.zeros(Kd_mat.shape)
     print(np.min(i_d), np.min(i_g))
+    print(np.max(i_d), np.max(i_g))
+    print(np.min(dKd), np.min(dKg))
     # i_d = (1 / 8 - np.sqrt(0.68) / 8) * np.ones(Kd_mat.shape)
     # i_g = (1 / 8 - np.sqrt(0.68) / 8) * np.ones(Kg_mat.shape)
     # i_d = np.zeros(Kd_mat.shape)
@@ -224,10 +263,10 @@ while FC_Err > tol and epoch < max_iter:
         dVec = np.array([hKd, hKg, hY])
         increVec = np.array([1, nKd, nKd * nKg],dtype=np.int32)
         # These are constant
-        A = - delta * np.ones(Kd_mat.shape)
-        C_dd = 0.5 * sigma_d**2 * Kd_mat**2
-        C_gg = 0.5 * sigma_g**2 * Kg_mat**2
-        C_yy = 0.5 * (eta * varsigma * A_d * Kd_mat * Kd_max)** 2
+        A = - delta / Kd_max  * np.ones(Kd_mat.shape)
+        C_dd = 0.5 * sigma_d**2 * (Kd_mat)**2 * Kd_max
+        C_gg = 0.5 * sigma_g**2 * (Kg_mat )**2 * Kg_max
+        C_yy = 0.5 * (eta * varsigma * A_d * Kd_mat )** 2 * Kd_max
         if linearsolver == 'petsc4py' or linearsolver == 'petsc' or linearsolver == 'both':
             petsc_mat = PETSc.Mat().create()
             petsc_mat.setType('aij')
@@ -275,9 +314,13 @@ while FC_Err > tol and epoch < max_iter:
 
     B_d = (alpha_d + i_d - 0.5 * phi_d * i_d**2) * Kd_mat
     B_g = (alpha_g + i_g - 0.5 * phi_g * i_g**2) * Kg_mat
-    B_y = beta_f * eta * A_d * Kd_mat * Kd_max
+    B_y = beta_f * eta * A_d * Kd_mat
 
+<<<<<<< HEAD
     D = delta * np.log(consumption)  - (gamma_1 + gamma_2 * Y_mat + gamma_3 * (Y_mat - 2) * (Y_mat > 2) )* beta_f * eta * A_d * Kd_mat * Kd_max  - 0.5 * (gamma_2 + gamma_3 * (Y_mat > 2)) * (varsigma * eta * A_d * Kd_mat * Kd_max)**2
+=======
+    D = delta / Kd_max  * np.log(consumption)  - (gamma_1 + gamma_2 * Y_mat + gamma_3 * (Y_mat - 2) * (Y_mat > 2) )* beta_f * eta * A_d * Kd_mat   - 0.5 * (gamma_2 + gamma_3 * (Y_mat > 2)) * (varsigma * eta * A_d * Kd_mat)**2 * Kd_max
+>>>>>>> e15f143 (edit post jump)
 
     if linearsolver == 'eigen' or linearsolver == 'both':
         start_eigen = time.time()
@@ -418,12 +461,21 @@ while FC_Err > tol and epoch < max_iter:
         # profiling
         # bpoint3 = time.time()
         # print("form rhs and workvector: {:.3f}s".format(bpoint3 - bpoint2))
+<<<<<<< HEAD
         x.set(0)
         viewer = PETSc.Viewer().createBinary('A.dat', 'w')
         petsc_mat.view(viewer)
         viewer = PETSc.Viewer().createBinary('TCRE_MacDougallEtAl2017_b.dat', 'w')
         petsc_rhs.view(viewer)
         ai, aj, av = petsc_mat.getValuesCSR()
+=======
+        # x.set(0)
+        # viewer = PETSc.Viewer().createBinary('A.dat', 'w')
+        # petsc_mat.view(viewer)
+        # viewer = PETSc.Viewer().createBinary('TCRE_MacDougallEtAl2017_b.dat', 'w')
+        # petsc_rhs.view(viewer)
+        # ai, aj, av = petsc_mat.getValuesCSR()
+>>>>>>> e15f143 (edit post jump)
         # print(type(x))
         print(type(petsc_mat))
         print(type(petsc_rhs))
@@ -434,7 +486,7 @@ while FC_Err > tol and epoch < max_iter:
         start_ksp = time.time()
         ksp.setOperators(petsc_mat)
         print(petsc_mat.norm())
-        ksp.setTolerances(rtol=1e-9)
+        ksp.setTolerances(rtol=1e-12)
         ksp.solve(petsc_rhs, x)
         # petsc_mat.destroy()
         petsc_rhs.destroy()
@@ -475,7 +527,7 @@ print("--- Total running time: %s seconds ---" % (time.time() - start_time))
 
 
 
-exit()
+# exit()
 
 import pickle
 # filename = filename
