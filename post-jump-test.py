@@ -98,14 +98,11 @@ nKg = len(Kg)
 lam = np.arange(lam_min, lam_max + hlam, hlam)
 nlam = len(lam)
 
-<<<<<<< HEAD
-=======
 
 hY = Y[1] - Y[0]
 hKd = Kd[1] - Kd[0]
 hKg = Kg[1] - Kg[0]
 
->>>>>>> e15f143 (edit post jump)
 print("Grid dimension: [{}, {}, {}]".format(nKd, nKg, nY))
 print("difference: [{}, {}, {}]".format(hKd, hKg, hY))
 # Discretization of the state space for numerical PDE solution.
@@ -182,17 +179,10 @@ while FC_Err > tol and epoch < max_iter:
         consumption_0 = A_d * Kd_mat * Kd_max + A_g * Kg_mat * Kg_max
         consumption = consumption_0
         mc = delta / consumption
-<<<<<<< HEAD
-        i_d = 1 / phi_d - mc / phi_d / dKd * Kd_max
-        # i_d[i_d < 0] = 0
-        # i_d[i_d > 1] = 1
-        i_g = 1 / phi_g - mc / phi_g / dKg * Kg_max
-=======
         i_d = 1 / phi_d - mc / phi_d / dKd
         # i_d[i_d < 0] = 0
         # i_d[i_d > 1] = 1
         i_g = 1 / phi_g - mc / phi_g / dKg
->>>>>>> e15f143 (edit post jump)
         # i_g[i_g < 0] = 0
         # i_g[i_g > 1] = 1
     else:
@@ -201,21 +191,12 @@ while FC_Err > tol and epoch < max_iter:
         consumption_new[consumption_new <= 1e-10] = 1e-10
         consumption_new[consumption_new > consumption_0] = consumption_0[consumption_new > consumption_0]
         mc = delta / consumption_new
-<<<<<<< HEAD
-        i_d = (1 / phi_d - mc / phi_d / dKd * Kd_max) * fraction + i_d * (1 - fraction)
-        i_d[i_d < 0] = 0
-        i_d[i_d > A_d] = A_d
-        i_g = (1 / phi_g - mc / phi_g / dKg * Kg_max) * fraction + i_g * (1 - fraction)
-        i_g[i_g < 0] = 0
-        i_g[i_g > A_g] = A_g
-=======
         i_d = (1 / phi_d - mc / phi_d / dKd ) * fraction + i_d * (1 - fraction)
         i_d[i_d < 1e-15] =  1e-15
         i_d[i_d > A_d] = A_d - 1e-15
         i_g = (1 / phi_g - mc / phi_g / dKg ) * fraction + i_g * (1 - fraction)
         i_g[i_g < 1e-15] =  1e-15
         i_g[i_g > A_g] = A_g - 1e-15
->>>>>>> e15f143 (edit post jump)
         # nums = 0
         # converge = False
         # while not converge:
@@ -316,11 +297,7 @@ while FC_Err > tol and epoch < max_iter:
     B_g = (alpha_g + i_g - 0.5 * phi_g * i_g**2) * Kg_mat
     B_y = beta_f * eta * A_d * Kd_mat
 
-<<<<<<< HEAD
-    D = delta * np.log(consumption)  - (gamma_1 + gamma_2 * Y_mat + gamma_3 * (Y_mat - 2) * (Y_mat > 2) )* beta_f * eta * A_d * Kd_mat * Kd_max  - 0.5 * (gamma_2 + gamma_3 * (Y_mat > 2)) * (varsigma * eta * A_d * Kd_mat * Kd_max)**2
-=======
     D = delta / Kd_max  * np.log(consumption)  - (gamma_1 + gamma_2 * Y_mat + gamma_3 * (Y_mat - 2) * (Y_mat > 2) )* beta_f * eta * A_d * Kd_mat   - 0.5 * (gamma_2 + gamma_3 * (Y_mat > 2)) * (varsigma * eta * A_d * Kd_mat)**2 * Kd_max
->>>>>>> e15f143 (edit post jump)
 
     if linearsolver == 'eigen' or linearsolver == 'both':
         start_eigen = time.time()
