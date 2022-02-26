@@ -450,7 +450,6 @@ while FC_Err > tol and epoch < max_iter:
         # viewer = PETSc.Viewer().createBinary('TCRE_MacDougallEtAl2017_b.dat', 'w')
         # petsc_rhs.view(viewer)
         # ai, aj, av = petsc_mat.getValuesCSR()
->>>>>>> e15f143 (edit post jump)
         # print(type(x))
         print(type(petsc_mat))
         print(type(petsc_rhs))
