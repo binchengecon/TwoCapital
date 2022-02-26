@@ -128,7 +128,7 @@ v0 =  np.log(Kd_mat * Kd_mat + Kg_mat * Kg_max)
 ############# step up of optimization
 FC_Err = 1
 epoch = 0
-tol = 1e-8
+tol = 1e-6
 epsilon = 10.
 fraction = 1
 
