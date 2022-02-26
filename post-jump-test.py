@@ -438,14 +438,12 @@ while FC_Err > tol and epoch < max_iter:
         # profiling
         # bpoint3 = time.time()
         # print("form rhs and workvector: {:.3f}s".format(bpoint3 - bpoint2))
-<<<<<<< HEAD
-        x.set(0)
-        viewer = PETSc.Viewer().createBinary('A.dat', 'w')
-        petsc_mat.view(viewer)
-        viewer = PETSc.Viewer().createBinary('TCRE_MacDougallEtAl2017_b.dat', 'w')
-        petsc_rhs.view(viewer)
-        ai, aj, av = petsc_mat.getValuesCSR()
-=======
+        # x.set(0)
+        # viewer = PETSc.Viewer().createBinary('A.dat', 'w')
+        # petsc_mat.view(viewer)
+        # viewer = PETSc.Viewer().createBinary('TCRE_MacDougallEtAl2017_b.dat', 'w')
+        # petsc_rhs.view(viewer)
+        # ai, aj, av = petsc_mat.getValuesCSR()
         # x.set(0)
         # viewer = PETSc.Viewer().createBinary('A.dat', 'w')
         # petsc_mat.view(viewer)
