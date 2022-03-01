@@ -23,7 +23,7 @@ reporterror = True
 # eigen: matrix assembled in C++
 # both: petsc+petsc4py
 #
-linearsolver = 'eigen'
+linearsolver = 'petsc'
 
 write_test = False
 if write_test:
@@ -31,7 +31,7 @@ if write_test:
 
 
 current_time = datetime.now()
-filename =  "res" + '_' + "{:d}-{:d}-{:d}".format(current_time.day, current_time.hour, current_time.minute)
+filename =  "res" + '-' + "{:d}-{:d}-{:d}".format(current_time.day, current_time.hour, current_time.minute)
 
 if write_test:
     f.write("Script starts: {:d}/{:d}-{:d}:{:d}\n".format(current_time.month, current_time.day, current_time.hour, current_time.minute))
@@ -42,7 +42,7 @@ start_time = time.time()
 # Parameters as defined in the paper
 delta = 0.01
 A_d = 0.12
-A_g = 0.2
+A_g = 0.15
 
 alpha_d = -0.02
 alpha_g = -0.02
@@ -56,7 +56,7 @@ phi_g = 7
 varphi = 0.1
 sigma_lam = 0.016
 ########## Scaling factor
-eta = 0.17
+eta = 0.008
 
 
 ###### damage
@@ -94,9 +94,9 @@ beta_f = 1.86 / 1000
 Y_min = 0.
 Y_max = 4.
 # range of capital
-Kd_min = 0.
-Kd_max = 9.
-Kg_min = 0.1
+Kd_min = 3.
+Kd_max = 10.
+Kg_min = 0.01
 Kg_max = 0.99
 ################### arrival rate######################
 lam_min = 0
@@ -105,8 +105,8 @@ hlam = 0.01
 
 # hR = 0.05
 hY  = 0.1 # make sure it is float instead of int
-hKd = 0.4
-hKg = 0.1
+hKd = 0.2
+hKg = 0.01
 
 # R = np.arange(R_min, R_max + hR, hR)
 # nR = len(R)
@@ -122,6 +122,8 @@ nlam = len(lam)
 
 if write_test:
     f.write("Grid dimension: [{}, {}, {}]\n".format(nKd, nKg, nY))
+
+print("Grid dimension: [{}, {}, {}]\n".format(nKd, nKg, nY))
 # Discretization of the state space for numerical PDE solution.
 ######## post jump, 3 states
 (Kd_mat, Kg_mat, Y_mat) = np.meshgrid(Kd, Kg, Y, indexing = 'ij')
@@ -142,9 +144,9 @@ v0 = Kd_mat - beta_f * Y_mat
 ############# step up of optimization
 FC_Err = 1
 epoch = 0
-tol = 1e-8
+tol = 1e-7
 epsilon = 0.01
-fraction = 0.1
+fraction = 0.5
 
 csvfile = open("ResForRatio.csv", "w")
 fieldnames = ["epoch", "iterations", "residual norm", "PDE_Err", "FC_Err"]
@@ -170,12 +172,12 @@ while FC_Err > tol and epoch < max_iter:
     ddKg = finiteDiff(v0,1,2,hKg)
     ddY = finiteDiff(v0,2,2,hY)
 
-    # if epoch > 2000:
-        # epsilon = 0.01
-    # elif epoch > 1000:
-        # epsilon = 0.05
-    # else:
-        # pass
+    if epoch > 2000:
+        epsilon = 0.1
+    elif epoch > 1000:
+        epsilon = 0.5
+    else:
+        pass
 
     # update control
     if epoch == 0:
@@ -192,25 +194,52 @@ while FC_Err > tol and epoch < max_iter:
         i_g /= phi_g
         # i_g[i_g < 0] = 0
         # i_g[i_g > A_g] = A_g
+        q = delta * ((A_g * Kg_mat - i_g * Kg_mat) + (A_d * (1 - Kg_mat) - i_d * (1 - Kg_mat))) ** (-1)
+
     else:
 
-        consumption_new = (A_d - id_star) * Kd_mat + (A_g - ig_star) * Kg_mat
-        consumption_new[consumption_new <= 1e-8] = 1e-8
-        # consumption_new[consumption_new > consumption_0] = consumption_0[consumption_new > consumption_0]
-        mc = delta / consumption_new
-        id_new = 1 / phi_d * (1 - mc / (dKd - Kg_mat * dKg )) * fraction + i_d * (1 - fraction)
-        id_new[id_new < -1] = -1
-        # id_new[id_new > A_d] = A_d- 1e-8
-        # id_new[id_new > 1/phi_d] = 1 / phi_d
-        ig_new = 1 / phi_g * (1 - mc / (dKd  + (1 - Kg_mat) * dKg)) * fraction + i_g * (1 - fraction)
-        ig_new[ig_new <-1] = -1
-        # ig_new[ig_new > A_g] = A_g
-        # ig_new[ig_new > 1 / phi_g] = 1 / phi_g
+        # consumption_new = (A_d - id_star) * Kd_mat + (A_g - ig_star) * Kg_mat
+        # consumption_new[consumption_new <= 1e-8] = 1e-8
+        # # consumption_new[consumption_new > consumption_0] = consumption_0[consumption_new > consumption_0]
+        # mc = delta / consumption_new
+        # id_new = 1 / phi_d * (1 - mc / (dKd - Kg_mat * dKg )) * fraction + i_d * (1 - fraction)
+        # id_new[id_new < 1e-8] = 1e-8
+        # # id_new[id_new > A_d] = A_d- 1e-8
+        # # id_new[id_new > 1/phi_d] = 1 / phi_d
+        # ig_new = 1 / phi_g * (1 - mc / (dKd  + (1 - Kg_mat) * dKg)) * fraction + i_g * (1 - fraction)
+        # # ig_new[ig_new < 1e-8] = 1e-8
+        # # ig_new[ig_new > A_g] = A_g
+        # # ig_new[ig_new > 1 / phi_g] = 1 / phi_g
 
-        # mc_new = fraction * delta / ((A_d -id_new) * (1 - Kg_mat) + (A_g - ig_new) * Kg_mat) + mc * (1 - fraction)
-        i_d = id_new
-        i_g = ig_new
+        # # mc_new = fraction * delta / ((A_d -id_new) * (1 - Kg_mat) + (A_g - ig_new) * Kg_mat) + mc * (1 - fraction)
+        # i_d = id_new
+        # i_g = ig_new
 
+     # updating controls
+        Converged = 0
+        num = 0
+
+        while Converged == 0:
+            i_g_1 = (1 - q / (dKg * (1 - Kg_mat) + dKd )) / phi_g
+            i_d_1 = (1 - q / (-dKg * Kg_mat + dKd)) / phi_d
+            i_d_1[i_d_1 >= A_d] = A_d - 1e-8
+            # i_d_1[i_d_1 <= 1e-8] = 1e-8
+            i_g_1[i_g_1 >= A_g] = A_g - 1e-8
+            # i_g_1[i_g_1 <= 1e-8] = 1e-8
+
+            if np.max(abs(i_g_1 - i_g)) <= 1e-8 and np.max(abs(i_d_1 - i_d)) <= 1e-8:
+                Converged = 1
+                i_g = i_g_1
+                i_d = i_d_1
+            else:
+                i_g = i_g_1
+                i_d = i_d_1
+
+                q = delta * (
+                    (A_g * Kg_mat - i_g * Kg_mat) + (A_d * (1-Kg_mat) - i_d * (1-Kg_mat))) ** (-1) * fraction + (1 - fraction) * q
+            num += 1
+            # print(num)
+            # print(np.max(abs(i_g_1 - i_g)) , np.max(abs(i_d_1 - i_d)))
         # nums = 0
         # converge = False
         # while not converge:
@@ -237,6 +266,10 @@ while FC_Err > tol and epoch < max_iter:
             # nums += 1
 
         # print(diff)
+    i_d[i_d >= A_d] = A_d - 1e-8
+    i_d[i_d <= 1e-15] = 1e-15
+    i_g[i_g >= A_g] = A_g - 1e-8
+    i_g[i_g <= 1e-8] = 1e-8
     print(np.min(i_d), np.min(i_g))
     # i_d = np.zeros(Kd_mat.shape)
     # i_g = np.zeros(Kg_mat.shape)
@@ -254,8 +287,8 @@ while FC_Err > tol and epoch < max_iter:
         increVec = np.array([1, nKd, nKd * nKg],dtype=np.int32)
         # These are constant
         A = - delta * np.ones(Kd_mat.shape)
-        C_dd = 0.5 * ( sigma_d * (1 - Kg_mat) + sigma_g * Kg_mat )**2
-        C_gg = np.zeros(Kd_mat.shape)
+        C_dd = 0.5 * (( sigma_d * (1 - Kg_mat) )**2 + (sigma_g * Kg_mat )**2)
+        C_gg = 0.5 * (1- Kg_mat)**2 * Kg_mat**2 * (sigma_d**2 + sigma_g**2)
         C_yy = 0.5 * (eta * varsigma * A_d * np.exp(Kd_mat) * (1 - Kg_mat))** 2
         if linearsolver == 'petsc4py' or linearsolver == 'petsc' or linearsolver == 'both':
             petsc_mat = PETSc.Mat().create()
@@ -374,7 +407,7 @@ while FC_Err > tol and epoch < max_iter:
         # create linear solver
         start_ksp = time.time()
         ksp.setOperators(petsc_mat)
-        ksp.setTolerances(rtol=1e-12)
+        ksp.setTolerances(rtol=1e-14)
         ksp.solve(petsc_rhs, x)
         petsc_mat.destroy()
         petsc_rhs.destroy()
@@ -388,7 +421,7 @@ while FC_Err > tol and epoch < max_iter:
             # Calculating PDE error and False Transient error
             PDE_rhs = A * v0 + B_d * dKd + B_g * dKg + B_y * dY + C_dd * ddKd + C_gg * ddKg + C_yy * ddY + D
             PDE_Err = np.max(abs(PDE_rhs))
-            FC_Err = np.max(abs((out_comp - v0)))
+            FC_Err = np.max(abs((out_comp - v0) / epsilon))
             print("Epoch {:d} (PETSc): PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch, PDE_Err, FC_Err))
             # profling
             # bpoint7 = time.time()
