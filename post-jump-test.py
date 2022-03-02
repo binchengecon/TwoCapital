@@ -129,7 +129,7 @@ v0 =  np.log(Kd_mat * Kd_mat + Kg_mat * Kg_max)
 FC_Err = 1
 epoch = 0
 tol = 1e-6
-epsilon = 10.
+epsilon = 1.
 fraction = 1
 
 
@@ -149,9 +149,9 @@ while FC_Err > tol and epoch < max_iter:
     # Applying finite difference scheme to the value function
     ######## first order
     dKd = finiteDiff(v0,0,1,hKd)
-    dKd[dKd < 1e-15] = 1e-15
+    dKd[dKd < 0.5] = 0.5
     dKg = finiteDiff(v0,1,1,hKg)
-    dKg[dKg < 1e-15] = 1e-15
+    dKg[dKg < 0.5] = 0.5
     dY = finiteDiff(v0,2,1,hY)
     dY[dY > -  1e-15] = -1e-15
     ######## second order

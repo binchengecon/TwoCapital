@@ -14,6 +14,7 @@ from scipy.sparse import spdiags
 from scipy.sparse import coo_matrix
 from scipy.sparse import csr_matrix
 from datetime import datetime
+from solver import solver_3d
 
 reporterror = True
 # Linear solver choices
@@ -56,7 +57,7 @@ phi_g = 7
 varphi = 0.1
 sigma_lam = 0.016
 ########## Scaling factor
-eta = 0.008
+eta = 0.03
 
 
 ###### damage
@@ -154,6 +155,17 @@ writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 writer.writeheader()
 max_iter = 40000
 # file_iter = open("iter_c_compile.txt", "w")
+
+res = solver_3d(Kd_mat, Kg_mat, Y_mat, # FOC_func, Coeff_func,  
+        args=(delta, eta, A_d, A_g, alpha_d, alpha_g, sigma_d, sigma_g, phi_d, phi_g, gamma_1, \
+            gamma_2, y_bar, varphi, varsigma, beta_f ),
+        linearsolver="petsc",
+        reporterror=True,
+        v0=v0, tol=1e-6, max_iter=10000, epsilon=0.1, fraction=0.5,
+        saveRes=True)
+
+exit()
+
 while FC_Err > tol and epoch < max_iter:
     print("-----------------------------------")
     print("---------Epoch {}---------------".format(epoch))
