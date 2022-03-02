@@ -32,7 +32,10 @@ as follows:
 \end{align*}
 
 
-We also assume there is R\&D investment that leads to an increased arrival rate of a one time jump in Sector 2 productivity. The arrival rate is denoted as  t and evolves as follows
+We also assume there is R\&D investment that leads to an increased arrival rate of a one time jump
+
+
+ in Sector 2 productivity. The arrival rate is denoted as  t and evolves as follows
 
 \begin{align*}
 \dif \lambda_{t} / \lambda_t & =( \varphi  i_\lambda - \alpha_\lambda) \dif t+\sigma_{\lambda}\dif W
@@ -75,7 +78,10 @@ Taking these pieces together we get the HJB equation
 \begin{align*}
 \delta V(K_{d},K_{g},\lambda,Y,\log N ) & =\max_{i_{g},i_{d}, i_{\lambda}}\delta \log(A_dK_d - i_dK_d + A_gK_g - i_gK_g  - i_\lambda \lambda ) -\delta \log N\\
  & +\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\}V_{d}K_{d}+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\}V_{g}K_{g}+\frac{\sigma_{d}^{2}K_{d}^{2}}{2}V_{dd}+\frac{\sigma_{g}^{2}K_{g}^{2}}{2}V_{gg}\\
- & +\beta_{f}E_{d}V_{Y}+\frac{1}{2}\varsigma^{2}E_{d}^{2}V_{YY}+[\{\gamma_{1}+\gamma_{2}Y_{t}\}\beta_{f}E_{d}+\frac{\gamma_2}{2} \varsigma^{2}E_{d}^{2}]V_{\log N}+\frac{\varsigma^{2}E_{d}^{2}}{2}V_{\log N\log N}\\
+ & +\beta_{f}E_{d}V_{Y}+\frac{1}{2}\varsigma^{2}E_{d}^{2}V_{YY}+[\{\gamma_{1}+\gamma_{2}Y_{t} + \gamma_3 (Y_t - 2) \mathbf
+ {I} \{Y_t > 2
+ \}\}\beta_{f}E_{d}\\
+ &+\frac{\gamma_2 + \gamma_3 \mathbf{I}\{Y_t > 2 \} }{2} \varsigma^{2}E_{d}^{2}]V_{\log N}+\frac{\varsigma^{2}E_{d}^{2}}{2}V_{\log N\log N}\\
  & +(\varphi i_{\lambda} - \alpha_\lambda)\lambda V_{\lambda}+\frac{(\sigma_{\lambda } \lambda)^{2}}{2}V_{\lambda \lambda}+\lambda  \left( V (K_d, K_g, \lambda, Y, \log N; A_g') - V (K_d, K_g, \lambda, Y, \log N; A_g) \right)
 \end{align*}
 
@@ -102,7 +108,8 @@ We can analytically simplify out $\log Nt$ to get a simpli ed HJB
 \begin{align*}
 \delta v(K_{d},K_{g}, \lambda,Y) & =\max_{i_{g},i_{d}, i_\lambda }\delta \log(A_dK_d - i_dK_d + A_gK_g - i_gK_g  - i_\lambda \lambda ) \\
  & +\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\}v_{d}K_{d}+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\}v_{g}K_{g}+\frac{\sigma_{d}^{2}K_{d}^{2}}{2}v_{dd}+\frac{\sigma_{g}^{2}K_{g}^{2}}{2}v_{gg}\\
- & +\beta_{f}E_{d}v_{Y}+\frac{1}{2}\varsigma^{2}E_{d}^{2}v{}_{YY} - [\{\gamma_{1}+\gamma_{2}Y_{t}\}\beta_{f}E_{d}+\frac{\gamma_2}{2}\varsigma^{2}E_{d}^{2}]\\
+ & +\beta_{f}E_{d}v_{Y}+\frac{1}{2}\varsigma^{2}E_{d}^{2}v{}_{YY} - [\{\gamma_{1}+\gamma_{2}Y_{t} + \gamma_3 (Y_t -2) \mathbf{I}\{ Y_t > 2
+ \}\beta_{f}E_{d}+\frac{\gamma_2 + \gamma_3 \mathbf{I}\{Y_t > 2\}{2}\varsigma^{2}E_{d}^{2}]\\
  & +(-\alpha_{\lambda}  + \varphi i_\lambda) \lambda v_{\lambda}+\frac{(\sigma_{\lambda} \lambda)^2}{2}v_{\lambda\lambda}+\lambda \left( v (K_d, K_g, \lambda, Y; A_g') - v (K_d, K_g, \lambda, Y; A_g) \right)
 \end{align*}
 
@@ -127,7 +134,13 @@ We solve post jump HJB:
 \begin{align*}
 	\delta v(K_{d}, K_{g}, Y; A_g') & =\max_{i_{g},i_{d} }\delta \log(A_dK_d - i_dK_d + A_g'K_g - i_gK_g  ) \\
 	& +\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\}v_{d}K_{d}+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\}v_{g}K_{g}+\frac{\sigma_{d}^{2}K_{d}^{2}}{2}v_{dd}+\frac{\sigma_{g}^{2}K_{g}^{2}}{2}v_{gg}\\
-	& +\beta_{f} (\eta A_d K_d )v_{Y}+\frac{1}{2}\varsigma^{2}(\eta A_d  K_d)^{2}v{}_{YY} - [\{\gamma_{1}+\gamma_{2}Y_{t}\}\beta_{f}(\eta A_d K_d)+\frac{\gamma_2}{2}\varsigma^{2}(\eta A_d K_d)^{2}]
+	& +\beta_{f} (\eta A_d K_d )v_{Y}+\frac{1}{2}\varsigma^{2}(\eta A_d  K_d)^{2}v{}_{YY} - [\{\gamma_{1}+\gamma_{2}Y_{t}+ \gamma_3 (Y_t - 2) \mathbf
+ {I} \{Y_t > 2
+ \}\}\beta_{f}(\eta A_d K_d)]\\
+ &
+ -\frac{\gamma_2 + + \gamma_3 \mathbf
+ {I} \{Y_t > 2
+ \}}{2}[ \varsigma^{2}(\eta A_d K_d)^{2}]
 \end{align*}
 
 denote
