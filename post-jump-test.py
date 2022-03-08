@@ -55,7 +55,7 @@ phi_g = 8
 varphi = 0.1
 sigma_lam = 0.016
 ########## Scaling factor
-eta = 0.17
+eta = 0.01
 
 
 ###### damage
@@ -69,7 +69,7 @@ beta_f = 1.86 / 1000
 # Grids Specification
 # temperature anomaly
 Y_min = 0.
-Y_max = 5.
+Y_max = 4.
 # range of capital
 Kd_min = 200.
 Kd_max = 10000.
@@ -82,8 +82,8 @@ hlam = 0.01
 
 # hR = 0.05
 hY  = 0.2 # make sure it is float instead of int
-hKd = 300.
-hKg = 300.
+hKd = 200.
+hKg = 200.
 
 # R = np.arange(R_min, R_max + hR, hR)
 # nR = len(R)
@@ -130,13 +130,13 @@ FC_Err = 1
 epoch = 0
 tol = 1e-6
 epsilon = 1.
-fraction = 1
+fraction = 0.5
 
 
-# csvfile = open(".csv", "w")
-# fieldnames = ["epoch", "iterations", "residual norm",  "PDE_Err", "FC_Err", "A_rank", "A_norm", "A_cond", "b_rank", "b_norm", "b_cond"]
-# writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-# writer.writeheader()
+csvfile = open("idig-zeros.csv", "w")
+fieldnames = ["epoch", "iterations", "residual norm",  "PDE_Err", "FC_Err", "ig_min", "ig_max", "dKg_min", "dKg_max", "dKd_min", "dKd_max"]
+writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+writer.writeheader()
 
 max_iter = 20000
 # file_iter = open("iter_c_compile.txt", "w")
@@ -149,11 +149,11 @@ while FC_Err > tol and epoch < max_iter:
     # Applying finite difference scheme to the value function
     ######## first order
     dKd = finiteDiff(v0,0,1,hKd)
-    dKd[dKd < 0.5] = 0.5
+    # dKd[dKd < 0.5] = 0.5
     dKg = finiteDiff(v0,1,1,hKg)
-    dKg[dKg < 0.5] = 0.5
+    # dKg[dKg < 0.5] = 0.5
     dY = finiteDiff(v0,2,1,hY)
-    dY[dY > -  1e-15] = -1e-15
+    # dY[dY > -  1e-15] = -1e-15
     ######## second order
     ddKd = finiteDiff(v0,0,2,hKd)
     ddKg = finiteDiff(v0,1,2,hKg)
@@ -185,42 +185,42 @@ while FC_Err > tol and epoch < max_iter:
         i_g = 1 / phi_g - mc / phi_g / dKg
         # i_g[i_g < 0] = 0
         # i_g[i_g > 1] = 1
+        q = delta * ((A_g * Kg_mat - i_g * Kg_mat) * Kd_max + (A_d * Kd_mat - i_d * Kd_mat) * Kd_max ) ** (-1)
     else:
 
-        consumption_new = (A_d - i_d) * Kd_mat * Kd_max  + (A_g - i_g) * Kg_mat * Kg_max
-        consumption_new[consumption_new <= 1e-10] = 1e-10
-        consumption_new[consumption_new > consumption_0] = consumption_0[consumption_new > consumption_0]
-        mc = delta / consumption_new
-        i_d = (1 / phi_d - mc / phi_d / dKd ) * fraction + i_d * (1 - fraction)
-        i_d[i_d < 1e-15] =  1e-15
-        i_d[i_d > A_d] = A_d - 1e-15
-        i_g = (1 / phi_g - mc / phi_g / dKg ) * fraction + i_g * (1 - fraction)
-        i_g[i_g < 1e-15] =  1e-15
-        i_g[i_g > A_g] = A_g - 1e-15
-        # nums = 0
-        # converge = False
-        # while not converge:
+        # consumption_new = (A_d - i_d) * Kd_mat * Kd_max  + (A_g - i_g) * Kg_mat * Kg_max
+        # consumption_new[consumption_new <= 1e-10] = 1e-10
+        # consumption_new[consumption_new > consumption_0] = consumption_0[consumption_new > consumption_0]
+        # mc = delta / consumption_new
+        # i_d = (1 / phi_d - mc / phi_d / dKd ) * fraction + i_d * (1 - fraction)
+        # i_d[i_d < 1e-15] =  1e-15
+        # i_d[i_d > A_d] = A_d - 1e-15
+        # i_g = (1 / phi_g - mc / phi_g / dKg ) * fraction + i_g * (1 - fraction)
+        # i_g[i_g < 1e-15] =  1e-15
+        # i_g[i_g > A_g] = A_g - 1e-15
+     # updating controls
+        Converged = 0
+        num = 0
 
-            # id_new = (1 / phi_d - mc / phi_d / dKd * Kd_max) * fraction + i_d * (1 - fraction)
-            # id_new[id_new < 0] = 0
-            # id_new[id_new > A_d] = A_d
-            # ig_new = (1 / phi_g - mc / phi_g / dKg * Kg_max) * fraction + i_g * (1 - fraction)
-            # ig_new[ig_new < 0] = 0
-            # ig_new[ig_new > A_g] = A_g
+        while Converged == 0:
+            i_g_1 = (1 - q / dKd) / phi_g
+            # i_d_1 = (1 - q / dKg) / phi_d
+            # i_d_1[i_d_1 >= A_d] = A_d - 1e-8
+            i_d_1 = np.zeros(Kd_mat.shape)
+            # i_d_1[i_d_1 <= 1e-8] = 1e-8
+            i_g_1[i_g_1 >= A_g] = A_g - 1e-8
+            # i_g_1[i_g_1 <= 1e-8] = 1e-8
 
-            # mc_new = fraction * delta / ((A_d -id_new) * Kd_mat * Kd_max + (A_g - ig_new) * Kg_mat * Kg_max) + mc * (1 - fraction)
-            # i_d = id_new
-            # i_g = ig_new
-            # diff = np.max(np.abs(mc - mc_new) / fraction)
-            # if diff  < 1e-5 or nums > 4000:
-                # converge = True
-                # mc = mc_new
-            # else:
-                # mc = mc_new
-                # pass
-            # nums += 1
+            if np.max(abs(i_g_1 - i_g)) <= 1e-8 and np.max(abs(i_d_1 - i_d)) <= 1e-8:
+                Converged = 1
+                i_g = i_g_1
+                i_d = i_d_1
+            else:
+                i_g = i_g_1
+                i_d = i_d_1
 
-        # print(diff)
+                q = delta * ( (A_g * Kg_mat - i_g * Kg_mat) * Kg_max + (A_d * Kd_mat - i_d * Kd_mat) * Kd_max ) ** (-1) * fraction + (1 - fraction) * q
+            num += 1
 
     # i_d = np.zeros(Kd_mat.shape)
     # i_g = np.zeros(Kd_mat.shape)
@@ -231,8 +231,12 @@ while FC_Err > tol and epoch < max_iter:
     # i_g = (1 / 8 - np.sqrt(0.68) / 8) * np.ones(Kg_mat.shape)
     # i_d = np.zeros(Kd_mat.shape)
     # i_g = np.zeros(Kg_mat.shape)
+    # i_d[i_d <= -20 + 1e-8] = -20 + 1e-8
+    # i_g[i_g <= -20 + 1e-8] = -20 + 1e-8
     # i_d[i_d < 0] = 0
     # i_g[i_g < 0] = 0
+    # i_d = np.zeros(Kd_mat.shape)
+    # i_g = np.zeros(Kd_mat.shape)
     consumption = (A_d -i_d) * Kd_mat * Kd_max + (A_g - i_g) * Kg_mat * Kg_max
     consumption[consumption < 1e-8] = 1e-8
     # i_d[i_d >= A_d] = A_d - 1e-8
@@ -293,8 +297,8 @@ while FC_Err > tol and epoch < max_iter:
     # Step (6) and (7) Formulating HJB False Transient parameters
     # See remark 2.1.4 for more details
 
-    B_d = (alpha_d + i_d - 0.5 * phi_d * i_d**2) * Kd_mat
-    B_g = (alpha_g + i_g - 0.5 * phi_g * i_g**2) * Kg_mat
+    B_d = (alpha_d + i_d - 0.5 * phi_d * i_d**2) * Kd_mat * Kd_max
+    B_g = (alpha_g + i_g - 0.5 * phi_g * i_g**2) * Kg_mat * Kg_max
     B_y = beta_f * eta * A_d * Kd_mat
 
     D = delta / Kd_max  * np.log(consumption)  - (gamma_1 + gamma_2 * Y_mat + gamma_3 * (Y_mat - 2) * (Y_mat > 2) )* beta_f * eta * A_d * Kd_mat   - 0.5 * (gamma_2 + gamma_3 * (Y_mat > 2)) * (varsigma * eta * A_d * Kd_mat)**2 * Kd_max
@@ -489,6 +493,21 @@ while FC_Err > tol and epoch < max_iter:
         # "FC_Err": FC_Err
     # }
     # writer.writerow(rowcontent)
+    # step 9: keep iterating until convergence
+    rowcontent = {
+        "epoch": epoch,
+        "iterations": num_iter,
+        "residual norm": ksp.getResidualNorm(),
+        "PDE_Err": PDE_Err,
+        "FC_Err": FC_Err,
+        "ig_min": np.min(i_g),
+        "ig_max": np.max(i_g),
+        "dKg_min": np.min(dKg),
+        "dKg_max": np.max(dKg),
+        "dKd_min": np.min(dKd),
+        "dKd_max": np.max(dKd),
+    }
+    writer.writerow(rowcontent)
     id_star = i_d
     ig_star = i_g
     v0 = out_comp

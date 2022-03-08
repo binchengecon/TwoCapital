@@ -100,15 +100,15 @@ savePic = False
 # plt.show()
 
 
-with open("data/res-28-9-34", "rb") as file:
+with open("data/res-petsc-4-10-50", "rb") as file:
   data = pickle.load(file)
 
 Kd = data["Kd"]
 Kd_max = data["Kd_max"]
-Kd = Kd * Kd_max
+# Kd = Kd * Kd_max
 Kg = data["Kg"]
 Kg_max = data["Kg_max"]
-Kg = Kg * Kg_max
+# Kg = Kg * Kg_max
 Y = data["Y"]
 i_d = data["i_d"]
 i_g = data["i_g"]
@@ -118,7 +118,7 @@ print(v.shape)
 # fig 1
 plt.figure()
 plt.title("value function - dirty capital")
-plt.plot(Kd, v[:, 10,10], label="$K_g = {:d}, Y = {:.2f}$".format(int(Kg[10]), Y[10]))
+plt.plot(np.exp(Kd), v[:, 10,10], label="$K_g = {:d}, Y = {:.2f}$".format(int(Kg[10]), Y[10]))
 # plt.plot(Kd, v[:, 10,10], label="$K_g = {:d}, Y = {:.2f}$".format(int(Kg[10]), Y[10]))
 plt.xlabel("$K_d$")
 plt.ylabel("v")

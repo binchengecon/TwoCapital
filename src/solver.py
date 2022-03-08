@@ -453,7 +453,7 @@ def solver_3d(X_mat, Y_mat, Z_mat, FOC_func=FOC_func, GetCoeff=GetCoeff, GetCoef
 
     if saveRes:
 
-        import datetime
+        from datetime import datetime
         
         current_time = datetime.now()
         filename =  "res" + '-' + "{:d}-{:d}-{:d}".format(current_time.day, current_time.hour, current_time.minute)

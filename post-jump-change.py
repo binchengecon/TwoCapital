@@ -57,7 +57,7 @@ phi_g = 7
 varphi = 0.1
 sigma_lam = 0.016
 ########## Scaling factor
-eta = 0.03
+eta = 0.17
 
 
 ###### damage
@@ -93,11 +93,11 @@ beta_f = 1.86 / 1000
 #R_max = 9
 
 Y_min = 0.
-Y_max = 4.
+Y_max = 3.
 # range of capital
-Kd_min = 3.
-Kd_max = 10.
-Kg_min = 0.01
+Kd_min = 4.
+Kd_max = 8.5
+Kg_min = 0.14
 Kg_max = 0.99
 ################### arrival rate######################
 lam_min = 0
@@ -106,7 +106,7 @@ hlam = 0.01
 
 # hR = 0.05
 hY  = 0.1 # make sure it is float instead of int
-hKd = 0.2
+hKd = 0.1
 hKg = 0.01
 
 # R = np.arange(R_min, R_max + hR, hR)
@@ -146,7 +146,7 @@ v0 = Kd_mat - beta_f * Y_mat
 FC_Err = 1
 epoch = 0
 tol = 1e-7
-epsilon = 0.01
+epsilon = 0.5
 fraction = 0.5
 
 csvfile = open("ResForRatio.csv", "w")
@@ -156,15 +156,15 @@ writer.writeheader()
 max_iter = 40000
 # file_iter = open("iter_c_compile.txt", "w")
 
-res = solver_3d(Kd_mat, Kg_mat, Y_mat, # FOC_func, Coeff_func,  
-        args=(delta, eta, A_d, A_g, alpha_d, alpha_g, sigma_d, sigma_g, phi_d, phi_g, gamma_1, \
-            gamma_2, y_bar, varphi, varsigma, beta_f ),
-        linearsolver="petsc",
-        reporterror=True,
-        v0=v0, tol=1e-6, max_iter=10000, epsilon=0.1, fraction=0.5,
-        saveRes=True)
+# res = solver_3d(Kd_mat, Kg_mat, Y_mat, # FOC_func, Coeff_func,  
+        # args=(delta, eta, A_d, A_g, alpha_d, alpha_g, sigma_d, sigma_g, phi_d, phi_g, gamma_1, \
+            # gamma_2, y_bar, varphi, varsigma, beta_f ),
+        # linearsolver="petsc",
+        # reporterror=True,
+        # v0=v0, tol=1e-6, max_iter=10000, epsilon=0.1, fraction=0.5,
+        # saveRes=True)
 
-exit()
+# exit()
 
 while FC_Err > tol and epoch < max_iter:
     print("-----------------------------------")
@@ -187,7 +187,7 @@ while FC_Err > tol and epoch < max_iter:
     if epoch > 2000:
         epsilon = 0.1
     elif epoch > 1000:
-        epsilon = 0.5
+        epsilon = 0.3
     else:
         pass
 
@@ -210,34 +210,17 @@ while FC_Err > tol and epoch < max_iter:
 
     else:
 
-        # consumption_new = (A_d - id_star) * Kd_mat + (A_g - ig_star) * Kg_mat
-        # consumption_new[consumption_new <= 1e-8] = 1e-8
-        # # consumption_new[consumption_new > consumption_0] = consumption_0[consumption_new > consumption_0]
-        # mc = delta / consumption_new
-        # id_new = 1 / phi_d * (1 - mc / (dKd - Kg_mat * dKg )) * fraction + i_d * (1 - fraction)
-        # id_new[id_new < 1e-8] = 1e-8
-        # # id_new[id_new > A_d] = A_d- 1e-8
-        # # id_new[id_new > 1/phi_d] = 1 / phi_d
-        # ig_new = 1 / phi_g * (1 - mc / (dKd  + (1 - Kg_mat) * dKg)) * fraction + i_g * (1 - fraction)
-        # # ig_new[ig_new < 1e-8] = 1e-8
-        # # ig_new[ig_new > A_g] = A_g
-        # # ig_new[ig_new > 1 / phi_g] = 1 / phi_g
 
-        # # mc_new = fraction * delta / ((A_d -id_new) * (1 - Kg_mat) + (A_g - ig_new) * Kg_mat) + mc * (1 - fraction)
-        # i_d = id_new
-        # i_g = ig_new
 
      # updating controls
         Converged = 0
         num = 0
 
-        while Converged == 0:
+        while Converged == 0 and num < 5000:
             i_g_1 = (1 - q / (dKg * (1 - Kg_mat) + dKd )) / phi_g
             i_d_1 = (1 - q / (-dKg * Kg_mat + dKd)) / phi_d
             i_d_1[i_d_1 >= A_d] = A_d - 1e-8
-            # i_d_1[i_d_1 <= 1e-8] = 1e-8
             i_g_1[i_g_1 >= A_g] = A_g - 1e-8
-            # i_g_1[i_g_1 <= 1e-8] = 1e-8
 
             if np.max(abs(i_g_1 - i_g)) <= 1e-8 and np.max(abs(i_d_1 - i_d)) <= 1e-8:
                 Converged = 1
@@ -252,39 +235,15 @@ while FC_Err > tol and epoch < max_iter:
             num += 1
             # print(num)
             # print(np.max(abs(i_g_1 - i_g)) , np.max(abs(i_d_1 - i_d)))
-        # nums = 0
-        # converge = False
-        # while not converge:
-
-            # id_new = 1 / phi_d * (1 - mc / (dKd - Kg_mat * dKg )) * fraction + i_d * (1 - fraction)
-            # id_new[id_new < 0] = 0
-            # id_new[id_new > A_d] = A_d- 1e-8
-            # # id_new[id_new > 1/phi_d] = 1 / phi_d
-            # ig_new = 1 / phi_g * (1 - mc / (dKd  + (1 - Kg_mat) * dKg)) * fraction + i_g * (1 - fraction)
-            # ig_new[ig_new < 0] = 0
-            # # ig_new[ig_new > A_g] = A_g
-            # ig_new[ig_new > 1 / phi_g] = 1 / phi_g
-
-            # mc_new = fraction * delta / ((A_d -id_new) * (1 - Kg_mat) + (A_g - ig_new) * Kg_mat) + mc * (1 - fraction)
-            # i_d = id_new
-            # i_g = ig_new
-            # diff = np.max(np.abs(mc - mc_new) / fraction)
-            # if diff  < 1e-5 or nums > 10000:
-                # converge = True
-                # mc = mc_new
-            # else:
-                # mc = mc_new
-                # pass
-            # nums += 1
 
         # print(diff)
     i_d[i_d >= A_d] = A_d - 1e-8
-    i_d[i_d <= 1e-15] = 1e-15
     i_g[i_g >= A_g] = A_g - 1e-8
-    i_g[i_g <= 1e-8] = 1e-8
     print(np.min(i_d), np.min(i_g))
     # i_d = np.zeros(Kd_mat.shape)
     # i_g = np.zeros(Kg_mat.shape)
+    i_d[i_d <= 1e-15] = 1e-15
+    i_g[i_g <= 1e-15] = 1e-15
     # i_d[i_d < 0] = 0
     # i_g[i_g < 0] = 0
     consumption = (A_d -i_d) * (1 - Kg_mat) + (A_g - i_g) * Kg_mat
