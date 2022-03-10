@@ -128,11 +128,11 @@ epsilon = 0.1
 fraction = 0.1
 
 
-test_name = "test"
-csvfile = open(test_name + ".csv", "w")
-fieldnames = ["epoch", "iterations", "residual norm",  "PDE_Err", "FC_Err", "ig_min", "ig_max", "mc_min", "mc_max"]
-writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-writer.writeheader()
+# test_name = "test"
+# csvfile = open(test_name + ".csv", "w")
+# fieldnames = ["epoch", "iterations", "residual norm",  "PDE_Err", "FC_Err", "ig_min", "ig_max", "mc_min", "mc_max"]
+# writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+# writer.writeheader()
 
 max_iter = 10000
 # file_iter = open("iter_c_compile.txt", "w")
@@ -213,22 +213,22 @@ while FC_Err > tol and epoch < max_iter:
             # num += 1
 
         # print(num)
-    i_d = np.zeros(Kd_mat.shape)
-    # Quadratic function of ig
-    AA = phi_g * Kg_mat
-    BB = - Kg_mat - (A_d * Kd_mat + A_g * Kg_mat) * phi_g
-    CC = A_d * Kd_mat + A_g * Kg_mat - delta / dKg
-    Delta = BB**2 - 4 * AA * CC
-    Delta[Delta < 1e-8] = 1e-8
-    i_g = ( - BB - np.sqrt(Delta)) / (2 * AA)
-    mc = delta / (A_d * Kd_mat - i_d * Kd_mat + A_g * Kg_mat - A_g * i_g)
-    print(np.min(Delta), np.max(Delta))
+    # i_d = np.zeros(Kd_mat.shape)
+    # # Quadratic function of ig
+    # AA = phi_g * Kg_mat
+    # BB = - Kg_mat - (A_d * Kd_mat + A_g * Kg_mat) * phi_g
+    # CC = A_d * Kd_mat + A_g * Kg_mat - delta / dKg
+    # Delta = BB**2 - 4 * AA * CC
+    # Delta[Delta < 1e-8] = 1e-8
+    # i_g = ( - BB - np.sqrt(Delta)) / (2 * AA)
+    # mc = delta / (A_d * Kd_mat - i_d * Kd_mat + A_g * Kg_mat - A_g * i_g)
+    # print(np.min(Delta), np.max(Delta))
     print(np.min(i_d), np.min(i_g))
     print(np.max(i_d), np.max(i_g))
     print(np.min(dKg), np.max(dKg))
 
-    # i_d = (1 / 8 - np.sqrt(0.68) / 8) * np.ones(Kd_mat.shape)
-    # i_g = (1 / 8 - np.sqrt(0.68) / 8) * np.ones(Kg_mat.shape)
+    i_d = (1 / 8 - np.sqrt(0.68) / 8) * np.ones(Kd_mat.shape)
+    i_g = (1 / 8 - np.sqrt(0.68) / 8) * np.ones(Kg_mat.shape)
 
     # i_d = np.zeros(Kd_mat.shape)
     # i_g = np.zeros(Kg_mat.shape)
@@ -479,22 +479,22 @@ while FC_Err > tol and epoch < max_iter:
     print("Epoch time: {:.4f}".format(time.time() - start_ep))
 
     # step 9: keep iterating until convergence
-    rowcontent = {
-        "epoch": epoch,
-        "iterations": num_iter,
-        "residual norm": ksp.getResidualNorm(),
-        "PDE_Err": PDE_Err,
-        "FC_Err": FC_Err,
-        "ig_min": np.min(i_g),
-        "ig_max": np.max(i_g),
-        # "dKg_min": np.min(dKg),
-        # "dKg_max": np.max(dKg),
-        # "dKd_min": np.min(dKd),
-        # "dKd_max": np.max(dKd),
-        "mc_min": np.min(mc),
-        "mc_max": np.max(mc),
-    }
-    writer.writerow(rowcontent)
+    # rowcontent = {
+        # "epoch": epoch,
+        # "iterations": num_iter,
+        # "residual norm": ksp.getResidualNorm(),
+        # "PDE_Err": PDE_Err,
+        # "FC_Err": FC_Err,
+        # "ig_min": np.min(i_g),
+        # "ig_max": np.max(i_g),
+        # # "dKg_min": np.min(dKg),
+        # # "dKg_max": np.max(dKg),
+        # # "dKd_min": np.min(dKd),
+        # # "dKd_max": np.max(dKd),
+        # "mc_min": np.min(mc),
+        # "mc_max": np.max(mc),
+    # }
+    # writer.writerow(rowcontent)
     id_star = i_d
     ig_star = i_g
     v0 = out_comp

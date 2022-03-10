@@ -1,4 +1,4 @@
-# Optimization of poat jump HJB
+# Optimization of post jump HJB
 #Required packages
 import os
 import sys
@@ -63,82 +63,60 @@ eta = 0.17
 ###### damage
 gamma_1 = 0.00017675
 gamma_2 = 2. * 0.0022
+gamma_3 = 0.001
 
 y_bar = 2
 beta_f = 1.86 / 1000
 
 # Grids Specification
-
 # Coarse Grids
-# R_min = 0
-# R_max = 9
-# F_min = 0
-# F_max = 4000
-# K_min = 0
-# K_max = 18
-# nR = 4
-# nF = 4
-# nK = 4
-# R = np.linspace(R_min, R_max, nR)
-# F = np.linspace(F_min, F_max, nF)
-# K = np.linspace(K_min, K_max, nK)
-
-# hR = R[1] - R[0]
-# hF = F[1] - F[0]
-# hK = K[1] - K[0]
-
-# Dense Grids
-
-#R_min = 0
-#R_max = 9
-
 Y_min = 0.
 Y_max = 3.
 # range of capital
-Kd_min = 4.
-Kd_max = 8.5
-Kg_min = 0.14
-Kg_max = 0.99
+K_min = 6.
+K_max = 9.
+R_min = 0.14
+R_max = 0.99
 ################### arrival rate######################
 lam_min = 0
 lam_max = 0.1
 hlam = 0.01
 
 # hR = 0.05
-hY  = 0.1 # make sure it is float instead of int
-hKd = 0.1
-hKg = 0.01
+hK = 0.10
+hR = 0.02
+hY = 0.10 # make sure it is float instead of int
 
 # R = np.arange(R_min, R_max + hR, hR)
 # nR = len(R)
 Y = np.arange(Y_min, Y_max + hY, hY)
 nY = len(Y)
-Kd = np.arange(Kd_min, Kd_max + hKd, hKd)
-nKd = len(Kd)
-Kg = np.arange(Kg_min, Kg_max + hKg, hKg)
-nKg = len(Kg)
+K = np.arange(K_min, K_max + hK, hK)
+nK = len(K)
+R = np.arange(R_min, R_max + hR, hR)
+nR = len(R)
 lam = np.arange(lam_min, lam_max + hlam, hlam)
 nlam = len(lam)
 
 
 if write_test:
-    f.write("Grid dimension: [{}, {}, {}]\n".format(nKd, nKg, nY))
+    f.write("Grid dimension: [{}, {}, {}]\n".format(nK, nR, nY))
 
-print("Grid dimension: [{}, {}, {}]\n".format(nKd, nKg, nY))
+print("Grid dimension: [{}, {}, {}]\n".format(nK, nR, nY))
 # Discretization of the state space for numerical PDE solution.
 ######## post jump, 3 states
-(Kd_mat, Kg_mat, Y_mat) = np.meshgrid(Kd, Kg, Y, indexing = 'ij')
-stateSpace = np.hstack([Kd_mat.reshape(-1,1,order = 'F'), Kg_mat.reshape(-1,1,order = 'F'), Y_mat.reshape(-1, 1, order='F')])
+(K_mat, R_mat, Y_mat) = np.meshgrid(K, R, Y, indexing = 'ij')
+stateSpace = np.hstack([K_mat.reshape(-1,1,order = 'F'), R_mat.reshape(-1,1,order = 'F'), Y_mat.reshape(-1, 1, order='F')])
 
 # For PETSc
-Kd_mat_1d =Kd_mat.ravel(order='F')
-Kg_mat_1d = Kg_mat.ravel(order='F')
+K_mat_1d =K_mat.ravel(order='F')
+R_mat_1d = R_mat.ravel(order='F')
 Y_mat_1d = Y_mat.ravel(order='F')
-lowerLims = np.array([Kd_min, Kg_min, Y_min], dtype=np.float64)
-upperLims = np.array([Kd_max, Kg_max, Y_max], dtype=np.float64)
+lowerLims = np.array([K_min, R_min, Y_min], dtype=np.float64)
+upperLims = np.array([K_max, R_max, Y_max], dtype=np.float64)
 
 
-v0 = Kd_mat - beta_f * Y_mat
+v0 = K_mat - beta_f * Y_mat
 # import pickle
 # data = pickle.load(open("data/res_13-1-37", "rb"))
 # v0 = data["v0"]
@@ -149,14 +127,14 @@ tol = 1e-7
 epsilon = 0.5
 fraction = 0.5
 
-csvfile = open("ResForRatio.csv", "w")
-fieldnames = ["epoch", "iterations", "residual norm", "PDE_Err", "FC_Err"]
-writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-writer.writeheader()
+# csvfile = open("ResForRatio.csv", "w")
+# fieldnames = ["epoch", "iterations", "residual norm", "PDE_Err", "FC_Err"]
+# writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+# writer.writeheader()
 max_iter = 40000
 # file_iter = open("iter_c_compile.txt", "w")
 
-# res = solver_3d(Kd_mat, Kg_mat, Y_mat, # FOC_func, Coeff_func,  
+# res = solver_3d(K_mat, R_mat, Y_mat, # FOC_func, Coeff_func,  
         # args=(delta, eta, A_d, A_g, alpha_d, alpha_g, sigma_d, sigma_g, phi_d, phi_g, gamma_1, \
             # gamma_2, y_bar, varphi, varsigma, beta_f ),
         # linearsolver="petsc",
@@ -174,14 +152,14 @@ while FC_Err > tol and epoch < max_iter:
     vold = v0.copy()
     # Applying finite difference scheme to the value function
     ######## first order
-    dKd = finiteDiff(v0,0,1,hKd)
-    # dKd[dKd < 1e-8] = 1e-8
-    dKg = finiteDiff(v0,1,1,hKg)
-    # dKg[dKg < 1e-8] = 1e-8
+    dK = finiteDiff(v0,0,1,hK)
+    # dK[dK < 1e-8] = 1e-8
+    dR = finiteDiff(v0,1,1,hR)
+    # dR[dR < 1e-8] = 1e-8
     dY = finiteDiff(v0,2,1,hY)
     ######## second order
-    ddKd = finiteDiff(v0,0,2,hKd)
-    ddKg = finiteDiff(v0,1,2,hKg)
+    ddK = finiteDiff(v0,0,2,hK)
+    ddR = finiteDiff(v0,1,2,hR)
     ddY = finiteDiff(v0,2,2,hY)
 
     if epoch > 2000:
@@ -193,22 +171,27 @@ while FC_Err > tol and epoch < max_iter:
 
     # update control
     if epoch == 0:
-        # i_d = np.zeros(Kd_mat.shape)
-        # i_g = np.zeros(Kg_mat.shape)
-        consumption_0 = A_d * (1 - Kg_mat) + A_g * Kg_mat
+        # i_d = np.zeros(K_mat.shape)
+        # i_g = np.zeros(R_mat.shape)
+        consumption_0 = A_d * (1 - R_mat) + A_g * R_mat
         consumption = consumption_0
         mc = delta / consumption
-        i_d = 1 -  mc / (dKd - Kg_mat *  dKg)
+        i_d = 1 -  mc / (dK - R_mat *  dR)
         i_d /= phi_d
         i_d[i_d < 0] = 0
         # i_d[i_d > A_d] = A_d
-        i_g = 1 - mc / (dKd + (1 - Kg_mat) * dKg)
+        i_g = 1 - mc / (dK + (1 - R_mat) * dR)
         i_g /= phi_g
         # i_g[i_g < 0] = 0
         # i_g[i_g > A_g] = A_g
-        q = delta * ((A_g * Kg_mat - i_g * Kg_mat) + (A_d * (1 - Kg_mat) - i_d * (1 - Kg_mat))) ** (-1)
+        q = delta * ((A_g * R_mat - i_g * R_mat) + (A_d * (1 - R_mat) - i_d * (1 - R_mat))) ** (-1)
 
     else:
+        d1 = dK - R_mat * dR
+        d2 = dK + (1 - R_mat) * dR
+
+        # i_d
+        CC = A_d * (1 - R_mat) + A_g * R_mat + 1 / phi_g * (-1 + d1 / d2) * R_mat
 
 
 
@@ -217,8 +200,8 @@ while FC_Err > tol and epoch < max_iter:
         num = 0
 
         while Converged == 0 and num < 5000:
-            i_g_1 = (1 - q / (dKg * (1 - Kg_mat) + dKd )) / phi_g
-            i_d_1 = (1 - q / (-dKg * Kg_mat + dKd)) / phi_d
+            i_g_1 = (1 - q / (dR * (1 - R_mat) + dK )) / phi_g
+            i_d_1 = (1 - q / (-dR * R_mat + dK)) / phi_d
             i_d_1[i_d_1 >= A_d] = A_d - 1e-8
             i_g_1[i_g_1 >= A_g] = A_g - 1e-8
 
@@ -231,7 +214,7 @@ while FC_Err > tol and epoch < max_iter:
                 i_d = i_d_1
 
                 q = delta * (
-                    (A_g * Kg_mat - i_g * Kg_mat) + (A_d * (1-Kg_mat) - i_d * (1-Kg_mat))) ** (-1) * fraction + (1 - fraction) * q
+                    (A_g * R_mat - i_g * R_mat) + (A_d * (1-R_mat) - i_d * (1-R_mat))) ** (-1) * fraction + (1 - fraction) * q
             num += 1
             # print(num)
             # print(np.max(abs(i_g_1 - i_g)) , np.max(abs(i_d_1 - i_d)))
@@ -240,13 +223,13 @@ while FC_Err > tol and epoch < max_iter:
     i_d[i_d >= A_d] = A_d - 1e-8
     i_g[i_g >= A_g] = A_g - 1e-8
     print(np.min(i_d), np.min(i_g))
-    # i_d = np.zeros(Kd_mat.shape)
-    # i_g = np.zeros(Kg_mat.shape)
+    # i_d = np.zeros(K_mat.shape)
+    # i_g = np.zeros(R_mat.shape)
     i_d[i_d <= 1e-15] = 1e-15
     i_g[i_g <= 1e-15] = 1e-15
     # i_d[i_d < 0] = 0
     # i_g[i_g < 0] = 0
-    consumption = (A_d -i_d) * (1 - Kg_mat) + (A_g - i_g) * Kg_mat
+    consumption = (A_d -i_d) * (1 - R_mat) + (A_g - i_g) * R_mat
     consumption[consumption < 1e-8] = 1e-8
     # i_d[i_d >= A_d] = A_d - 1e-8
     # i_g[i_g >= A_g] = A_g - 1e-8
@@ -254,17 +237,17 @@ while FC_Err > tol and epoch < max_iter:
     # See remark 2.1.3 for more details
     start_time2 = time.time()
     if epoch == 0:
-        dVec = np.array([hKd, hKg, hY])
-        increVec = np.array([1, nKd, nKd * nKg],dtype=np.int32)
+        dVec = np.array([hK, hR, hY])
+        increVec = np.array([1, nK, nK * nR],dtype=np.int32)
         # These are constant
-        A = - delta * np.ones(Kd_mat.shape)
-        C_dd = 0.5 * (( sigma_d * (1 - Kg_mat) )**2 + (sigma_g * Kg_mat )**2)
-        C_gg = 0.5 * (1- Kg_mat)**2 * Kg_mat**2 * (sigma_d**2 + sigma_g**2)
-        C_yy = 0.5 * (eta * varsigma * A_d * np.exp(Kd_mat) * (1 - Kg_mat))** 2
+        A = - delta * np.ones(K_mat.shape)
+        C_dd = 0.5 * (( sigma_d * (1 - R_mat) )**2 + (sigma_g * R_mat )**2)
+        C_gg = 0.5 * (1- R_mat)**2 * R_mat**2 * (sigma_d**2 + sigma_g**2)
+        C_yy = 0.5 * (eta * varsigma * A_d * np.exp(K_mat) * (1 - R_mat))** 2
         if linearsolver == 'petsc4py' or linearsolver == 'petsc' or linearsolver == 'both':
             petsc_mat = PETSc.Mat().create()
             petsc_mat.setType('aij')
-            petsc_mat.setSizes([nKd*nKg*nY, nKd*nKg*nY])
+            petsc_mat.setSizes([nK*nR*nY, nK*nR*nY])
             petsc_mat.setPreallocationNNZ(13)
             petsc_mat.setUp()
             ksp = PETSc.KSP()
@@ -279,10 +262,10 @@ while FC_Err > tol and epoch < max_iter:
             C_yy_1d = C_yy.ravel(order = 'F')
 
             if linearsolver == 'petsc4py':
-                I_LB_d = (stateSpace[:,0] == Kd_min)
-                I_UB_d = (stateSpace[:,0] == Kd_max)
-                I_LB_g = (stateSpace[:,1] == Kg_min)
-                I_UB_g = (stateSpace[:,1] == Kg_max)
+                I_LB_d = (stateSpace[:,0] == K_min)
+                I_UB_d = (stateSpace[:,0] == K_max)
+                I_LB_g = (stateSpace[:,1] == R_min)
+                I_UB_g = (stateSpace[:,1] == R_max)
                 I_LB_y = (stateSpace[:,2] == Y_min)
                 I_UB_y = (stateSpace[:,2] == Y_max)
                 diag_0_base = A_1d[:]
@@ -306,11 +289,11 @@ while FC_Err > tol and epoch < max_iter:
     # Step (6) and (7) Formulating HJB False Transient parameters
     # See remark 2.1.4 for more details
 
-    B_d = (alpha_d + i_d - 0.5* phi_d * i_d**2) * (1 - Kg_mat) +  (alpha_g + i_g - 0.5 * phi_g * i_g**2) * Kg_mat - C_dd
-    B_g = ((alpha_g + i_g - 0.5 * phi_g * i_g**2) -  (alpha_d + i_d - 0.5* phi_d * i_d**2)) * Kg_mat * (1 - Kg_mat)
-    B_y = beta_f * eta * A_d * np.exp(Kd_mat) * (1 - Kg_mat)
+    B_d = (alpha_d + i_d - 0.5* phi_d * i_d**2) * (1 - R_mat) +  (alpha_g + i_g - 0.5 * phi_g * i_g**2) * R_mat - C_dd
+    B_g = ((alpha_g + i_g - 0.5 * phi_g * i_g**2) -  (alpha_d + i_d - 0.5* phi_d * i_d**2)) * R_mat * (1 - R_mat)
+    B_y = beta_f * eta * A_d * np.exp(K_mat) * (1 - R_mat)
 
-    D = delta * np.log(consumption) + delta * Kd_mat  - (gamma_1 + gamma_2 * Y_mat)* beta_f * eta * A_d * np.exp(Kd_mat) * (1 - Kg_mat)  - 0.5 * gamma_2 * (varsigma * eta * A_d * np.exp(Kd_mat) * (1 - Kg_mat) )**2
+    D = delta * np.log(consumption) + delta * K_mat  - (gamma_1 + gamma_2 * Y_mat + gamma_3 * (Y_mat -2) * (Y_mat > 2))* beta_f * eta * A_d * np.exp(K_mat) * (1 - R_mat)  - 0.5 * (gamma_2 + gamma_3 * (Y_mat > 0.2)) * (varsigma * eta * A_d * np.exp(K_mat) * (1 - R_mat) )**2
 
     if linearsolver == 'eigen' or linearsolver == 'both':
         start_eigen = time.time()
@@ -321,7 +304,7 @@ while FC_Err > tol and epoch < max_iter:
             v = np.array(out_eigen[2])
             res = np.linalg.norm(out_eigen[3].dot(v) - out_eigen[4])
             print("Eigen residual norm: {:g}; iterations: {}".format(res, out_eigen[0]))
-            PDE_rhs = A * v0 + B_d * dKd + B_g * dKg + B_y * dY + C_dd * ddKd + C_gg * ddKg + C_yy * ddY + D
+            PDE_rhs = A * v0 + B_d * dK + B_g * dR + B_y * dY + C_dd * ddK + C_gg * ddR + C_yy * ddY + D
             PDE_Err = np.max(abs(PDE_rhs))
             FC_Err = np.max(abs((out_comp - v0)))
             print("Episode {:d} (Eigen): PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch, PDE_Err, FC_Err))
@@ -390,7 +373,7 @@ while FC_Err > tol and epoch < max_iter:
         print("PETSc preconditioned residual norm is {:g}; iterations: {}".format(ksp.getResidualNorm(), ksp.getIterationNumber()))
         if epoch % 1 == 0 and reporterror:
             # Calculating PDE error and False Transient error
-            PDE_rhs = A * v0 + B_d * dKd + B_g * dKg + B_y * dY + C_dd * ddKd + C_gg * ddKg + C_yy * ddY + D
+            PDE_rhs = A * v0 + B_d * dK + B_g * dR + B_y * dY + C_dd * ddK + C_gg * ddR + C_yy * ddY + D
             PDE_Err = np.max(abs(PDE_rhs))
             FC_Err = np.max(abs((out_comp - v0) / epsilon))
             print("Epoch {:d} (PETSc): PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch, PDE_Err, FC_Err))
@@ -414,7 +397,7 @@ while FC_Err > tol and epoch < max_iter:
         B_y_1d = B_y.ravel(order = 'F')
         D_1d = D.ravel(order = 'F')
         v0_1d = v0.ravel(order = 'F')
-        petsclinearsystem.formLinearSystem(Kd_mat_1d, Kg_mat_1d, Y_mat_1d, A_1d, B_d_1d, B_g_1d, B_y_1d, C_dd_1d, C_gg_1d, C_yy_1d, epsilon, lowerLims, upperLims, dVec, increVec, petsc_mat)
+        petsclinearsystem.formLinearSystem(K_mat_1d, R_mat_1d, Y_mat_1d, A_1d, B_d_1d, B_g_1d, B_y_1d, C_dd_1d, C_gg_1d, C_yy_1d, epsilon, lowerLims, upperLims, dVec, increVec, petsc_mat)
         # profiling
         # bpoint2 = time.time()
         # print("form petsc mat: {:.3f}s".format(bpoint2 - bpoint1))
@@ -437,7 +420,7 @@ while FC_Err > tol and epoch < max_iter:
         # petsc_mat.destroy()
         petsc_rhs.destroy()
         x.destroy()
-        out_comp = np.array(ksp.getSolution()).reshape(Kd_mat.shape,order = "F")
+        out_comp = np.array(ksp.getSolution()).reshape(K_mat.shape,order = "F")
         end_ksp = time.time()
         # profiling
         # print("ksp solve: {:.3f}s".format(end_ksp - start_ksp))
@@ -447,7 +430,7 @@ while FC_Err > tol and epoch < max_iter:
         print("PETSc preconditioned residual norm is {:g}; iterations: {}".format(ksp.getResidualNorm(), ksp.getIterationNumber()))
         if epoch % 1 == 0 and reporterror:
             # Calculating PDE error and False Transient error
-            PDE_rhs = A * v0 + B_d * dKd + B_g * dKg + B_y * dY + C_dd * ddKd + C_gg * ddKg + C_yy * ddY + D
+            PDE_rhs = A * v0 + B_d * dK + B_g * dR + B_y * dY + C_dd * ddK + C_gg * ddR + C_yy * ddY + D
             PDE_Err = np.max(abs(PDE_rhs))
             FC_Err = np.max(abs((out_comp - v0)/ epsilon))
             print("Epoch {:d} (PETSc): PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch, PDE_Err, FC_Err))
