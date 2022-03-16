@@ -51,8 +51,8 @@ sigma_d = 0.016
 sigma_g = 0.016
 
 varsigma = 1.2 * 1.86 / 1000
-phi_d = 7
-phi_g = 7
+phi_d = 8.
+phi_g = 8.
 ########## arrival rate
 varphi = 0.1
 sigma_lam = 0.016
@@ -63,7 +63,7 @@ eta = 0.17
 ###### damage
 gamma_1 = 0.00017675
 gamma_2 = 2. * 0.0022
-gamma_3 = 0.001
+gamma_3 = 0.0
 
 y_bar = 2
 beta_f = 1.86 / 1000
@@ -73,8 +73,8 @@ beta_f = 1.86 / 1000
 Y_min = 0.
 Y_max = 3.
 # range of capital
-K_min = 6.
-K_max = 9.
+K_min = 4.00
+K_max = 8.50
 R_min = 0.14
 R_max = 0.99
 ################### arrival rate######################
@@ -84,7 +84,7 @@ hlam = 0.01
 
 # hR = 0.05
 hK = 0.10
-hR = 0.02
+hR = 0.01
 hY = 0.10 # make sure it is float instead of int
 
 # R = np.arange(R_min, R_max + hR, hR)
@@ -187,11 +187,11 @@ while FC_Err > tol and epoch < max_iter:
         q = delta * ((A_g * R_mat - i_g * R_mat) + (A_d * (1 - R_mat) - i_d * (1 - R_mat))) ** (-1)
 
     else:
-        d1 = dK - R_mat * dR
-        d2 = dK + (1 - R_mat) * dR
+        # d1 = dK - R_mat * dR
+        # d2 = dK + (1 - R_mat) * dR
 
-        # i_d
-        CC = A_d * (1 - R_mat) + A_g * R_mat + 1 / phi_g * (-1 + d1 / d2) * R_mat
+        # # i_d
+        # CC = A_d * (1 - R_mat) + A_g * R_mat + 1 / phi_g * (-1 + d1 / d2) * R_mat
 
 
 
@@ -212,7 +212,6 @@ while FC_Err > tol and epoch < max_iter:
             else:
                 i_g = i_g_1
                 i_d = i_d_1
-
                 q = delta * (
                     (A_g * R_mat - i_g * R_mat) + (A_d * (1-R_mat) - i_d * (1-R_mat))) ** (-1) * fraction + (1 - fraction) * q
             num += 1
@@ -475,6 +474,6 @@ for key in dir():
         pass
 
 
-file = open("data/" + filename, 'wb')
+file = open("data/PostJump/" + filename, 'wb')
 pickle.dump(my_shelf, file)
 file.close()
