@@ -22,7 +22,7 @@
 \subsection*{A Model With Clean and Dirty Capital Stocks and and R\&D in Green Innovation-}
 
 Assume there are two capital sectors, each with AK production technology
-($Y_{i}=A_{i}K_{i},\,i\ =d, g)$ and each with its own capital stock
+($Y_{i}=A_{i}K_{i},\,i\ =d, g$) and each with its own capital stock
 that evolves with quadratic adjustments costs and Brownian shocks
 as follows:
 
@@ -32,26 +32,25 @@ as follows:
 \end{align*}
 
 
-We also assume there is R\&D investment that leads to an increased arrival rate of a one time jump
-
-
- in Sector 2 productivity. The arrival rate is denoted as  t and evolves as follows
+We also assume there is R\&D investment that leads to an increased arrival rate of a one time jump in Sector 2 productivity. The arrival rate is denoted as  t and evolves as follows
 
 \begin{align*}
 \dif \lambda_{t} / \lambda_t & =( \varphi  i_\lambda - \alpha_\lambda) \dif t+\sigma_{\lambda}\dif W
 \end{align*}
 
 
-The key di erence between the sectors is that production from Sector 1 generates emissions. As a result,the evolution of atmospheric temperature is give by the Matthews Approximation, so that temperature $Y_t$ and cumulative carbon emissions are given by
+The key difference between the sectors is that production from Sector 1 generates emissions. As a result,the evolution of atmospheric temperature is give by the Matthews Approximation, so that temperature $Y_t$ and cumulative carbon emissions are given by
 
 \begin{align*}
 	\dif Y_t = E_t ( \beta_f \dif t + \varsigma \dif W)
 \end{align*}
 
 where  $\beta_f$ is the Matthews parameter and  $\eta$  is the scaling factor converting Sector $d$ output $ A_dK_d$ into emissions such that 
+
 $$
 E_t =  \eta A_dK_d
 $$
+
 Output can be used in for consumption, investment in either capital stock, or for R\&D into improving the productivity of Sector g :
 
 \begin{align*}
@@ -103,14 +102,14 @@ Using the fact that $\varphi V_{\lambda} = \delta (A_dK_d - i_dK_d + A_gK_g - i_
 \end{align*}
 
 
-We can analytically simplify out $\log Nt$ to get a simplified HJB
+We can analytically simplify out $\log N_t$ to get a simplified HJB
 
 \begin{align*}
 \delta v(K_{d},K_{g}, \lambda,Y) & =\max_{i_{g},i_{d}, i_\lambda }\delta \log(A_dK_d - i_dK_d + A_gK_g - i_gK_g  - i_\lambda \lambda ) \\
- &+\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\}v_{d}K_{d}+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\}v_{g}K_{g}+\frac{\sigma_{d}^{2}K_{d}^{2}}{2}v_{dd}+\frac{\sigma_{g}^{2}K_{g}^{2}}{2}v_{gg}\\
- & +\beta_{f}E_{d}v_{Y}+\frac{1}{2}\varsigma^{2}E_{d}^{2}v{}_{YY} - [\{\gamma_{1}+\gamma_{2}Y_{t} + \gamma_3 (Y_t -2) \mathbf{I}\{ Y_t > 2
- \}\beta_{f}E_{d}+\frac{\gamma_2 + \gamma_3 \mathbf{I}\{Y_t > 2\}{2}\varsigma^{2}E_{d}^{2}]\\
- & +(-\alpha_{\lambda}  + \varphi i_\lambda) \lambda v_{\lambda}+\frac{(\sigma_{\lambda} \lambda)^2}{2}v_{\lambda\lambda}+\lambda \left( v (K_d, K_g, \lambda, Y; A_g') - v (K_d, K_g, \lambda, Y; A_g) \right)
+	&+\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\}v_{d}K_{d}+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\}v_{g}K_{g}+\frac{\sigma_{d}^{2}K_{d}^{2}}{2}v_{dd}+\frac{\sigma_{g}^{2}K_{g}^{2}}{2}v_{gg}\\
+	& +\beta_{f}E_{d}v_{Y}+\frac{1}{2}\varsigma^{2}E_{d}^{2}v_{YY}\\
+	&-[\{\gamma_{1}+\gamma_{2}Y_{t} + \gamma_3 (Y_t - 2) \mathbf{I} \{Y_t > 2\}\}\beta_{f}E_{d}+\frac{\gamma_2 + \gamma_3 \mathbf{I}\{Y_t > 2 \} }{2} \varsigma^{2}E_{d}^{2}]\\
+	& +(\varphi i_{\lambda} - \alpha_\lambda)\lambda v_{\lambda}+\frac{(\sigma_{\lambda } \lambda)^{2}}{2}v_{\lambda \lambda}+\lambda  \left( v (K_d, K_g, \lambda, Y; A_g') - v (K_d, K_g, \lambda, Y; A_g) \right)
 \end{align*}
 
 FOC
@@ -176,7 +175,9 @@ FOC
 \end{align*}
 
 \begin{align*}
-	\dif L = \dif (\log K_g - \log K_d) = \left( (\alpha_g + i_d  - \frac{\phi_{g}}{2}i_g^2) -  (\alpha + i_d - \frac{\phi_d}{2} i_d^2)\right) \dif t  + (\sigma_g - \sigma_d) \dif W
+	\dif L =& \dif (\log K_g - \log K_d) = \left( (\alpha_g + i_g  - \frac{\phi_{g}}{2}i_g^2 - \frac{|\sigma_g|^2}{2}) -  (\alpha_d + i_d - \frac{\phi_d}{2} i_d^2 - \frac{|\sigma_d|^2}{2})\right) \dif t  + (\sigma_g - \sigma_d) \dif W\\
+	\dif \exp(L) =&  \exp(L) \left( \dif L\right) + \frac{\exp(L)}{2} |\sigma_d - \sigma_g|^2 \dif t\\
+	\dif R = 
 \end{align*}
 
 \begin{align*}
