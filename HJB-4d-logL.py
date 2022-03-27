@@ -82,7 +82,7 @@ v_post = postjump["v0"]
 # jump intensity
 logL_min = - 6.
 logL_max = - 2.
-hL = 0.2
+hL = 0.4
 logL = np.arange(logL_min, logL_max, hL)
 
 X = K[10:]
@@ -158,8 +158,8 @@ writer.writeheader()
 FC_Err   = 1
 epoch    = 0
 tol      = 1e-6
-epsilon  = 0.0005
-fraction = 1.
+epsilon  = 0.001
+fraction = 0.5
 max_iter = 20000
 # file_iter = open("iter_c_compile.txt", "w")
 while  FC_Err > tol and epoch < max_iter:
