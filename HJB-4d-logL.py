@@ -43,7 +43,8 @@ with open("./data/PostJump/res-post", "rb") as f:
 
 delta = postjump["delta"]
 A_d = postjump["A_d"]
-A_g = 0.100
+A_g_prime = postjump["A_g"]
+A_g = 0.1000
 
 alpha_d = postjump["alpha_d"]
 alpha_g = postjump["alpha_g"] 
@@ -56,10 +57,9 @@ phi_d = postjump["phi_d"]
 phi_g = postjump["phi_g"]
 ########## arrival rate
 # varphi = postjump["varphi"]
-varphi  = 0.01
-# sigma_lam =postjump["sigma_lam"]
+varphi  = 0.050
 sigma_l = 0.016
-alpha_l = 0.0000
+alpha_l = 0.020
 ########## Scaling factor
 eta = postjump["eta"]
 
@@ -80,9 +80,9 @@ Temp = postjump["Y"]
 v_post = postjump["v0"]
 
 # jump intensity
-logL_min = - 6.
-logL_max = - 2.
-hL = 0.4
+logL_min = - 4.
+logL_max = 0.
+hL = 0.5
 logL = np.arange(logL_min, logL_max, hL)
 
 X = K[10:]
@@ -95,7 +95,7 @@ gamma_1 = postjump["gamma_1"]
 gamma_2 = postjump["gamma_2"]
 gamma_3 = postjump["gamma_3"]
 
-filename =  "res-" + str(gamma_3)  + '-' + "{:d}-{:d}-{:d}".format(current_time.day, current_time.hour, current_time.minute)
+filename =  "varphi-" + str(varphi) +"-gamma" + str(gamma_3)  + '-' + "Agp" + "-" + str(A_g_prime) + "-{:d}-{:d}-{:d}".format(current_time.day, current_time.hour, current_time.minute)
 
 hX = X[1] - X[0]
 nX = len(X)
@@ -141,9 +141,15 @@ v0 = np.zeros(X_mat.shape)
 for i in range(len(W)):
     v0[:,:,:, i] = v_post[10:, :-40, :]
 V_post = v0
-# v0 = K_mat + Lambda_mat
 
-csvfile = open("test2-logL.csv", "w")
+
+with open("./data/PreJump/varphi_0.05/varphi-0.05-gamma0.0-Agp-0.15-29-21-13", "rb") as f:
+    data = pickle.load(f)
+v0 = data["v0"]
+# v0 = V_post
+continue_mode = True
+
+csvfile = open("test3-logL.csv", "w")
 fieldnames = [
         "epoch", "iterations", "residual norm", "PDE_Err", "FC_Err", 
         "id_min", "id_max", 
@@ -151,6 +157,7 @@ fieldnames = [
         "consum_min", "consum_max",
         "mc_min", "mc_max",
 ]
+
 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 writer.writeheader()
 ############# step up of optimization
@@ -158,9 +165,9 @@ writer.writeheader()
 FC_Err   = 1
 epoch    = 0
 tol      = 1e-6
-epsilon  = 0.001
+epsilon  = 0.003
 fraction = 0.5
-max_iter = 20000
+max_iter = 4000
 # file_iter = open("iter_c_compile.txt", "w")
 while  FC_Err > tol and epoch < max_iter:
     print("-----------------------------------")
@@ -191,11 +198,14 @@ while  FC_Err > tol and epoch < max_iter:
     # if epoch > 100:
         # epsilon = 0.01
     # if epoch > 2000:
-        # epsilon = 0.0001
+        # epsilon = 0.001
     # elif epoch > 1000:
         # epsilon = 0.1
     # else:
         # pass
+
+    # if FC_Err < 0.0031:
+        # epsilon = 0.0001
 
     # update control
     if epoch == 0:
@@ -218,6 +228,12 @@ while  FC_Err > tol and epoch < max_iter:
         i_l_max = i_l.max()
         q = delta  * ( (A_d - i_d) * (1 - R_mat) + (A_g - i_g)  * R_mat - i_l  ) ** (-1)
 
+
+        if continue_mode:
+            i_d = data["i_d"]
+            i_g = data["i_g"]
+            i_l = data["i_l"]
+
     else:
         # pass
         # i_d = (1 / 8 - np.sqrt(0.678) / 8) * np.ones(K_mat.shape) + 0.00001
@@ -238,7 +254,7 @@ while  FC_Err > tol and epoch < max_iter:
         i_g_max = i_g.max()
         # i_g[i_g > A_g  - 1e-16] = A_g - 1e-16
         # i_g[i_g <  0.000] = 0.0
-        temp = (A_d - i_d ) * (1 - R_mat) * np.exp(- logL_mat) + (A_g - i_g) * R_mat * np.exp(- logL_mat) - delta / (np.exp(K_mat) * varphi * dLam) 
+        temp = (A_d - i_d ) * (1 - R_mat) + (A_g - i_g) * R_mat  - delta / (np.exp(K_mat - logL_mat) * varphi * dLam) 
         # temp[ temp < 0.000 ] = 0.000
         # temp[ temp > A_g - 1e-15] = A_g - 1e-15
         i_l =  temp
@@ -251,7 +267,7 @@ while  FC_Err > tol and epoch < max_iter:
         # i_l[i_l < 0.0 ] = 0.0
         # i_l = np.zeros(X_mat.shape)
         # i_l = 1e-5 * np.ones(X_mat.shape)
-        print("min il/K: {:.10f}, max il/K: {:.10f}".format(np.min(np.exp(logL_mat) * i_l), np.max(np.exp(logL_mat) * i_l)))
+        print("min il/K: {:.10f}, max il/K: {:.10f}".format(np.min(i_l), np.max(i_l)))
 
         ## updating using quardratic equation
         # a = 1 / phi_d - 1 / phi_d * (dK + (1-R_mat)*dR) / (dK - R_mat * dR) 
@@ -387,14 +403,14 @@ while  FC_Err > tol and epoch < max_iter:
     mu_g = alpha_g + i_g - 0.5 * phi_g * i_g**2
     B_1 = mu_d * (1 - R_mat) + mu_g * R_mat - C_11
     B_2 = (mu_g - mu_d - R_mat * sigma_g**2 + (1 - R_mat) * sigma_d**2) * R_mat * (1 - R_mat)
-    temp2 =  (A_d - i_d ) * (1 - R_mat) * np.exp(- logL_mat) + (A_g - i_g) * R_mat * np.exp(- logL_mat) 
-    B_4 =  varphi * temp2 * np.exp(K_mat) - alpha_l - 0.5 * sigma_l**2
+    temp2 =  (A_d - i_d ) * (1 - R_mat)  + (A_g - i_g) * R_mat  
+    B_4 =  varphi * temp2 * np.exp(K_mat - logL_mat) - alpha_l - 0.5 * sigma_l**2
     # B_4[B_4 <=0] = 0.
     # B_4 = ( (A_d - i_d) * (1 - R_mat)  +  (A_g - i_g) * R_mat ) * varphi * np.exp(K_mat)  - alpha_l * Lambda_mat
      
     # B_4  = 0.001 * np.ones(X_mat.shape)
     # B_4 = np.zeros(X_mat.shape)
-    consumption = (A_d - i_d) * (1 - R_mat)  +  (A_g - i_g) * R_mat  - i_l * np.exp(logL_mat)
+    consumption = (A_d - i_d) * (1 - R_mat)  +  (A_g - i_g) * R_mat  - i_l
     consumption_min = consumption.min()
     consumption_max = consumption.max()
     print("max consum: {},\t min consum: {}\t".format(np.max(consumption), np.min(consumption)))
@@ -448,8 +464,10 @@ while  FC_Err > tol and epoch < max_iter:
                         -increVec[3],increVec[3],-2*increVec[3],2*increVec[3]])
         # The transpose of matrix A_sp is the desired. Create the csc matrix so that it can be used directly as the transpose of the corresponding csr matrix.
         A_sp = spdiags(data, diags, len(diag_0), len(diag_0), format='csc')
+        A_sp = A_sp * epsilon
         # A_dense = A_sp.todense()
-        b = -v0_1d/epsilon - D_1d
+        # b = -v0_1d/epsilon - D_1d
+        b = -v0_1d - D_1d * epsilon
         # A_rank = matrix_rank(A_dense)
         # b_rank = matrix_rank(b)
         # A_norm = norm(A_dense, ord=2)
@@ -480,7 +498,7 @@ while  FC_Err > tol and epoch < max_iter:
         # create linear solver
         start_ksp = time.time()
         ksp.setOperators(petsc_mat)
-        ksp.setTolerances(rtol=1e-13)
+        ksp.setTolerances(rtol=1e-9)
         ksp.solve(petsc_rhs, x)
         petsc_mat.destroy()
         petsc_rhs.destroy()
@@ -645,6 +663,6 @@ for key in dir():
         pass
 
 
-file = open("data/PostJump/" + filename, 'wb')
+file = open("data/PreJump/varphi_0.05/" + filename, 'wb')
 pickle.dump(my_shelf, file)
 file.close()

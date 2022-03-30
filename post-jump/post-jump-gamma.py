@@ -52,9 +52,6 @@ sigma_g = 0.016
 varsigma = 1.2 * 1.86 / 1000
 phi_d = 8.
 phi_g = 8.
-########## arrival rate
-varphi = 0.1
-sigma_lam = 0.016
 ########## Scaling factor
 eta = 0.17
 
@@ -93,7 +90,7 @@ nR = len(R)
 # lam = np.arange(lam_min, lam_max + hlam, hlam)
 # nlam = len(lam)
 
-filename =  "gamma" + '-' + str(gamma_3) + '-' + "{:d}-{:d}-{:d}".format(current_time.day, current_time.hour, current_time.minute)
+filename =  "Ag" + str(A_g) + "-" + "gamma" + '-' + str(gamma_3) + '-' + "{:d}-{:d}-{:d}".format(current_time.day, current_time.hour, current_time.minute)
 
 if write_test:
     f.write("Grid dimension: [{}, {}, {}]\n".format(nK, nR, nY))
@@ -112,15 +109,15 @@ lowerLims = np.array([K_min, R_min, Y_min], dtype=np.float64)
 upperLims = np.array([K_max, R_max, Y_max], dtype=np.float64)
 
 
-v0 = K_mat - beta_f * Y_mat
-# import pickle
-# data = pickle.load(open("data/res_13-1-37", "rb"))
-# v0 = data["v0"]
+# v0 = K_mat - beta_f * Y_mat
+import pickle
+data = pickle.load(open("../data/PostJump/Ag0.2-gamma-0.0-28-23-37", "rb"))
+v0 = data["v0"]
 ############# step up of optimization
 FC_Err = 1
 epoch = 0
 tol = 1e-7
-epsilon = 0.5
+epsilon = 0.1
 fraction = 0.5
 
 # csvfile = open("ResForRatio.csv", "w")
@@ -158,12 +155,12 @@ while FC_Err > tol and epoch < max_iter:
     ddR = finiteDiff(v0,1,2,hR)
     ddY = finiteDiff(v0,2,2,hY)
 
-    if epoch > 2000:
-        epsilon = 0.1
-    elif epoch > 1000:
-        epsilon = 0.3
-    else:
-        pass
+    # if epoch > 5000:
+        # epsilon = 0.01
+    # elif epoch > 1000:
+        # epsilon = 0.1
+    # else:
+        # pass
 
     # update control
     if epoch == 0:
@@ -183,14 +180,6 @@ while FC_Err > tol and epoch < max_iter:
         q = delta * ((A_g * R_mat - i_g * R_mat) + (A_d * (1 - R_mat) - i_d * (1 - R_mat))) ** (-1)
 
     else:
-        # d1 = dK - R_mat * dR
-        # d2 = dK + (1 - R_mat) * dR
-
-        # # i_d
-        # CC = A_d * (1 - R_mat) + A_g * R_mat + 1 / phi_g * (-1 + d1 / d2) * R_mat
-
-
-
      # updating controls
         Converged = 0
         num = 0
@@ -198,10 +187,10 @@ while FC_Err > tol and epoch < max_iter:
         while Converged == 0 and num < 5000:
             i_g_1 = (1 - q / (dR * (1 - R_mat) + dK )) / phi_g
             i_d_1 = (1 - q / (-dR * R_mat + dK)) / phi_d
-            i_d_1[i_d_1 >= A_d] = A_d - 1e-8
-            i_g_1[i_g_1 >= A_g] = A_g - 1e-8
+            i_d_1[i_d_1 >= A_d - 1e-15] = A_d - 1e-15
+            i_g_1[i_g_1 >= A_g - 1e-15] = A_g - 1e-15
 
-            if np.max(abs(i_g_1 - i_g)) <= 1e-8 and np.max(abs(i_d_1 - i_d)) <= 1e-8:
+            if np.max(abs(i_g_1 - i_g)) <= 1e-12 and np.max(abs(i_d_1 - i_d)) <= 1e-12:
                 Converged = 1
                 i_g = i_g_1
                 i_d = i_d_1
@@ -215,17 +204,17 @@ while FC_Err > tol and epoch < max_iter:
             # print(np.max(abs(i_g_1 - i_g)) , np.max(abs(i_d_1 - i_d)))
 
         # print(diff)
-    i_d[i_d >= A_d] = A_d - 1e-8
-    i_g[i_g >= A_g] = A_g - 1e-8
+    # i_d[i_d >= A_d] = A_d - 1e-15
+    # i_g[i_g >= A_g] = A_g - 1e-8
     print(np.min(i_d), np.min(i_g))
     # i_d = np.zeros(K_mat.shape)
     # i_g = np.zeros(R_mat.shape)
-    i_d[i_d <= 1e-15] = 1e-15
-    i_g[i_g <= 1e-15] = 1e-15
+    # i_d[i_d <= 1e-15] = 1e-15
+    # i_g[i_g <= 1e-15] = 1e-15
     # i_d[i_d < 0] = 0
     # i_g[i_g < 0] = 0
     consumption = (A_d -i_d) * (1 - R_mat) + (A_g - i_g) * R_mat
-    consumption[consumption < 1e-8] = 1e-8
+    consumption[consumption < 1e-16] = 1e-16
     # i_d[i_d >= A_d] = A_d - 1e-8
     # i_g[i_g >= A_g] = A_g - 1e-8
     # Step (2), solve minimization problem in HJB and calculate drift distortion
