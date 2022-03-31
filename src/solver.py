@@ -4,9 +4,9 @@ sys.path.append('./src')
 from supportfunctions import finiteDiff
 import numpy as np
 import pandas
-import petsc4py
-import petsclinearsystem
-from petsc4py import PETSc
+# import petsc4py
+# import petsclinearsystem
+# from petsc4py import PETSc
 import time
 
 def FOC_func(logK, R, Y, q, id_star, ig_star, dK, dR, dY, args, fraction):

@@ -5,12 +5,9 @@ from scipy.stats import norm
 import pdb
 import warnings
 import time
-from scipy.interpolate import RegularGridInterpolator, CubicSpline
-from plotly.subplots import make_subplots
-import plotly.graph_objs as go
-from plotly.offline import init_notebook_mode, iplot
 import pickle
 import SolveLinSys
+from numba import njit
 
 def finiteDiff(data, dim, order, dlt, cap = None):  
     # compute the central difference derivatives for given input and dimensions

@@ -57,9 +57,9 @@ phi_d = postjump["phi_d"]
 phi_g = postjump["phi_g"]
 ########## arrival rate
 # varphi = postjump["varphi"]
-varphi  = 0.050
+varphi  = 0.010
 sigma_l = 0.016
-alpha_l = 0.020
+alpha_l = 0.000
 ########## Scaling factor
 eta = postjump["eta"]
 
@@ -663,6 +663,6 @@ for key in dir():
         pass
 
 
-file = open("data/PreJump/varphi_0.05/" + filename, 'wb')
+file = open("data/PreJump/" + filename, 'wb')
 pickle.dump(my_shelf, file)
 file.close()
