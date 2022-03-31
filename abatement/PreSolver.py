@@ -23,6 +23,7 @@ def _hjb_iteration_pre(
         ):
 
     dvdk  = finiteDiff(v0, 0, 1, dk)
+    dvdk[dvdk < 1e-15] = 1e-15
     dvdkk = finiteDiff(v0, 0, 2, dk)
     dvdy  = finiteDiff(v0, 1, 1, dy)
     dvdyy = finiteDiff(v0, 1, 2, dy)
@@ -41,8 +42,7 @@ def _hjb_iteration_pre(
 
     temp = mc * vartheta_bar * theta / (lambda_bar * np.exp(k_mat))
     a = temp / (alpha * lambda_bar * np.exp(k_mat)) ** 2
-    b = - 2 * temp / (alpha * lambda_bar * np.exp(k_mat))\
-        + (F - G**2/xi_b) * sigma_y ** 2
+    b = - 2 * temp / (alpha * lambda_bar * np.exp(k_mat)) + (F - G**2/xi_b) * sigma_y ** 2
     c = temp + G * np.sum(pi_c * theta_ell, axis=0)
 
     # Method 1 : Solve second order equation
@@ -77,7 +77,53 @@ def _hjb_iteration_pre(
         temp3 = alpha - i_new - alpha * vartheta_bar * (1 - e_new / (alpha * lambda_bar * np.exp(k_mat)))**theta
         x_new = temp3 * np.exp(k_mat - logI_mat) - 1 / (dvdI * psi_0 * psi_1)
 
-    # e_new = e_new * (e_new > 0) + 1e-8 * (e_new <= 0)
+    elif psi_1 ==1 and theta == 3:
+        temp2 = dvdI * psi_1 * psi_0 * np.exp(k_mat - logI_mat)
+        temp = temp2 * vartheta_bar * theta / (lambda_bar * np.exp(k_mat))
+        a = temp / (alpha * lambda_bar * np.exp(k_mat)) ** 2
+        b = - 2 * temp / (alpha * lambda_bar * np.exp(k_mat)) + (F - G**2/xi_b) * sigma_y ** 2
+        c = temp + G * np.sum(pi_c * theta_ell, axis=0)
+        temp = b ** 2 - 4 * a * c
+        temp = temp * (temp > 0)
+        root1 = (- b - np.sqrt(temp)) / (2 * a)
+        root2 = (- b + np.sqrt(temp)) / (2 * a)
+        if root1.all() > 0 :
+            e_new = root1
+        else:
+            e_new = root2
+
+        i_new = (1 - temp2 / dvdk) / kappa
+        temp3 = alpha - i_new - alpha * vartheta_bar * (1 - e_new / (alpha * lambda_bar * np.exp(k_mat)))**theta
+        x_new = temp3 * np.exp(k_mat - logI_mat) - 1 / (dvdI * psi_0 * psi_1)
+
+    elif psi_1 != 1 and theta == 2:
+        temp = alpha - i - alpha * vartheta_bar * (1 - e / (alpha * lambda_bar * np.exp(k_mat))) ** theta - x * np.exp(logI_mat - k_mat)
+        temp[temp < 1e-16] = 1e-16
+        mc = 1. / temp
+
+        temp1 =  mc * vartheta_bar * theta / (lambda_bar * np.exp(k_mat))
+        a = - mc * temp1 / (alpha * lambda_bar * np.exp(k_mat)) + F * sigma_y**2
+        b = mc * temp1 + G * np.sum(pi_c * theta_ell, axis=0)
+        e_new = - b / a
+        i_new = (1 - mc / dvdk) / kappa
+        x_new = (mc * np.exp(logI_mat - k_mat) / dvdI * psi_0 * psi_1)**(1 / (psi_1 - 1))
+    elif psi_1 != 1 and vartheta_bar != 0 and theta == 3:
+        temp = b ** 2 - 4 * a * c
+        temp = temp * (temp > 0)
+        root1 = (- b - np.sqrt(temp)) / (2 * a)
+        root2 = (- b + np.sqrt(temp)) / (2 * a)
+        if root1.all() > 0 :
+            e_new = root1
+        else:
+            e_new = root2
+        temp = alpha - i - alpha * vartheta_bar * (1 - e / (alpha * lambda_bar * np.exp(k_mat))) ** theta - x * np.exp(logI_mat - k_mat)
+        temp[temp < 1e-16] = 1e-16
+        mc = 1. / temp
+        i_new = - (mc / dvdk - 1) / kappa
+        x_new = (mc * np.exp(logI_mat - k_mat) / dvdI * psi_0 * psi_1)**(1 / (psi_1 - 1))
+
+    x_new = np.zeros(k_mat.shape)
+    # e_new = e_new * (e_new > 0) + 1e-16 * (e_new <= 0)
     i = i_new * fraction + i * (1-fraction)
     e = e_new * fraction + e * (1-fraction)
     x = x_new * fraction + x * (1-fraction)
@@ -97,17 +143,18 @@ def _hjb_iteration_pre(
     C_yy = .5 * sigma_y **2 * e**2
     C_II = sigma_g**2 / 2 * np.ones_like(logI_mat)
 
-    D = np.log(1. / mc)\
-        + k_mat - 1./ delta * (d_Delta * np.sum(pi_c * theta_ell, axis=0) * e + .5 * dd_Delta * sigma_y ** 2 * e ** 2)\
-        + xi_a * entropy - C_yy * G**2 / xi_b
+    D = np.log(1. / mc) + k_mat - 1./ delta * (d_Delta * np.sum(pi_c * theta_ell, axis=0) * e + .5 * dd_Delta * sigma_y ** 2 * e ** 2) + xi_a * entropy - C_yy * G**2 / xi_b
 
     h = - G * e * sigma_y / xi_b
 
     return pi_c, A, B_k, B_y, B_I, C_kk, C_yy, C_II,  D, dvdk, dvdy, dvdI, dvdkk, dvdyy, dvdII, i, e, x, h
 
 
-def hjb_post_damage_pre_tech(k_grid, y_grid, logI_grid, model_args=(), v0=None, ϵ=1., fraction=.1,
-                              tol=1e-8, max_iter=10_000, print_iteration=True):
+def hjb_post_damage_pre_tech(
+        k_grid, y_grid, logI_grid, model_args=(), 
+        v0=None, ϵ=1., fraction=.1, tol=1e-8, max_iter=10_000, 
+        print_iteration=True
+        ):
 
     delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi_a, xi_b, xi_g, v_post, gamma_1, gamma_2, gamma_3, y_bar, zeta, psi_0, psi_1, sigma_g, theta, lambda_bar, vartheta_bar = model_args
     dk = k_grid[1] - k_grid[0]
@@ -152,8 +199,9 @@ def hjb_post_damage_pre_tech(k_grid, y_grid, logI_grid, model_args=(), v0=None, 
                     )
         
         g_tech = np.exp(1. / xi_g * (v0 - V_post))
-        A -= np.exp(logI_mat) * g_tech
-        D += np.exp(logI_mat) * g_tech * V_post + xi_g * np.exp(logI_mat) * (1 - g_tech + g_tech * np.log(g_tech))
+        g_tech[g_tech <= 1e-16] = 1e-16
+        # A -= np.exp(logI_mat) * g_tech
+        D += np.exp(logI_mat) * g_tech * (V_post-v0) + xi_g * np.exp(logI_mat) * (1 - g_tech + g_tech * np.log(g_tech))
 
         v = false_transient_one_iteration_3d(state_space, A, B_k, B_y, B_I, C_kk, C_yy, C_II, D, v0, ε)
 
@@ -172,6 +220,29 @@ def hjb_post_damage_pre_tech(k_grid, y_grid, logI_grid, model_args=(), v0=None, 
 
     g_tech = np.exp(1. / xi_g * (v - V_post))
 
+    import pickle
+    from datetime import datetime
+    now = datetime.now()
+    current_time = now.strftime("%d-%H:%M")
+    filename = "pre_jump_res_{}".format(current_time)
+
+    my_shelf = {}
+    for key in dir():
+        if isinstance(locals()[key], (int,float, float, str, bool, np.ndarray,list)):
+            try:
+                my_shelf[key] = locals()[key]
+            except TypeError:
+                #
+                # __builtins__, my_shelf, and imported modules can not be shelved.
+                #
+                print('ERROR shelving: {0}'.format(key))
+        else:
+            pass
+
+
+    file = open("./res_data/" + filename, 'wb')
+    pickle.dump(my_shelf, file)
+    file.close()
     res = {'v': v,
            'e': e,
            'i': i,
