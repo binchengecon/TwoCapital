@@ -9,7 +9,7 @@ sys.stdout.flush()
 import petsc4py
 petsc4py.init(sys.argv)
 from petsc4py import PETSc
-# import petsclinearsystem
+import petsclinearsystem
 from scipy.sparse import spdiags
 from scipy.sparse import coo_matrix
 from scipy.sparse import csr_matrix
@@ -24,7 +24,7 @@ reporterror = True
 # eigen: matrix assembled in C++
 # both: petsc+petsc4py
 #
-linearsolver = 'petsc4py'
+linearsolver = 'petsc'
 
 write_test = False
 if write_test:
@@ -44,7 +44,7 @@ start_time = time.time()
 xi_a = 10000.
 xi_p = 10000.
 xi_b = 10000.
-xi_g = 10000.
+xi_g = 100.
 y_bar = 2.
 
 # Model parameters
@@ -54,7 +54,7 @@ kappa   = 6.667
 mu_k    = -0.043
 sigma_k = np.sqrt(0.0087**2 + 0.0038**2)
 # Technology
-theta        = 2 # 3
+theta        = 3
 lambda_bar   = 0.1206
 vartheta_bar = 0.0453
 
@@ -67,8 +67,8 @@ theta_ell = pd.read_csv('../data/model144.csv', header=None).to_numpy()[:, 0]/10
 pi_c_o = np.ones_like(theta_ell)/len(theta_ell)
 sigma_y = 1.2 * np.mean(theta_ell)
 beta_f = 1.86 / 1000
-zeta    = 0.02
-psi_0   = 0.05
+zeta    = 0.00
+psi_0   = 0.00001
 psi_1   = 1
 sigma_g = 0.016
 # Tech jump
@@ -81,7 +81,7 @@ vartheta_bar_second = 0.
 # Coarse Grids
 K_min = 4.00
 K_max = 8.50
-hK   = 0.10
+hK    = 0.10
 K = np.arange(K_min, K_max + hK, hK)
 nK = len(K)
 Y_min = 0.
@@ -89,11 +89,11 @@ Y_max = 3.
 hY   = 0.10 # make sure it is float instead of int
 Y = np.arange(Y_min, Y_max + hY, hY)
 nY = len(Y)
-lam_min = - 5.
+lam_min = - 4.
 lam_max = - 0.
-hlam = 0.20
-logI = np.arange(lam_min, lam_max,  hlam)
-nlogI = len(logI)
+hlam    = 0.1
+logI    = np.arange(lam_min, lam_max,  hlam)
+nlogI   = len(logI)
 
 X1     = K
 nX1    = len(X1)
@@ -115,6 +115,7 @@ if write_test:
     f.write("Grid dimension: [{}, {}, {}]\n".format(nX1, nX2, nX3))
 
 print("Grid dimension: [{}, {}, {}]\n".format(nX1, nX2, nX3))
+print("Grid step: [{}, {}, {}]\n".format(hX1, hX2, hX3))
 # Discretization of the state space for numerical PDE solution.
 ######## post jump, 3 states
 (X1_mat, X2_mat, X3_mat) = np.meshgrid(X1, X2, X3, indexing = 'ij')
@@ -133,34 +134,42 @@ upperLims = np.array([X1_max, X2_max, X3_max], dtype=np.float64)
 model_args = (delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi_a, xi_b, gamma_1, gamma_2, gamma_3, y_bar, theta, lambda_bar_first, vartheta_bar_first)
 
 
-# postjump = hjb_post_damage_post_tech(
-        # K, Y, model_args, v0=None, 
-        # epsilon=1., fraction=.5,tol=1e-8, max_iter=2000, print_iteration=True)
+postjump = hjb_post_damage_post_tech(
+        K, Y, model_args, v0=None,
+        epsilon=1., fraction=.2,tol=1e-8, max_iter=2000, print_iteration=True)
 
+with open("./res_data/post_jump_test", "wb") as f:
+    pickle.dump(postjump, f)
 
-v_post = pickle.load(open("./res_data/post_jump", "rb"))["v"]
+v_post = postjump["v"]
+# v_post = pickle.load(open("./res_data/post_jump_test", "rb"))["v"]
 v0 = np.zeros(K_mat.shape)
 for i in range(nlogI):
     v0[:,:,i] = v_post
 V_post = v0
+# v0 = K_mat + L_mat
+pi_c = np.array([temp * np.ones_like(K_mat) for temp in pi_c_o])
+pi_c_o = pi_c.copy()
+theta_ell = np.array([temp * np.ones(K_mat.shape) for temp in theta_ell])
 # import pickle
-# data = pickle.load(open("data/res_13-1-37", "rb"))
+# v0 = pickle.load(open("./res_data/pre_jump", "rb"))["v0"]
+
 # v0 = data["v0"]
 ############# step up of optimization
-FC_Err = 1
-epoch = 0
-tol = 1e-7
-epsilon = 0.001
-fraction = 0.0001
+FC_Err   = 1
+epoch    = 0
+tol      = 1e-7
+epsilon  = 0.01
+fraction = 0.5
 
 # csvfile = open("ResForRatio.csv", "w")
 # fieldnames = ["epoch", "iterations", "residual norm", "PDE_Err", "FC_Err"]
 # writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 # writer.writeheader()
-max_iter = 40000
+max_iter = 4000
 # file_iter = open("iter_c_compile.txt", "w")
 
-# res = solver_3d(K_mat, R_mat, Y_mat, # FOC_func, Coeff_func,  
+# res = solver_3d(K_mat, R_mat, Y_mat, # FOC_func, Coeff_func,
         # args=(delta, eta, A_d, A_g, alpha_d, alpha_g, sigma_d, sigma_g, phi_d, phi_g, gamma_1, \
             # gamma_2, y_bar, varphi, varsigma, beta_f ),
         # linearsolver="petsc",
@@ -179,11 +188,13 @@ while FC_Err > tol and epoch < max_iter:
     # Applying finite difference scheme to the value function
     ######## first order
     dX1  = finiteDiff(v0,0,1,hX1)
+    dX1[dX1 <= 1e-8] = 1e-8
     dK = dX1
     # dK[dK < 1e-8] = 1e-8
-    dX2  = finiteDiff(v0,2,1,hX2)
+    dX2  = finiteDiff(v0,1,1,hX2)
     dY = dX2
     dX3  = finiteDiff(v0,2,1,hX3)
+    # dX3[dX3 <= 1e-8] = 1e-8
     dL = dX3
     ######## second order
     ddX1 = finiteDiff(v0,0,2,hX1)
@@ -204,10 +215,10 @@ while FC_Err > tol and epoch < max_iter:
 
     # update control
     if epoch == 0:
-        i = np.zeros(K_mat.shape)
-        e = np.zeros(K_mat.shape)
-        x = np.zeros(K_mat.shape)
-        temp = alpha - i - alpha * vartheta_bar * (1 - e / (alpha * lambda_bar * np.exp(K_mat)))**theta - x * np.exp(L_mat - K_mat)
+        ii = np.zeros(K_mat.shape)
+        ee = np.zeros(K_mat.shape)
+        xx = np.zeros(K_mat.shape)
+        temp = alpha - ii - alpha * vartheta_bar * (1 - ee / (alpha * lambda_bar * np.exp(K_mat)))**theta - xx * np.exp(L_mat - K_mat)
         mc = 1 / temp
 
     else:
@@ -215,21 +226,52 @@ while FC_Err > tol and epoch < max_iter:
         if theta == 2 and psi_1 == 1:
             mc = dL * psi_1 * psi_0 * np.exp(K_mat - L_mat)
             temp2 = theta * vartheta_bar / lambda_bar * np.exp(- K_mat)
-            F = dY - 1 / delta * dGamma
-            G = ddY - 1 / delta * ddGamma
+            F = dY  - dGamma
+            G = ddY - ddGamma
             Omega_1 = mc * temp2 + F * beta_f
             Omega_2 = mc * temp2 / (alpha * lambda_bar * np.exp(K_mat)) - F * sigma_y**2
             e_new =  Omega_1 / Omega_2
-            e = e_new * fraction + e_star * (1 - fraction) 
+            # e_new[e_new <= 1e-15] = 1e-15
             i_new = (1 - mc / dK) / kappa
-            i = i_new * fraction + i_star * (1 - fraction) 
-            temp3 = alpha  - i - alpha * vartheta_bar * (1 - e / (alpha * lambda_bar * np.exp(K_mat)))**theta
+            # i_new[i_new <= 1e-15] = 1e-15
+            temp3 = alpha  - ii - alpha * vartheta_bar * (1 - ee / (alpha * lambda_bar * np.exp(K_mat)))**theta
             x_new = temp3 * np.exp(K_mat - L_mat) - 1 / (dL * psi_0 * psi_1)
-            x = x_new * fraction + x_star * (1 - fraction)
+            # x_new[x_new <= 1e-15] = 1e-15
+        elif theta == 3 and psi_1 == 1:
 
+            G = dY  - dGamma
+            F = ddY - ddGamma
+            mc = dL * psi_1 * psi_0 * np.exp(K_mat - L_mat)
+            temp = mc * vartheta_bar * theta / (lambda_bar * np.exp(K_mat))
+            a = temp / (alpha * lambda_bar * np.exp(K_mat)) ** (theta - 1)
+            b = - 2 * temp / (alpha * lambda_bar * np.exp(K_mat)) + F * sigma_y ** 2
+            c = temp + G * beta_f
+            temp = b ** 2 - 4 * a * c
+            temp[temp <=0] = 0
+            # temp = temp * (temp > 0)
+            root1 = (- b - np.sqrt(temp)) / (2 * a)
+            root2 = (- b + np.sqrt(temp)) / (2 * a)
+            if root1.all() > 0 :
+                e_new = root1
+            else:
+                e_new = root2
 
-    g = np.exp(1 / xi_g * (v0 - V_post))
-    consumption = alpha - i - alpha * vartheta_bar * (1 - e / (alpha * lambda_bar * np.exp(K_mat)))**theta - x * np.exp(L_mat - K_mat)
+            i_new = (1 - mc/ dK) / kappa
+            temp3 = alpha - ii - alpha * vartheta_bar * (1 - ee / (alpha * lambda_bar * np.exp(K_mat)))**theta
+            x_new = temp3 * np.exp(K_mat - L_mat) - 1 / (dL * psi_0 * psi_1)
+
+        ii = i_new * fraction + i_star * (1 - fraction)
+        ee = e_new * fraction + e_star * (1 - fraction)
+        xx = x_new * fraction + x_star * (1 - fraction)
+    print("min i: {},\t max i: {}\t".format(ii.min(), ii.max()))
+    print("min e: {},\t max e: {}\t".format(ee.min(), ee.max()))
+    print("min x: {},\t max x: {}\t".format(xx.min(), xx.max()))
+    # ii = np.zeros(K_mat.shape)
+    # ee = np.zeros(K_mat.shape)
+    xx = np.zeros(K_mat.shape)
+    gg = np.exp(1 / xi_g * (v0 - V_post))
+    gg[gg <=1e-15] = 1e-15
+    consumption = alpha - ii - alpha * vartheta_bar * (1 - ee / (alpha * lambda_bar * np.exp(K_mat)))**theta - xx * np.exp(L_mat - K_mat)
     consumption[consumption <= 1e-16] = 1e-16
     # Step (2), solve minimization problem in HJB and calculate drift distortion
     # See remark 2.1.3 for more details
@@ -238,9 +280,9 @@ while FC_Err > tol and epoch < max_iter:
         dVec = np.array([hX1, hX2, hX3])
         increVec = np.array([1, nX1, nX1 * nX2],dtype=np.int32)
         # These are constant
-        A   = - delta  * np.ones(K_mat.shape) - np.exp(L_mat) * g
+        A   = - delta * np.ones(K_mat.shape)  - np.exp(L_mat) * gg
         C_1 = 0.5 * sigma_k**2 * np.ones(K_mat.shape)
-        C_2 = 0.5 * sigma_y**2 * e**2
+        C_2 = 0.5 * sigma_y**2 * ee**2
         C_3 = 0.5 * sigma_g**2 * np.ones(K_mat.shape)
         if linearsolver == 'petsc4py' or linearsolver == 'petsc' or linearsolver == 'both':
             petsc_mat = PETSc.Mat().create()
@@ -254,7 +296,7 @@ while FC_Err > tol and epoch < max_iter:
             ksp.getPC().setType('ilu')
             ksp.setFromOptions()
 
-            A_1d = A.ravel(order = 'F')
+            A_1d   = A.ravel(order = 'F')
             C_1_1d = C_1.ravel(order = 'F')
             C_2_1d = C_2.ravel(order = 'F')
             C_3_1d = C_3.ravel(order = 'F')
@@ -286,11 +328,11 @@ while FC_Err > tol and epoch < max_iter:
 
     # Step (6) and (7) Formulating HJB False Transient parameters
     # See remark 2.1.4 for more details
-    B_1 = mu_k + i - 0.5 * kappa * i**2 - 0.5 * sigma_k**2
-    B_2 = beta_f * e
-    B_3 = - zeta + psi_0 * x**psi_1 - 0.5 * sigma_g**2
+    B_1 = mu_k + ii - 0.5 * kappa * ii**2 - 0.5 * sigma_k**2
+    B_2 = beta_f * ee
+    B_3 = - zeta + psi_0 * xx**psi_1 - 0.5 * sigma_g**2
 
-    D = np.log(consumption) + K_mat  - 1. / delta * dGamma * beta_f * e  - 0.5 / delta * ddGamma * sigma_y**2 * e**2  + xi_g * np.exp(L_mat) * (1 - g + g * np.log(g)) + np.exp(L_mat) * g * V_post
+    D = delta * np.log(consumption) + delta * K_mat  -  dGamma * beta_f * ee  - 0.5 * ddGamma * sigma_y**2 * ee**2  + xi_g * np.exp(L_mat) * (1 - gg + gg * np.log(gg)) + np.exp(L_mat) * gg *(V_post)
 
     if linearsolver == 'eigen' or linearsolver == 'both':
         start_eigen = time.time()
@@ -328,14 +370,13 @@ while FC_Err > tol and epoch < max_iter:
         # bpoint3 = time.time()
         # print("prepare: {:.3f}s".format(bpoint3 - bpoint2))
 
-        data = [diag_0, diag_1p, diag_1m, diag_11p, diag_1m, diag_2p, diag_2m, diag_22p, diag_22m, diag_3p, diag_3m, diag_33p, diag_33m]
+        data = [diag_0, diag_1p, diag_1m, diag_11p, diag_11m, diag_2p, diag_2m, diag_22p, diag_22m, diag_3p, diag_3m, diag_33p, diag_33m]
         diags = np.array([0,-increVec[0],increVec[0],-2*increVec[0],2*increVec[0],
                         -increVec[1],increVec[1],-2*increVec[1],2*increVec[1],
                         -increVec[2],increVec[2],-2*increVec[2],2*increVec[2]])
         # The transpose of matrix A_sp is the desired. Create the csc matrix so that it can be used directly as the transpose of the corresponding csr matrix.
         A_sp = spdiags(data, diags, len(diag_0), len(diag_0), format='csc')
-        A_sp = A_sp * epsilon
-        b    = -v0_1d - D_1d * epsilon
+        b    = -v0_1d / epsilon - D_1d
         # A_sp = spdiags(data, diags, len(diag_0), len(diag_0))
         # A_sp = csr_matrix(A_sp.T)
         # b = -v0/ε - D
@@ -393,13 +434,13 @@ while FC_Err > tol and epoch < max_iter:
         B_1_1d = B_1.ravel(order = 'F')
         B_2_1d = B_2.ravel(order = 'F')
         B_3_1d = B_3.ravel(order = 'F')
-        D_1d = D.ravel(order = 'F')
+        D_1d   = D.ravel(order = 'F')
         v0_1d = v0.ravel(order = 'F')
-        petsclinearsystem.formLinearSystem(K_mat_1d, R_mat_1d, Y_mat_1d, A_1d, B_1_1d, B_2_1d, B_3_1d, C_1_1d, C_2_1d, C_3_1d, epsilon, lowerLims, upperLims, dVec, increVec, petsc_mat)
+        petsclinearsystem.formLinearSystem(X1_mat_1d, X2_mat_1d, X3_mat_1d, A_1d, B_1_1d, B_2_1d, B_3_1d, C_1_1d, C_2_1d, C_3_1d, epsilon, lowerLims, upperLims, dVec, increVec, petsc_mat)
         # profiling
         # bpoint2 = time.time()
         # print("form petsc mat: {:.3f}s".format(bpoint2 - bpoint1))
-        b = v0_1d + D_1d*epsilon
+        b = v0_1d + D_1d * epsilon
         # petsc4py setting
         # petsc_mat.scale(-1./ε)
         # b = -v0_1d/ε - D_1d
@@ -413,12 +454,12 @@ while FC_Err > tol and epoch < max_iter:
         # create linear solver
         start_ksp = time.time()
         ksp.setOperators(petsc_mat)
-        ksp.setTolerances(rtol=1e-12)
+        ksp.setTolerances(rtol=1e-13)
         ksp.solve(petsc_rhs, x)
         # petsc_mat.destroy()
         petsc_rhs.destroy()
         x.destroy()
-        out_comp = np.array(ksp.getSolution()).reshape(K_mat.shape,order = "F")
+        out_comp = np.array(ksp.getSolution()).reshape(X1_mat.shape,order = "F")
         end_ksp = time.time()
         # profiling
         # print("ksp solve: {:.3f}s".format(end_ksp - start_ksp))
@@ -428,7 +469,7 @@ while FC_Err > tol and epoch < max_iter:
         print("PETSc preconditioned residual norm is {:g}; iterations: {}".format(ksp.getResidualNorm(), ksp.getIterationNumber()))
         if epoch % 1 == 0 and reporterror:
             # Calculating PDE error and False Transient error
-            PDE_rhs = A * v0 + B_1 * dK + B_2 * dR + B_3 * dY + C_1 * ddK + C_2 * ddR + C_3 * ddY + D
+            PDE_rhs = A * v0 + B_1 * dX1 + B_2 * dX2 + B_3 * dX3 + C_1 * ddX1 + C_2 * ddX2 + C_3 * ddX3 + D
             PDE_Err = np.max(abs(PDE_rhs))
             FC_Err = np.max(abs((out_comp - v0)/ epsilon))
             print("Epoch {:d} (PETSc): PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch, PDE_Err, FC_Err))
@@ -442,11 +483,12 @@ while FC_Err > tol and epoch < max_iter:
         # # "FC_Err": FC_Err
     # # }
     # # writer.writerow(rowcontent)
-    e_star = e
-    i_star = i
-    x_star = x
+    e_star = ee
+    i_star = ii
+    x_star = xx
     v0 = out_comp
     epoch += 1
+
 if reporterror:
     print("===============================================")
     print("Fianal epoch {:d}: PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch -1, PDE_Err, FC_Err))
@@ -456,7 +498,7 @@ if write_test:
     f.write("Fianal epoch {:d}: PDE Error: {:.10f}; False Transient Error: {:.10f}\n" .format(epoch -1, PDE_Err, FC_Err))
     f.write("--- Total running time: %s seconds ---\n" % (time.time() - start_time))
 
-# exit()
+exit()
 
 import pickle
 # filename = filename

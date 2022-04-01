@@ -2,7 +2,7 @@
 #Required packages
 import os
 import sys
-sys.path.append('./src')
+sys.path.append('../src')
 import csv
 from supportfunctions import *
 sys.stdout.flush()
@@ -90,8 +90,6 @@ K = np.arange(K_min, K_max + hK, hK)
 nK = len(K)
 R = np.arange(R_min, R_max + hR, hR)
 nR = len(R)
-lam = np.arange(lam_min, lam_max + hlam, hlam)
-nlam = len(lam)
 
 
 if write_test:
@@ -129,7 +127,7 @@ fraction = 0.5
 max_iter = 40000
 # file_iter = open("iter_c_compile.txt", "w")
 
-# res = solver_3d(K_mat, R_mat, Y_mat, # FOC_func, Coeff_func,  
+# res = solver_3d(K_mat, R_mat, Y_mat, # FOC_func, Coeff_func,
         # args=(delta, eta, A_d, A_g, alpha_d, alpha_g, sigma_d, sigma_g, phi_d, phi_g, gamma_1, \
             # gamma_2, y_bar, varphi, varsigma, beta_f ),
         # linearsolver="petsc",

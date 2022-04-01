@@ -47,7 +47,7 @@ A_g_prime = postjump["A_g"]
 A_g = 0.1000
 
 alpha_d = postjump["alpha_d"]
-alpha_g = postjump["alpha_g"] 
+alpha_g = postjump["alpha_g"]
 sigma_d = postjump["sigma_d"]
 sigma_g = postjump["sigma_g"]
 
@@ -151,9 +151,9 @@ continue_mode = True
 
 csvfile = open("test3-logL.csv", "w")
 fieldnames = [
-        "epoch", "iterations", "residual norm", "PDE_Err", "FC_Err", 
-        "id_min", "id_max", 
-        "ig_min", "ig_max", 
+        "epoch", "iterations", "residual norm", "PDE_Err", "FC_Err",
+        "id_min", "id_max",
+        "ig_min", "ig_max",
         "consum_min", "consum_max",
         "mc_min", "mc_max",
 ]
@@ -161,7 +161,7 @@ fieldnames = [
 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 writer.writeheader()
 ############# step up of optimization
- 
+
 FC_Err   = 1
 epoch    = 0
 tol      = 1e-6
@@ -221,7 +221,7 @@ while  FC_Err > tol and epoch < max_iter:
         i_g = 1 / phi_g - mc / phi_g / (dK + (1 - R_mat) * dR)
         i_g_min = i_g.min()
         i_g_max = i_g.max()
-        # i_l = (A_d - i_d ) * (1 - R_mat) + (A_g - i_g) * R_mat - delta / (np.exp(K_mat) * varphi * dLam) 
+        # i_l = (A_d - i_d ) * (1 - R_mat) + (A_g - i_g) * R_mat - delta / (np.exp(K_mat) * varphi * dLam)
         # i_l = 1e-15 * np.ones(X_mat.shape)
         i_l = np.zeros(X_mat.shape)
         i_l_min = i_l.min()
@@ -254,7 +254,7 @@ while  FC_Err > tol and epoch < max_iter:
         i_g_max = i_g.max()
         # i_g[i_g > A_g  - 1e-16] = A_g - 1e-16
         # i_g[i_g <  0.000] = 0.0
-        temp = (A_d - i_d ) * (1 - R_mat) + (A_g - i_g) * R_mat  - delta / (np.exp(K_mat - logL_mat) * varphi * dLam) 
+        temp = (A_d - i_d ) * (1 - R_mat) + (A_g - i_g) * R_mat  - delta / (np.exp(K_mat - logL_mat) * varphi * dLam)
         # temp[ temp < 0.000 ] = 0.000
         # temp[ temp > A_g - 1e-15] = A_g - 1e-15
         i_l =  temp
@@ -270,9 +270,9 @@ while  FC_Err > tol and epoch < max_iter:
         print("min il/K: {:.10f}, max il/K: {:.10f}".format(np.min(i_l), np.max(i_l)))
 
         ## updating using quardratic equation
-        # a = 1 / phi_d - 1 / phi_d * (dK + (1-R_mat)*dR) / (dK - R_mat * dR) 
+        # a = 1 / phi_d - 1 / phi_d * (dK + (1-R_mat)*dR) / (dK - R_mat * dR)
         # print(np.min(a), np.max(a))
-        # b = phi_g / phi_d * (dK + (1-R_mat)*dR) / (dK - R_mat * dR) 
+        # b = phi_g / phi_d * (dK + (1-R_mat)*dR) / (dK - R_mat * dR)
         # print(np.min(b), np.max(b))
         # AA = ((1 - R_mat) * b + R_mat) * phi_g
         # BB = - phi_g * ((A_d - a) * (1 - R_mat) + A_g * R_mat) - ((1 - R_mat) * b + R_mat)
@@ -315,7 +315,7 @@ while  FC_Err > tol and epoch < max_iter:
                 # temp[temp < 1e-15] = 1e-15
                 # q = delta / temp * fraction + q * (1 - fraction)
             # num += 1
-   
+
         # print(err1, err2)
     print("mc min: {:.10f}, mc max: {:.10f}".format(mc_min, mc_max))
     print("min id: {},\t min ig: {},\t min il: {}".format(np.min(i_d), np.min(i_g), np.min(i_l)))
@@ -339,7 +339,7 @@ while  FC_Err > tol and epoch < max_iter:
         dVec = np.array([hX, hY, hZ, hW])
         increVec = np.array([1, nX, nX * nY, nX * nY * nZ], dtype=np.int32)
         # These are constant
-        A = - delta   * np.ones(K_mat.shape)  - np.exp(logL_mat) 
+        A = - delta   * np.ones(K_mat.shape)  - np.exp(logL_mat)
         C_11 = 0.5 * (sigma_d * (1 - R_mat) + sigma_g * R_mat)**2
         C_22 = 0.5 * R_mat**2 * (1 - R_mat)**2 * (sigma_d + sigma_g)**2
         C_33 = 0.5 * (varsigma * eta * A_d * np.exp(K_mat) * (1 - R_mat) )**2
@@ -399,15 +399,15 @@ while  FC_Err > tol and epoch < max_iter:
 
     # Step (6) and (7) Formulating HJB False Transient parameters
     # See remark 2.1.4 for more details
-    mu_d = alpha_d + i_d - 0.5 * phi_d * i_d**2 
+    mu_d = alpha_d + i_d - 0.5 * phi_d * i_d**2
     mu_g = alpha_g + i_g - 0.5 * phi_g * i_g**2
     B_1 = mu_d * (1 - R_mat) + mu_g * R_mat - C_11
     B_2 = (mu_g - mu_d - R_mat * sigma_g**2 + (1 - R_mat) * sigma_d**2) * R_mat * (1 - R_mat)
-    temp2 =  (A_d - i_d ) * (1 - R_mat)  + (A_g - i_g) * R_mat  
+    temp2 =  (A_d - i_d ) * (1 - R_mat)  + (A_g - i_g) * R_mat
     B_4 =  varphi * temp2 * np.exp(K_mat - logL_mat) - alpha_l - 0.5 * sigma_l**2
     # B_4[B_4 <=0] = 0.
     # B_4 = ( (A_d - i_d) * (1 - R_mat)  +  (A_g - i_g) * R_mat ) * varphi * np.exp(K_mat)  - alpha_l * Lambda_mat
-     
+
     # B_4  = 0.001 * np.ones(X_mat.shape)
     # B_4 = np.zeros(X_mat.shape)
     consumption = (A_d - i_d) * (1 - R_mat)  +  (A_g - i_g) * R_mat  - i_l
@@ -415,7 +415,7 @@ while  FC_Err > tol and epoch < max_iter:
     consumption_max = consumption.max()
     print("max consum: {},\t min consum: {}\t".format(np.max(consumption), np.min(consumption)))
     consumption[consumption <= 0] = 1e-300
-    
+
     D = delta * np.log(consumption) + delta * K_mat - delta - (gamma_1 + gamma_2 * Temp_mat )* beta_f * eta * A_d * np.exp(K_mat) * (1 - R_mat)  - 0.5 * (gamma_2) * (varsigma * eta * A_d * np.exp(K_mat) * (1 - R_mat) )**2 + np.exp(logL_mat) * V_post
 
     if linearsolver == 'eigen' or linearsolver == 'both':

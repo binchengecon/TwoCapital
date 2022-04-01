@@ -20,7 +20,7 @@ kappa   = 6.667
 mu_k    = -0.043
 sigma_k = np.sqrt(0.0087**2 + 0.0038**2)
 # Technology
-theta        = 2 # 3
+theta        = 3 # 3
 lambda_bar   = 0.1206
 vartheta_bar = 0.0453
 
@@ -66,13 +66,13 @@ model_args = (delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi
 
 
 model_res = hjb_post_damage_post_tech(
-        k_grid, y_grid_long, model_args, v0=None, 
+        k_grid, y_grid_long, model_args, v0=None,
         epsilon=0.5, fraction=.5,tol=1e-10, max_iter=4000, print_iteration=True)
 
-with open("./res_data/post_jump", "wb") as f:
+with open("./res_data/post_jump_3", "wb") as f:
     pickle.dump(model_res, f)
 
-with open("./res_data/post_jump", "rb") as f:
+with open("./res_data/post_jump_3", "rb") as f:
     model_res = pickle.load(f)
 
 v_post = model_res["v"]
@@ -80,16 +80,16 @@ v_post = model_res["v"]
 V_post = np.zeros((nk, ny, nlogI))
 for i in range(nlogI):
     V_post[:,:,i] = v_post
-    
-Guess = pickle.load(open("./res_data/pre_jump_res_31-22:26", "rb"))
+
+Guess = pickle.load(open("./res_data/pre_jump_res_01-04:30", "rb"))
 
 
 model_args_pre = ( delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi_a, xi_b, xi_g, v_post, gamma_1, gamma_2, gamma_3_i, y_bar, zeta, psi_0, psi_1, sigma_g, theta, lambda_bar, vartheta_bar)
 
 res_pre = hjb_post_damage_pre_tech(
         k_grid, y_grid_long, logI_grid, model_args_pre, v0=V_post,
-        ε=0.0001, fraction=0.5, tol=1e-15, max_iter=20000,
-        Guess=None
+        ε=0.0001, fraction=0.5, tol=1e-8, max_iter=20000,
+        Guess=Guess
         )
 with open("./res_data/pre_jump", "wb") as f:
     pickle.dump(res_pre, f, protocol=pickle.HIGHEST_PROTOCOL)

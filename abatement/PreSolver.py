@@ -66,7 +66,7 @@ def _hjb_iteration_pre(
 #     # Method 2 : Fix a and solve
 #     e_new = (a * e**2 + c) / (-b)
 
-    
+
     # find x_new
     if psi_1 ==1 and theta == 2:
         G = dvdy  - 1. / delta * d_Delta
@@ -153,7 +153,7 @@ def _hjb_iteration_pre(
     C_yy = .5 * sigma_y **2 * e**2
     C_II = sigma_g**2 / 2 * np.ones_like(logI_mat)
 
-    consumption = alpha - i - alpha * vartheta_bar * (1 - e / (alpha * lambda_bar * np.exp(k_mat)))**theta - x * np.exp(logI_mat - k_mat) 
+    consumption = alpha - i - alpha * vartheta_bar * (1 - e / (alpha * lambda_bar * np.exp(k_mat)))**theta - x * np.exp(logI_mat - k_mat)
     consumption[consumption <= 1e-16] = 1e-16
     print("min consum: {},\t max consum: {}\t".format(consumption.min(), consumption.max()))
 
@@ -165,8 +165,8 @@ def _hjb_iteration_pre(
 
 
 def hjb_post_damage_pre_tech(
-        k_grid, y_grid, logI_grid, model_args=(), 
-        v0=None, ϵ=1., fraction=.1, tol=1e-8, max_iter=10_000, 
+        k_grid, y_grid, logI_grid, model_args=(),
+        v0=None, ϵ=1., fraction=.1, tol=1e-8, max_iter=10_000,
         print_iteration=True,
         Guess=None,
         ):
@@ -183,14 +183,14 @@ def hjb_post_damage_pre_tech(
     V_post = np.zeros_like(k_mat)
     for i in range(len(logI_grid)):
         V_post[:, :, i] = v_post
-    
+
     if Guess is None:
 
         a_i = kappa * (1. / delta)
         b_i = - (1. + alpha * kappa) * (1. / delta)
         c_i = alpha * (1. / delta) - 1.
         i = (- b_i - np.sqrt(b_i ** 2 - 4 * a_i * c_i)) / (2 * a_i)
-        
+
         i = np.ones_like(k_mat) * i
         e = np.zeros_like(k_mat)
         x = np.zeros_like(k_mat)
@@ -223,7 +223,7 @@ def hjb_post_damage_pre_tech(
         pi_c, A, B_k, B_y, B_I, C_kk, C_yy, C_II,  D, dvdk, dvdy, dvdI, dvdkk, dvdyy, dvdII, i, e, x, h = _hjb_iteration_pre(
         v0, k_mat, y_mat, logI_mat, dk, dy, dI, d_Delta, dd_Delta, theta, lambda_bar, vartheta_bar, delta, alpha, kappa, mu_k, sigma_k, pi_c_o, pi_c, theta_ell, sigma_y, zeta, psi_0, psi_1, sigma_g,  xi_a, xi_b, i, e, x, fraction
                     )
-        
+
         g_tech = np.exp(1. / xi_g * (v0 - V_post))
         g_tech[g_tech <= 1e-16] = 1e-16
         A -= np.exp(logI_mat) * g_tech
