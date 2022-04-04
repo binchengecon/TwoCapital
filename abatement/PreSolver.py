@@ -31,14 +31,14 @@ def _hjb_iteration_pre(
     dvdI[dvdI <1e-10] = 1e-10
     dvdII = finiteDiff(v0, 2, 2, dI)
 
-    temp = alpha - i - alpha * vartheta_bar * (1 - e / (alpha * lambda_bar * np.exp(k_mat))) ** theta - x * np.exp(logI_mat - k_mat)
+    temp = alpha - i - alpha * vartheta_bar * (1 - e / (alpha * lambda_bar * np.exp(k_mat))) ** theta - x
     temp[temp < 1e-16] = 1e-16
     mc = 1. / temp
 
     i_new = - (mc / dvdk - 1) / kappa
 
-    G = dvdy  - 1. / delta * d_Delta
-    F = dvdyy - 1. / delta * dd_Delta
+    G = dvdy  - d_Delta
+    F = dvdyy - dd_Delta
 
     temp = mc * vartheta_bar * theta / (lambda_bar * np.exp(k_mat))
     a = temp / (alpha * lambda_bar * np.exp(k_mat)) ** 2
@@ -69,8 +69,8 @@ def _hjb_iteration_pre(
 
     # find x_new
     if psi_1 ==1 and theta == 2:
-        G = dvdy  - 1. / delta * d_Delta
-        F = dvdyy - 1. / delta * dd_Delta
+        G = dvdy  - d_Delta
+        F = dvdyy - dd_Delta
         temp2 = dvdI * psi_1 * psi_0 * np.exp(k_mat - logI_mat)
         Omega_1 = temp2 * theta * vartheta_bar / lambda_bar * np.exp(- k_mat) + G * np.sum(pi_c * theta_ell, axis=0)
         Omega_2 = temp2 * theta * vartheta_bar / lambda_bar * np.exp(- k_mat) / (alpha * lambda_bar * np.exp(k_mat))- F * sigma_y**2
@@ -80,8 +80,8 @@ def _hjb_iteration_pre(
         x_new = temp3 * np.exp(k_mat - logI_mat) - 1 / (dvdI * psi_0 * psi_1)
 
     elif psi_1 ==1 and theta == 3:
-        G = dvdy  - 1. / delta * d_Delta
-        F = dvdyy - 1. / delta * dd_Delta
+        G = dvdy  - d_Delta
+        F = dvdyy - dd_Delta
         mc = dvdI * psi_1 * psi_0 * np.exp(k_mat - logI_mat)
         temp = mc * vartheta_bar * theta / (lambda_bar * np.exp(k_mat))
         a = temp / (alpha * lambda_bar * np.exp(k_mat)) ** (theta - 1)
@@ -102,7 +102,7 @@ def _hjb_iteration_pre(
         x_new = temp3 * np.exp(k_mat - logI_mat) - 1 / (dvdI * psi_0 * psi_1)
 
     elif psi_1 != 1 and theta == 2:
-        temp = alpha - i - alpha * vartheta_bar * (1 - e / (alpha * lambda_bar * np.exp(k_mat))) ** theta - x * np.exp(logI_mat - k_mat)
+        temp = alpha - i - alpha * vartheta_bar * (1 - e / (alpha * lambda_bar * np.exp(k_mat))) ** theta - x
         temp[temp < 1e-16] = 1e-16
         mc = 1. / temp
 
@@ -111,7 +111,7 @@ def _hjb_iteration_pre(
         b = mc * temp1 + G * np.sum(pi_c * theta_ell, axis=0)
         e_new = - b / a
         i_new = (1 - mc / dvdk) / kappa
-        x_new = (mc * np.exp(logI_mat - k_mat) / dvdI * psi_0 * psi_1)**(1 / (psi_1 - 1))
+        x_new = (mc / dvdI * psi_0 * psi_1)**(1 / (psi_1 - 1))
     elif psi_1 != 1 and vartheta_bar != 0 and theta == 3:
         temp = b ** 2 - 4 * a * c
         temp = temp * (temp > 0)
@@ -121,11 +121,11 @@ def _hjb_iteration_pre(
             e_new = root1
         else:
             e_new = root2
-        temp = alpha - i - alpha * vartheta_bar * (1 - e / (alpha * lambda_bar * np.exp(k_mat))) ** theta - x * np.exp(logI_mat - k_mat)
+        temp = alpha - i - alpha * vartheta_bar * (1 - e / (alpha * lambda_bar * np.exp(k_mat))) ** theta - x
         temp[temp < 1e-16] = 1e-16
         mc = 1. / temp
         i_new = - (mc / dvdk - 1) / kappa
-        x_new = (mc * np.exp(logI_mat - k_mat) / dvdI * psi_0 * psi_1)**(1 / (psi_1 - 1))
+        x_new = (mc / dvdI * psi_0 * psi_1)**(1 / (psi_1 - 1))
 
     # x_new = np.zeros(k_mat.shape)
     # i_new[i_new <= 1e-15] = 1e-15
@@ -148,16 +148,16 @@ def _hjb_iteration_pre(
     A = np.ones_like(y_mat) * (- delta)
     B_k = mu_k + i - kappa / 2. * i ** 2 - sigma_k ** 2 / 2.
     B_y = np.sum(pi_c * theta_ell, axis=0) * e
-    B_I = - zeta + psi_0 * x**psi_1 - sigma_g**2/2
+    B_I = - zeta + psi_0 * (x * np.exp(k_mat - logI_mat) )**psi_1 - sigma_g**2/2
     C_kk = sigma_k ** 2 / 2 * np.ones_like(y_mat)
     C_yy = .5 * sigma_y **2 * e**2
     C_II = sigma_g**2 / 2 * np.ones_like(logI_mat)
 
-    consumption = alpha - i - alpha * vartheta_bar * (1 - e / (alpha * lambda_bar * np.exp(k_mat)))**theta - x * np.exp(logI_mat - k_mat)
+    consumption = alpha - i - alpha * vartheta_bar * (1 - e / (alpha * lambda_bar * np.exp(k_mat)))**theta - x
     consumption[consumption <= 1e-16] = 1e-16
     print("min consum: {},\t max consum: {}\t".format(consumption.min(), consumption.max()))
 
-    D = np.log(consumption) + k_mat - 1./ delta * (d_Delta * np.sum(pi_c * theta_ell, axis=0) * e + .5 * dd_Delta * sigma_y ** 2 * e ** 2) + xi_a * entropy
+    D = delta * np.log(consumption) + delta * k_mat - (d_Delta * np.sum(pi_c * theta_ell, axis=0) * e + .5 * dd_Delta * sigma_y ** 2 * e ** 2) + xi_a * entropy
 
     h = - G * e * sigma_y / xi_b
 
@@ -178,7 +178,7 @@ def hjb_post_damage_pre_tech(
     (k_mat, y_mat, logI_mat) = np.meshgrid(k_grid, y_grid, logI_grid, indexing = 'ij')
 
     if v0 is None:
-        v0 = 1. / delta * k_mat -  y_mat ** 2
+        v0 = k_mat -  y_mat ** 2
     # expand v_post
     V_post = np.zeros_like(k_mat)
     for i in range(len(logI_grid)):
@@ -186,9 +186,9 @@ def hjb_post_damage_pre_tech(
 
     if Guess is None:
 
-        a_i = kappa * (1. / delta)
-        b_i = - (1. + alpha * kappa) * (1. / delta)
-        c_i = alpha * (1. / delta) - 1.
+        a_i = kappa
+        b_i = - (1. + alpha * kappa) 
+        c_i = alpha - 1.
         i = (- b_i - np.sqrt(b_i ** 2 - 4 * a_i * c_i)) / (2 * a_i)
 
         i = np.ones_like(k_mat) * i

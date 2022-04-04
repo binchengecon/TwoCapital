@@ -5,6 +5,7 @@ import sys
 sys.path.append('../src')
 import csv
 from supportfunctions import *
+from supportfunctions import finiteDiff_3D
 sys.stdout.flush()
 import petsc4py
 petsc4py.init(sys.argv)
@@ -25,18 +26,9 @@ reporterror = True
 # both: petsc+petsc4py
 #
 linearsolver = 'petsc'
+now = datetime.now()
+current_time = now.strftime("%d-%H:%M")
 
-write_test = False
-if write_test:
-    f = open("test-log.txt", 'a')
-
-
-current_time = datetime.now()
-filename =  "res" + '-' + "{:d}-{:d}-{:d}".format(current_time.day, current_time.hour, current_time.minute)
-
-if write_test:
-    f.write("Script starts: {:d}/{:d}-{:d}:{:d}\n".format(current_time.month, current_time.day, current_time.hour, current_time.minute))
-    f.write("Linear solver: " + linearsolver+ "\n" )
 
 
 start_time = time.time()
@@ -60,17 +52,17 @@ vartheta_bar = 0.0453
 
 gamma_1 = 1.7675/10000
 gamma_2 = .0022*2
-gamma_3 = 0.0000
+gamma_3 = 1/3
 
 
 theta_ell = pd.read_csv('../data/model144.csv', header=None).to_numpy()[:, 0]/1000.
-pi_c_o = np.ones_like(theta_ell)/len(theta_ell)
-sigma_y = 1.2 * np.mean(theta_ell)
-beta_f = 1.86 / 1000
-zeta    = 0.00
-psi_0   = 0.00001
-psi_1   = 1
-sigma_g = 0.016
+pi_c_o    = np.ones_like(theta_ell)/len(theta_ell)
+sigma_y   = 1.2 * np.mean(theta_ell)
+beta_f    = 1.86 / 1000
+zeta      = 0.00
+psi_0     = 0.01
+psi_1     = 1
+sigma_g   = 0.016
 # Tech jump
 lambda_bar_first = lambda_bar / 2
 vartheta_bar_first = vartheta_bar / 2
@@ -82,18 +74,18 @@ vartheta_bar_second = 0.
 K_min = 4.00
 K_max = 8.50
 hK    = 0.10
-K = np.arange(K_min, K_max + hK, hK)
-nK = len(K)
+K     = np.arange(K_min, K_max + hK, hK)
+nK    = len(K)
 Y_min = 0.
 Y_max = 3.
-hY   = 0.10 # make sure it is float instead of int
-Y = np.arange(Y_min, Y_max + hY, hY)
-nY = len(Y)
-lam_min = - 4.
-lam_max = - 0.
-hlam    = 0.1
-logI    = np.arange(lam_min, lam_max,  hlam)
-nlogI   = len(logI)
+hY    = 0.10 # make sure it is float instead of int
+Y     = np.arange(Y_min, Y_max + hY, hY)
+nY    = len(Y)
+L_min = - 4.
+L_max = - 1.
+hL    = 0.1
+L     = np.arange(L_min, L_max,  hL)
+nL    = len(L)
 
 X1     = K
 nX1    = len(X1)
@@ -105,15 +97,13 @@ nX2    = len(X2)
 hX2    = X2[1] - X2[0]
 X2_min = X2.min()
 X2_max = X2.max()
-X3     = logI
+X3     = L
 nX3    = len(X3)
 hX3    = X3[1] - X3[0]
 X3_min = X3.min()
 X3_max = X3.max()
 
-if write_test:
-    f.write("Grid dimension: [{}, {}, {}]\n".format(nX1, nX2, nX3))
-
+filename =  "post_damage_" + str(gamma_3)  + '_{}'.format(current_time)
 print("Grid dimension: [{}, {}, {}]\n".format(nX1, nX2, nX3))
 print("Grid step: [{}, {}, {}]\n".format(hX1, hX2, hX3))
 # Discretization of the state space for numerical PDE solution.
@@ -134,39 +124,45 @@ upperLims = np.array([X1_max, X2_max, X3_max], dtype=np.float64)
 model_args = (delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi_a, xi_b, gamma_1, gamma_2, gamma_3, y_bar, theta, lambda_bar_first, vartheta_bar_first)
 
 
-postjump = hjb_post_damage_post_tech(
-        K, Y, model_args, v0=None,
-        epsilon=1., fraction=.2,tol=1e-8, max_iter=2000, print_iteration=True)
+# postjump = hjb_post_damage_post_tech(
+        # K, Y, model_args, v0=None,
+        # epsilon=1., fraction=.2,tol=1e-8, max_iter=2000, print_iteration=True)
 
-with open("./res_data/post_jump_test", "wb") as f:
-    pickle.dump(postjump, f)
+# with open("./res_data/gamma/post_jump_" + filename, "wb") as f:
+    # pickle.dump(postjump, f)
 
-v_post = postjump["v"]
-# v_post = pickle.load(open("./res_data/post_jump_test", "rb"))["v"]
+# v_post = postjump["v"]
+# v_post = pickle.load(open("./res_data/gamma/post_jump_" + filename, "rb"))["v"]
+v_post = pickle.load(open("./res_data/gamma/post_jump_post_damage_0.3333333333333333_04-04:16", "rb"))["v"]
 v0 = np.zeros(K_mat.shape)
-for i in range(nlogI):
+for i in range(nL):
     v0[:,:,i] = v_post
 V_post = v0
-# v0 = K_mat + L_mat
+Guess = None
 pi_c = np.array([temp * np.ones_like(K_mat) for temp in pi_c_o])
 pi_c_o = pi_c.copy()
 theta_ell = np.array([temp * np.ones(K_mat.shape) for temp in theta_ell])
 # import pickle
-# v0 = pickle.load(open("./res_data/pre_jump", "rb"))["v0"]
-
-# v0 = data["v0"]
+# v0 = pickle.load(open("./res_data/res-1-12-7", "rb"))["v0"]
+# Guess = pickle.load(open("./res_data/res-1-15-47", "rb"))
+# v0 = Guess["v0"]
 ############# step up of optimization
+# v0 = pickle.load(open("./res_data/gamma/pre_jump_post_damage_0_02-18:32", "rb"))["v0"]
+# v0 = 1 / delta * (K_mat + L_mat)  - 1 / delta * beta_f * Y_mat
 FC_Err   = 1
 epoch    = 0
 tol      = 1e-7
-epsilon  = 0.01
+epsilon  = 0.00000001
 fraction = 0.5
 
+i_star = np.zeros(K_mat.shape)
+e_star = np.zeros(K_mat.shape)
+x_star = np.zeros(K_mat.shape)
 # csvfile = open("ResForRatio.csv", "w")
 # fieldnames = ["epoch", "iterations", "residual norm", "PDE_Err", "FC_Err"]
 # writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 # writer.writeheader()
-max_iter = 4000
+max_iter = 400000
 # file_iter = open("iter_c_compile.txt", "w")
 
 # res = solver_3d(K_mat, R_mat, Y_mat, # FOC_func, Coeff_func,
@@ -187,91 +183,105 @@ while FC_Err > tol and epoch < max_iter:
     vold = v0.copy()
     # Applying finite difference scheme to the value function
     ######## first order
-    dX1  = finiteDiff(v0,0,1,hX1)
-    dX1[dX1 <= 1e-8] = 1e-8
+    dX1  = finiteDiff_3D(v0,0,1,hX1)
+    dX1[dX1 <= 1e-16] = 1e-16
     dK = dX1
-    # dK[dK < 1e-8] = 1e-8
-    dX2  = finiteDiff(v0,1,1,hX2)
+    dX2  = finiteDiff_3D(v0,1,1,hX2)
     dY = dX2
-    dX3  = finiteDiff(v0,2,1,hX3)
-    # dX3[dX3 <= 1e-8] = 1e-8
+    dX3  = finiteDiff_3D(v0,2,1,hX3)
+    dX3[dX3 <= 1e-16] = 1e-16
     dL = dX3
     ######## second order
-    ddX1 = finiteDiff(v0,0,2,hX1)
-    ddX2 = finiteDiff(v0,1,2,hX2)
+    ddX1 = finiteDiff_3D(v0,0,2,hX1)
+    ddX2 = finiteDiff_3D(v0,1,2,hX2)
     ddY = ddX2
-    ddX3 = finiteDiff(v0,2,2,hX3)
+    ddX3 = finiteDiff_3D(v0,2,2,hX3)
 
 
     dGamma = gamma_1 + gamma_2 * Y_mat + gamma_3 * (Y_mat - y_bar) * (Y_mat > y_bar)
     ddGamma = gamma_2 + gamma_3 * (Y_mat > y_bar)
 
-    if epoch > 2000:
-        epsilon = 0.1
-    elif epoch > 1000:
-        epsilon = 0.3
-    else:
-        pass
+    # if epoch > 2000:
+        # epsilon = 0.1
+    # elif epoch > 1000:
+        # epsilon = 0.3
+    # else:
+        # pass
 
     # update control
+    # if epoch == 0:
+        # ii = 0.01 * np.ones(K_mat.shape)
+        # ee = np.ones(K_mat.shape)
+        # xx = 0.1 * np.ones(K_mat.shape)
+        # temp = alpha - ii - alpha * vartheta_bar * (1 - ee / (alpha * lambda_bar * np.exp(K_mat)))**theta - xx
+        # mc = 1 / temp
+        # if Guess:
+            # ii = Guess["ii"]
+            # ee = Guess["ee"]
+            # xx = Guess["xx"]
     if epoch == 0:
-        ii = np.zeros(K_mat.shape)
-        ee = np.zeros(K_mat.shape)
-        xx = np.zeros(K_mat.shape)
-        temp = alpha - ii - alpha * vartheta_bar * (1 - ee / (alpha * lambda_bar * np.exp(K_mat)))**theta - xx * np.exp(L_mat - K_mat)
-        mc = 1 / temp
-
+        fraction = 1
     else:
+        fraction = epsilon
+
+    # else:
      # updating controls
-        if theta == 2 and psi_1 == 1:
-            mc = dL * psi_1 * psi_0 * np.exp(K_mat - L_mat)
-            temp2 = theta * vartheta_bar / lambda_bar * np.exp(- K_mat)
-            F = dY  - dGamma
-            G = ddY - ddGamma
-            Omega_1 = mc * temp2 + F * beta_f
-            Omega_2 = mc * temp2 / (alpha * lambda_bar * np.exp(K_mat)) - F * sigma_y**2
-            e_new =  Omega_1 / Omega_2
-            # e_new[e_new <= 1e-15] = 1e-15
-            i_new = (1 - mc / dK) / kappa
-            # i_new[i_new <= 1e-15] = 1e-15
-            temp3 = alpha  - ii - alpha * vartheta_bar * (1 - ee / (alpha * lambda_bar * np.exp(K_mat)))**theta
-            x_new = temp3 * np.exp(K_mat - L_mat) - 1 / (dL * psi_0 * psi_1)
-            # x_new[x_new <= 1e-15] = 1e-15
-        elif theta == 3 and psi_1 == 1:
+    if theta == 2 and psi_1 == 1:
+        mc = dL * psi_1 * psi_0 * np.exp(K_mat - L_mat)
+        temp2 = theta * vartheta_bar / lambda_bar * np.exp(- K_mat)
+        F = dY  - 1./ delta * dGamma
+        G = ddY - 1./ delta * ddGamma
+        Omega_1 = mc * temp2 + F * beta_f
+        Omega_2 = mc * temp2 / (alpha * lambda_bar * np.exp(K_mat)) - F * sigma_y**2
+        e_new =  Omega_1 / Omega_2
+        # e_new[e_new <= 1e-15] = 1e-15
+        i_new = (1 - mc / dK) / kappa
+        # i_new[i_new <= 1e-15] = 1e-15
+        temp3 = alpha  - ii - alpha * vartheta_bar * (1 - ee / (alpha * lambda_bar * np.exp(K_mat)))**theta
+        x_new = temp3 * np.exp(K_mat - L_mat) - 1 / (dL * psi_0 * psi_1)
+        # x_new[x_new <= 1e-15] = 1e-15
+    elif theta == 3 and psi_1 == 1:
 
-            G = dY  - dGamma
-            F = ddY - ddGamma
-            mc = dL * psi_1 * psi_0 * np.exp(K_mat - L_mat)
-            temp = mc * vartheta_bar * theta / (lambda_bar * np.exp(K_mat))
-            a = temp / (alpha * lambda_bar * np.exp(K_mat)) ** (theta - 1)
-            b = - 2 * temp / (alpha * lambda_bar * np.exp(K_mat)) + F * sigma_y ** 2
-            c = temp + G * beta_f
-            temp = b ** 2 - 4 * a * c
-            temp[temp <=0] = 0
-            # temp = temp * (temp > 0)
-            root1 = (- b - np.sqrt(temp)) / (2 * a)
-            root2 = (- b + np.sqrt(temp)) / (2 * a)
-            if root1.all() > 0 :
-                e_new = root1
-            else:
-                e_new = root2
+        G = dY  - 1./ delta * dGamma
+        F = ddY - 1./ delta * ddGamma
+        mc = dL * psi_1 * psi_0 * np.exp(K_mat - L_mat)
+        mc[mc <= 1e-16] = 1e-16
+        temp = mc * vartheta_bar * theta / (lambda_bar * np.exp(K_mat))
+        a = temp / (alpha * lambda_bar * np.exp(K_mat)) ** (theta - 1)
+        b = - 2 * temp / (alpha * lambda_bar * np.exp(K_mat)) + F * sigma_y ** 2
+        c = temp + G * beta_f
+        temp = b ** 2 - 4 * a * c
+        temp[temp <=0] = 0
+        # temp = temp * (temp > 0)
+        root1 = (- b - np.sqrt(temp)) / (2 * a)
+        root2 = (- b + np.sqrt(temp)) / (2 * a)
+        if root1.all() > 0 :
+            e_new = root1
+        else:
+            e_new = root2
 
-            i_new = (1 - mc/ dK) / kappa
-            temp3 = alpha - ii - alpha * vartheta_bar * (1 - ee / (alpha * lambda_bar * np.exp(K_mat)))**theta
-            x_new = temp3 * np.exp(K_mat - L_mat) - 1 / (dL * psi_0 * psi_1)
 
-        ii = i_new * fraction + i_star * (1 - fraction)
-        ee = e_new * fraction + e_star * (1 - fraction)
-        xx = x_new * fraction + x_star * (1 - fraction)
+        e_new[e_new < - 1000] = - 1000
+        e_new[e_new > 1e3] = 1e3
+        i_new = (1 - mc/ dK) / kappa
+        i_new[i_new < - 1000] = - 1000
+        temp3 = alpha - i_star - alpha * vartheta_bar * (1 - e_star / (alpha * lambda_bar * np.exp(K_mat)))**theta
+        x_new = temp3 - 1 / mc
+        x_new[x_new < -1000] = - 1000
+        x_new[x_new > 1 - 1e-16] = 1 - 1e-16
+
+    ii = i_new * fraction + i_star * (1 - fraction)
+    ee = e_new * fraction + e_star * (1 - fraction)
+    xx = x_new * fraction + x_star * (1 - fraction)
     print("min i: {},\t max i: {}\t".format(ii.min(), ii.max()))
     print("min e: {},\t max e: {}\t".format(ee.min(), ee.max()))
     print("min x: {},\t max x: {}\t".format(xx.min(), xx.max()))
     # ii = np.zeros(K_mat.shape)
     # ee = np.zeros(K_mat.shape)
-    xx = np.zeros(K_mat.shape)
-    gg = np.exp(1 / xi_g * (v0 - V_post))
-    gg[gg <=1e-15] = 1e-15
-    consumption = alpha - ii - alpha * vartheta_bar * (1 - ee / (alpha * lambda_bar * np.exp(K_mat)))**theta - xx * np.exp(L_mat - K_mat)
+    # xx = np.zeros(K_mat.shape)
+    # gg = np.exp(1 / xi_g * (v0 - V_post))
+    # gg[gg <=1e-16] = 1e-16
+    consumption = alpha - ii - alpha * vartheta_bar * (1 - ee / (alpha * lambda_bar * np.exp(K_mat)))**theta - xx
     consumption[consumption <= 1e-16] = 1e-16
     # Step (2), solve minimization problem in HJB and calculate drift distortion
     # See remark 2.1.3 for more details
@@ -280,7 +290,7 @@ while FC_Err > tol and epoch < max_iter:
         dVec = np.array([hX1, hX2, hX3])
         increVec = np.array([1, nX1, nX1 * nX2],dtype=np.int32)
         # These are constant
-        A   = - delta * np.ones(K_mat.shape)  - np.exp(L_mat) * gg
+        A   = - delta * np.ones(K_mat.shape)
         C_1 = 0.5 * sigma_k**2 * np.ones(K_mat.shape)
         C_2 = 0.5 * sigma_y**2 * ee**2
         C_3 = 0.5 * sigma_g**2 * np.ones(K_mat.shape)
@@ -330,9 +340,9 @@ while FC_Err > tol and epoch < max_iter:
     # See remark 2.1.4 for more details
     B_1 = mu_k + ii - 0.5 * kappa * ii**2 - 0.5 * sigma_k**2
     B_2 = beta_f * ee
-    B_3 = - zeta + psi_0 * xx**psi_1 - 0.5 * sigma_g**2
+    B_3 = - zeta + psi_0 * (xx * np.exp(K_mat - L_mat))**psi_1 - 0.5 * sigma_g**2
 
-    D = delta * np.log(consumption) + delta * K_mat  -  dGamma * beta_f * ee  - 0.5 * ddGamma * sigma_y**2 * ee**2  + xi_g * np.exp(L_mat) * (1 - gg + gg * np.log(gg)) + np.exp(L_mat) * gg *(V_post)
+    D = np.log(consumption) + K_mat  - 1./ delta * dGamma * beta_f * ee  - 0.5 / delta * ddGamma * sigma_y**2 * ee**2 + np.exp(L_mat) * (V_post - v0)  #+ xi_g * np.exp(L_mat) * (1 - gg + gg * np.log(gg)) + np.exp(L_mat) * gg *(V_post)
 
     if linearsolver == 'eigen' or linearsolver == 'both':
         start_eigen = time.time()
@@ -376,7 +386,9 @@ while FC_Err > tol and epoch < max_iter:
                         -increVec[2],increVec[2],-2*increVec[2],2*increVec[2]])
         # The transpose of matrix A_sp is the desired. Create the csc matrix so that it can be used directly as the transpose of the corresponding csr matrix.
         A_sp = spdiags(data, diags, len(diag_0), len(diag_0), format='csc')
-        b    = -v0_1d / epsilon - D_1d
+        # A_sp = A_sp * epsilon
+        # b    = -v0_1d / epsilon - D_1d
+        # b    = -v0_1d - D_1d * epsilon
         # A_sp = spdiags(data, diags, len(diag_0), len(diag_0))
         # A_sp = csr_matrix(A_sp.T)
         # b = -v0/ε - D
@@ -400,7 +412,7 @@ while FC_Err > tol and epoch < max_iter:
         # create linear solver
         start_ksp = time.time()
         ksp.setOperators(petsc_mat)
-        ksp.setTolerances(rtol=1e-14)
+        ksp.setTolerances(rtol=1e-10)
         ksp.solve(petsc_rhs, x)
         petsc_mat.destroy()
         petsc_rhs.destroy()
@@ -435,7 +447,7 @@ while FC_Err > tol and epoch < max_iter:
         B_2_1d = B_2.ravel(order = 'F')
         B_3_1d = B_3.ravel(order = 'F')
         D_1d   = D.ravel(order = 'F')
-        v0_1d = v0.ravel(order = 'F')
+        v0_1d  = v0.ravel(order = 'F')
         petsclinearsystem.formLinearSystem(X1_mat_1d, X2_mat_1d, X3_mat_1d, A_1d, B_1_1d, B_2_1d, B_3_1d, C_1_1d, C_2_1d, C_3_1d, epsilon, lowerLims, upperLims, dVec, increVec, petsc_mat)
         # profiling
         # bpoint2 = time.time()
@@ -494,11 +506,8 @@ if reporterror:
     print("Fianal epoch {:d}: PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch -1, PDE_Err, FC_Err))
 print("--- Total running time: %s seconds ---" % (time.time() - start_time))
 
-if write_test:
-    f.write("Fianal epoch {:d}: PDE Error: {:.10f}; False Transient Error: {:.10f}\n" .format(epoch -1, PDE_Err, FC_Err))
-    f.write("--- Total running time: %s seconds ---\n" % (time.time() - start_time))
 
-exit()
+# exit()
 
 import pickle
 # filename = filename
@@ -516,6 +525,6 @@ for key in dir():
         pass
 
 
-file = open("./res_data/pre_jump", 'wb')
+file = open("./res_data/gamma/pre_jump_" + filename, 'wb')
 pickle.dump(my_shelf, file)
 file.close()

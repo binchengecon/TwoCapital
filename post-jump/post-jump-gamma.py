@@ -15,6 +15,13 @@ from scipy.sparse import coo_matrix
 from scipy.sparse import csr_matrix
 from datetime import datetime
 from solver import solver_3d
+import argparse
+
+
+parser = argparse.ArgumentParser(description="Set damage curvature value.")
+parser.add_argument("--gamma", type=float, help="Value of gamma_3")
+args = parser.parse_args()
+
 
 reporterror = True
 # Linear solver choices
@@ -26,16 +33,6 @@ reporterror = True
 #
 linearsolver = 'petsc'
 
-write_test = False
-if write_test:
-    f = open("test-log.txt", 'a')
-
-
-current_time = datetime.now()
-
-if write_test:
-    f.write("Script starts: {:d}/{:d}-{:d}:{:d}\n".format(current_time.month, current_time.day, current_time.hour, current_time.minute))
-    f.write("Linear solver: " + linearsolver+ "\n" )
 
 
 start_time = time.time()
@@ -59,7 +56,7 @@ eta = 0.17
 ###### damage
 gamma_1 = 0.00017675
 gamma_2 = 2. * 0.0022
-gamma_3 = 0.005
+gamma_3 = args.gamma
 
 y_bar = 2
 beta_f = 1.86 / 1000
@@ -89,11 +86,10 @@ R = np.arange(R_min, R_max + hR, hR)
 nR = len(R)
 # lam = np.arange(lam_min, lam_max + hlam, hlam)
 # nlam = len(lam)
+now = datetime.now()
+current_time = now.strftime("%d-%H:%M")
+filename =  "Ag" + str(A_g) + "-" + "gamma" + '-' + str(gamma_3) + '-' + "{}".format(current_time)
 
-filename =  "Ag" + str(A_g) + "-" + "gamma" + '-' + str(gamma_3) + '-' + "{:d}-{:d}-{:d}".format(current_time.day, current_time.hour, current_time.minute)
-
-if write_test:
-    f.write("Grid dimension: [{}, {}, {}]\n".format(nK, nR, nY))
 
 print("Grid dimension: [{}, {}, {}]\n".format(nK, nR, nY))
 # Discretization of the state space for numerical PDE solution.
@@ -109,22 +105,26 @@ lowerLims = np.array([K_min, R_min, Y_min], dtype=np.float64)
 upperLims = np.array([K_max, R_max, Y_max], dtype=np.float64)
 
 
-# v0 = K_mat - beta_f * Y_mat
+# v0 =1/delta * K_mat - beta_f * Y_mat**2
 import pickle
-data = pickle.load(open("../data/PostJump/Ag0.2-gamma-0.0-28-23-37", "rb"))
+data = pickle.load(open("../data/PostJump/Ag0.15-gamma-0.05-04-11:25", "rb"))
 v0 = data["v0"]
 ############# step up of optimization
 FC_Err = 1
 epoch = 0
 tol = 1e-7
-epsilon = 0.1
-fraction = 0.5
+epsilon  = 0.000001
+fraction = 0.01
 
 # csvfile = open("ResForRatio.csv", "w")
 # fieldnames = ["epoch", "iterations", "residual norm", "PDE_Err", "FC_Err"]
 # writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 # writer.writeheader()
-max_iter = 40000
+max_iter = 10000
+id_star = np.zeros_like(K_mat)
+ig_star = np.zeros_like(K_mat)
+id_star = data["id_star"]
+ig_star = data["ig_star"]
 # file_iter = open("iter_c_compile.txt", "w")
 
 # res = solver_3d(K_mat, R_mat, Y_mat, # FOC_func, Coeff_func,  
@@ -146,7 +146,7 @@ while FC_Err > tol and epoch < max_iter:
     # Applying finite difference scheme to the value function
     ######## first order
     dK = finiteDiff(v0,0,1,hK)
-    # dK[dK < 1e-8] = 1e-8
+    # dK[dK < 1e-16] = 1e-16
     dR = finiteDiff(v0,1,1,hR)
     # dR[dR < 1e-8] = 1e-8
     dY = finiteDiff(v0,2,1,hY)
@@ -164,57 +164,71 @@ while FC_Err > tol and epoch < max_iter:
 
     # update control
     if epoch == 0:
+        fraction = 0.5
+    else:
+        fraction = 0.5
         # i_d = np.zeros(K_mat.shape)
         # i_g = np.zeros(R_mat.shape)
-        consumption_0 = A_d * (1 - R_mat) + A_g * R_mat
-        consumption = consumption_0
-        mc = delta / consumption
-        i_d = 1 -  mc / (dK - R_mat *  dR)
-        i_d /= phi_d
-        i_d[i_d < 0] = 0
-        # i_d[i_d > A_d] = A_d
-        i_g = 1 - mc / (dK + (1 - R_mat) * dR)
-        i_g /= phi_g
-        # i_g[i_g < 0] = 0
-        # i_g[i_g > A_g] = A_g
-        q = delta * ((A_g * R_mat - i_g * R_mat) + (A_d * (1 - R_mat) - i_d * (1 - R_mat))) ** (-1)
+        # consumption_0 = A_d * (1 - R_mat) + A_g * R_mat
+        # consumption = consumption_0
+        # mc = delta / consumption
+        # i_d = 1 -  mc / (dK - R_mat *  dR)
+        # i_d /= phi_d
+        # i_d[i_d < 0] = 0
+        # # i_d[i_d > A_d] = A_d
+        # i_g = 1 - mc / (dK + (1 - R_mat) * dR)
+        # i_g /= phi_g
+        # # i_g[i_g < 0] = 0
+        # # i_g[i_g > A_g] = A_g
+        # q = delta * ((A_g * R_mat - i_g * R_mat) + (A_d * (1 - R_mat) - i_d * (1 - R_mat))) ** (-1)
 
-    else:
-     # updating controls
-        Converged = 0
-        num = 0
+    # else:
 
-        while Converged == 0 and num < 5000:
-            i_g_1 = (1 - q / (dR * (1 - R_mat) + dK )) / phi_g
-            i_d_1 = (1 - q / (-dR * R_mat + dK)) / phi_d
-            i_d_1[i_d_1 >= A_d - 1e-15] = A_d - 1e-15
-            i_g_1[i_g_1 >= A_g - 1e-15] = A_g - 1e-15
+    mc = 1 / ((A_d - id_star) * (1 - R_mat) + (A_g - ig_star) * R_mat)
+    i_d_new = (1 - mc / (-dR * R_mat + dK)) / phi_d
+    i_d = i_d_new * fraction + id_star * (1 - fraction)
+    i_g_new = (1 - mc / (dR * (1 - R_mat) + dK)) / phi_g
+    i_g = i_g_new * fraction + ig_star * (1 - fraction)
+     # # updating controls
+        # Converged = 0
+        # num = 0
 
-            if np.max(abs(i_g_1 - i_g)) <= 1e-12 and np.max(abs(i_d_1 - i_d)) <= 1e-12:
-                Converged = 1
-                i_g = i_g_1
-                i_d = i_d_1
-            else:
-                i_g = i_g_1
-                i_d = i_d_1
-                q = delta * (
-                    (A_g * R_mat - i_g * R_mat) + (A_d * (1-R_mat) - i_d * (1-R_mat))) ** (-1) * fraction + (1 - fraction) * q
-            num += 1
-            # print(num)
-            # print(np.max(abs(i_g_1 - i_g)) , np.max(abs(i_d_1 - i_d)))
+        # while Converged == 0 and num < 5000:
+            # i_g_1 = (1 - q / (dR * (1 - R_mat) + dK )) / phi_g
+            # i_d_1 = (1 - q / (-dR * R_mat + dK)) / phi_d
+            # # i_d_1[i_d_1 >= A_d - 1e-15] = A_d - 1e-15
+            # # i_g_1[i_g_1 >= A_g - 1e-15] = A_g - 1e-15
+
+            # if np.max(abs(i_g_1 - i_g)) <= 1e-12 and np.max(abs(i_d_1 - i_d)) <= 1e-12:
+                # Converged = 1
+                # i_g = i_g_1
+                # i_d = i_d_1
+            # else:
+                # i_g = i_g_1
+                # i_d = i_d_1
+                # q = delta * (
+                    # (A_g * R_mat - i_g * R_mat) + (A_d * (1-R_mat) - i_d * (1-R_mat))) ** (-1) * fraction + (1 - fraction) * q
+            # num += 1
+            # # print(num)
+        # print(np.max(abs(i_g_1 - i_g)) , np.max(abs(i_d_1 - i_d)))
 
         # print(diff)
     # i_d[i_d >= A_d] = A_d - 1e-15
     # i_g[i_g >= A_g] = A_g - 1e-8
     print(np.min(i_d), np.min(i_g))
+    print(np.max(i_d), np.max(i_g))
     # i_d = np.zeros(K_mat.shape)
     # i_g = np.zeros(R_mat.shape)
-    # i_d[i_d <= 1e-15] = 1e-15
-    # i_g[i_g <= 1e-15] = 1e-15
+    # i_d[i_d <= -1 + 1e-15] = -1 + 1e-15
+    # i_g[i_g <= -1 + 1e-15] = -1 + 1e-15
+    # i_d[i_d >= 1 - 1e-15] = 1 - 1e-15
+    # i_g[i_g >= 1 - 1e-15] = 1 - 1e-15
     # i_d[i_d < 0] = 0
     # i_g[i_g < 0] = 0
+    print(np.min(i_d), np.min(i_g))
+    print(np.max(i_d), np.max(i_g))
     consumption = (A_d -i_d) * (1 - R_mat) + (A_g - i_g) * R_mat
-    consumption[consumption < 1e-16] = 1e-16
+    consumption[consumption < 1e-18] = 1e-18
     # i_d[i_d >= A_d] = A_d - 1e-8
     # i_g[i_g >= A_g] = A_g - 1e-8
     # Step (2), solve minimization problem in HJB and calculate drift distortion
@@ -278,6 +292,7 @@ while FC_Err > tol and epoch < max_iter:
     B_y = beta_f * eta * A_d * np.exp(K_mat) * (1 - R_mat)
 
     D = delta * np.log(consumption) + delta * K_mat  - (gamma_1 + gamma_2 * Y_mat + gamma_3 * (Y_mat -2) * (Y_mat > 2))* beta_f * eta * A_d * np.exp(K_mat) * (1 - R_mat)  - 0.5 * (gamma_2 + gamma_3 * (Y_mat > 0.2)) * (varsigma * eta * A_d * np.exp(K_mat) * (1 - R_mat) )**2
+    D /= delta
 
     if linearsolver == 'eigen' or linearsolver == 'both':
         start_eigen = time.time()
@@ -399,7 +414,7 @@ while FC_Err > tol and epoch < max_iter:
         # create linear solver
         start_ksp = time.time()
         ksp.setOperators(petsc_mat)
-        ksp.setTolerances(rtol=1e-12)
+        ksp.setTolerances(rtol=1e-16)
         ksp.solve(petsc_rhs, x)
         # petsc_mat.destroy()
         petsc_rhs.destroy()
@@ -437,9 +452,6 @@ if reporterror:
     print("Fianal epoch {:d}: PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch -1, PDE_Err, FC_Err))
 print("--- Total running time: %s seconds ---" % (time.time() - start_time))
 
-if write_test:
-    f.write("Fianal epoch {:d}: PDE Error: {:.10f}; False Transient Error: {:.10f}\n" .format(epoch -1, PDE_Err, FC_Err))
-    f.write("--- Total running time: %s seconds ---\n" % (time.time() - start_time))
 
 # exit()
 
