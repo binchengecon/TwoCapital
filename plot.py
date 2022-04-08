@@ -6,30 +6,42 @@ import matplotlib.pyplot as plt
 
 mpl.rcParams["savefig.bbox"] = "tight"
 
-res = pd.read_csv("TestNorm.csv", header=0)
+res = pd.read_csv("eigen--1.0-False-8-23-39.csv", header=0)
 plt.figure()
-plt.title("$\epsilon$ = 0.3, fraction = 1")
+plt.title("$\epsilon$ = 0.3, fraction = 0.1")
 plt.plot(res["epoch"], res["A_norm"])
 plt.xlabel("Episode")
 plt.ylabel("Norm of A")
 
 plt.figure()
-plt.title("$\epsilon$ = 0.3, fraction = 1")
+plt.title("$\epsilon$ = 0.3, fraction = 0.1")
 plt.plot(res["epoch"], res["b_norm"])
 plt.xlabel("Episode")
 plt.ylabel("Norm of b")
 
 plt.figure()
-plt.title("$\epsilon$ = 0.3, fraction = 1")
+plt.title("$\epsilon$ = 0.3, fraction = 0.1")
 plt.plot(res["epoch"], res["residual norm"])
 plt.xlabel("Episode")
 plt.ylabel("Residual norm")
 
 plt.figure()
-plt.title("$\epsilon$ = 0.3, fraction = 1")
+plt.title("$\epsilon$ = 0.3, fraction = 0.1")
 plt.plot(res["epoch"], res["iterations"])
 plt.xlabel("Episode")
 plt.ylabel("Number of iterations")
+
+plt.figure()
+plt.title("$\epsilon$ = 0.3, fraction = 0.1")
+plt.plot(res["epoch"], res["PDE_Err"])
+plt.xlabel("Episode")
+plt.ylabel("PDE error")
+
+plt.figure()
+plt.title("$\epsilon$ = 0.3, fraction = 0.1")
+plt.plot(res["epoch"], res["FC_Err"])
+plt.xlabel("Episode")
+plt.ylabel("False transient error")
 
 with open("data/res-eigen_2-12-53", "rb") as file:
     data = pickle.load(file)
