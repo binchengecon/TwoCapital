@@ -1,1 +1,0 @@
-epoch,iterations,residual norm,PDE_Err,FC_Err,A_rank,A_norm,A_cond,b_rank,b_norm,b_cond

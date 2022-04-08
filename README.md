@@ -110,12 +110,8 @@ available solution:
 - `eigen` for `SolveLinSys`
 
 
-`post-jump-test.py` corresponds to section 1.1 in the`write-up.pdf`, with normalized capitals
+`./post-jump/post-jump-test.py` corresponds to section 1.1 in the`write-up.pdf`, with normalized capitals
 
-`post-jump-change.py` corresponds to section 1.2.2 in `write-up.pdf` with state variables log K, R, Y
+`./post-jump/post-jump-change.py` corresponds to section 1.2.2 in `write-up.pdf` with state variables log K, R, Y
 
 
-
-Errors
-
-<img src="./fc-err.png" />

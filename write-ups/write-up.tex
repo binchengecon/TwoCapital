@@ -5,7 +5,7 @@
 \usepackage{geometry}
 \geometry{verbose,tmargin=1in,bmargin=1in,lmargin=1in,rmargin=1in}
 \usepackage{float}
-\usepackage{amsmath}
+\usepackage{amsmath, amssymb}
 \PassOptionsToPackage{normalem}{ulem}
 \usepackage{ulem}
 \usepackage{babel}
@@ -19,10 +19,10 @@
 
 \begin{document}
 
-\subsection*{A Model With Clean and Dirty Capital Stocks and and R\&D in Green Innovation-}
+\subsection*{A Model With Clean and Dirty Capital Stocks and and R\&D in Green Innovation}
 
 Assume there are two capital sectors, each with AK production technology
-($Y_{i}=A_{i}K_{i},\,i\ =d, g)$ and each with its own capital stock
+($Y_{i}=A_{i}K_{i},\,i\ =d, g$) and each with its own capital stock
 that evolves with quadratic adjustments costs and Brownian shocks
 as follows:
 
@@ -39,16 +39,18 @@ We also assume there is R\&D investment that leads to an increased arrival rate 
 \end{align*}
 
 
-The key di erence between the sectors is that production from Sector 1 generates emissions. As a result,the evolution of atmospheric temperature is give by the Matthews Approximation, so that temperature $Y_t$ and cumulative carbon emissions are given by
+The key difference between the sectors is that production from Sector 1 generates emissions. As a result,the evolution of atmospheric temperature is give by the Matthews Approximation, so that temperature $Y_t$ and cumulative carbon emissions are given by
 
 \begin{align*}
 	\dif Y_t = E_t ( \beta_f \dif t + \varsigma \dif W)
 \end{align*}
 
 where  $\beta_f$ is the Matthews parameter and  $\eta$  is the scaling factor converting Sector $d$ output $ A_dK_d$ into emissions such that 
+
 $$
 E_t =  \eta A_dK_d
 $$
+
 Output can be used in for consumption, investment in either capital stock, or for R\&D into improving the productivity of Sector g :
 
 \begin{align*}
@@ -75,7 +77,10 @@ Taking these pieces together we get the HJB equation
 \begin{align*}
 \delta V(K_{d},K_{g},\lambda,Y,\log N ) & =\max_{i_{g},i_{d}, i_{\lambda}}\delta \log(A_dK_d - i_dK_d + A_gK_g - i_gK_g  - i_\lambda \lambda ) -\delta \log N\\
  & +\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\}V_{d}K_{d}+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\}V_{g}K_{g}+\frac{\sigma_{d}^{2}K_{d}^{2}}{2}V_{dd}+\frac{\sigma_{g}^{2}K_{g}^{2}}{2}V_{gg}\\
- & +\beta_{f}E_{d}V_{Y}+\frac{1}{2}\varsigma^{2}E_{d}^{2}V_{YY}+[\{\gamma_{1}+\gamma_{2}Y_{t}\}\beta_{f}E_{d}+\frac{\gamma_2}{2} \varsigma^{2}E_{d}^{2}]V_{\log N}+\frac{\varsigma^{2}E_{d}^{2}}{2}V_{\log N\log N}\\
+ & +\beta_{f}E_{d}V_{Y}+\frac{1}{2}\varsigma^{2}E_{d}^{2}V_{YY}+[\{\gamma_{1}+\gamma_{2}Y_{t} + \gamma_3 (Y_t - 2) \mathbf
+ {I} \{Y_t > 2
+ \}\}\beta_{f}E_{d}\\
+ &+\frac{\gamma_2 + \gamma_3 \mathbf{I}\{Y_t > 2 \} }{2} \varsigma^{2}E_{d}^{2}]V_{\log N}+\frac{\varsigma^{2}E_{d}^{2}}{2}V_{\log N\log N}\\
  & +(\varphi i_{\lambda} - \alpha_\lambda)\lambda V_{\lambda}+\frac{(\sigma_{\lambda } \lambda)^{2}}{2}V_{\lambda \lambda}+\lambda  \left( V (K_d, K_g, \lambda, Y, \log N; A_g') - V (K_d, K_g, \lambda, Y, \log N; A_g) \right)
 \end{align*}
 
@@ -97,13 +102,14 @@ Using the fact that $\varphi V_{\lambda} = \delta (A_dK_d - i_dK_d + A_gK_g - i_
 \end{align*}
 
 
-We can analytically simplify out $\log Nt$ to get a simpli ed HJB
+We can analytically simplify out $\log N_t$ to get a simplified HJB
 
 \begin{align*}
 \delta v(K_{d},K_{g}, \lambda,Y) & =\max_{i_{g},i_{d}, i_\lambda }\delta \log(A_dK_d - i_dK_d + A_gK_g - i_gK_g  - i_\lambda \lambda ) \\
- & +\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\}v_{d}K_{d}+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\}v_{g}K_{g}+\frac{\sigma_{d}^{2}K_{d}^{2}}{2}v_{dd}+\frac{\sigma_{g}^{2}K_{g}^{2}}{2}v_{gg}\\
- & +\beta_{f}E_{d}v_{Y}+\frac{1}{2}\varsigma^{2}E_{d}^{2}v{}_{YY} - [\{\gamma_{1}+\gamma_{2}Y_{t}\}\beta_{f}E_{d}+\frac{\gamma_2}{2}\varsigma^{2}E_{d}^{2}]\\
- & +(-\alpha_{\lambda}  + \varphi i_\lambda) \lambda v_{\lambda}+\frac{(\sigma_{\lambda} \lambda)^2}{2}v_{\lambda\lambda}+\lambda \left( v (K_d, K_g, \lambda, Y; A_g') - v (K_d, K_g, \lambda, Y; A_g) \right)
+	&+\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\}v_{d}K_{d}+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\}v_{g}K_{g}+\frac{\sigma_{d}^{2}K_{d}^{2}}{2}v_{dd}+\frac{\sigma_{g}^{2}K_{g}^{2}}{2}v_{gg}\\
+	& +\beta_{f}E_{d}v_{Y}+\frac{1}{2}\varsigma^{2}E_{d}^{2}v_{YY}\\
+	&-[\{\gamma_{1}+\gamma_{2}Y_{t} + \gamma_3 (Y_t - 2) \mathbf{I} \{Y_t > 2\}\}\beta_{f}E_{d}+\frac{\gamma_2 + \gamma_3 \mathbf{I}\{Y_t > 2 \} }{2} \varsigma^{2}E_{d}^{2}]\\
+	& +(\varphi i_{\lambda} - \alpha_\lambda)\lambda v_{\lambda}+\frac{(\sigma_{\lambda } \lambda)^{2}}{2}v_{\lambda \lambda}+\lambda  \left( v (K_d, K_g, \lambda, Y; A_g') - v (K_d, K_g, \lambda, Y; A_g) \right)
 \end{align*}
 
 FOC
@@ -127,7 +133,13 @@ We solve post jump HJB:
 \begin{align*}
 	\delta v(K_{d}, K_{g}, Y; A_g') & =\max_{i_{g},i_{d} }\delta \log(A_dK_d - i_dK_d + A_g'K_g - i_gK_g  ) \\
 	& +\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\}v_{d}K_{d}+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\}v_{g}K_{g}+\frac{\sigma_{d}^{2}K_{d}^{2}}{2}v_{dd}+\frac{\sigma_{g}^{2}K_{g}^{2}}{2}v_{gg}\\
-	& +\beta_{f} (\eta A_d K_d )v_{Y}+\frac{1}{2}\varsigma^{2}(\eta A_d  K_d)^{2}v{}_{YY} - [\{\gamma_{1}+\gamma_{2}Y_{t}\}\beta_{f}(\eta A_d K_d)+\frac{\gamma_2}{2}\varsigma^{2}(\eta A_d K_d)^{2}]
+	& +\beta_{f} (\eta A_d K_d )v_{Y}+\frac{1}{2}\varsigma^{2}(\eta A_d  K_d)^{2}v{}_{YY} - [\{\gamma_{1}+\gamma_{2}Y_{t}+ \gamma_3 (Y_t - 2) \mathbf
+ {I} \{Y_t > 2
+ \}\}\beta_{f}(\eta A_d K_d)]\\
+ &
+ -\frac{\gamma_2 + + \gamma_3 \mathbf
+ {I} \{Y_t > 2
+ \}}{2}[ \varsigma^{2}(\eta A_d K_d)^{2}]
 \end{align*}
 
 denote
@@ -163,7 +175,9 @@ FOC
 \end{align*}
 
 \begin{align*}
-	\dif L = \dif (\log K_g - \log K_d) = \left( (\alpha_g + i_d  - \frac{\phi_{g}}{2}i_g^2) -  (\alpha + i_d - \frac{\phi_d}{2} i_d^2)\right) \dif t  + (\sigma_g - \sigma_d) \dif W
+	\dif L =& \dif (\log K_g - \log K_d) = \left( (\alpha_g + i_g  - \frac{\phi_{g}}{2}i_g^2 - \frac{|\sigma_g|^2}{2}) -  (\alpha_d + i_d - \frac{\phi_d}{2} i_d^2 - \frac{|\sigma_d|^2}{2})\right) \dif t  + (\sigma_g - \sigma_d) \dif W\\
+	\dif \exp(L) =&  \exp(L) \left( \dif L\right) + \frac{\exp(L)}{2} |\sigma_d - \sigma_g|^2 \dif t\\
+	\dif R = 
 \end{align*}
 
 \begin{align*}
@@ -183,6 +197,10 @@ FOC
 
 
 \subsubsection{$\log K, R, Y$}
+
+$\log K \in [4., 8.5] $, $R \in [0.14, 0.99]$ and $Y \in [0., 3.]$
+
+
 \begin{align*}
 	\delta v(\log K, R,  Y; A_g') & =\max_{i_{g},i_{d} }\delta \log((A_d - i_d) (1 - R) + (A_g' - i_g)R  ) + \delta \log K \\
 	& +\left(\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\} (1 - R)+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\} R  - \frac{\mid\sigma_{d}(1 - R)+ \sigma_g R \mid
@@ -206,66 +224,38 @@ FOC
 \end{align*}
 
 
-\subsection{test results}
-
-\subsubsection{Preliminary results: try $i_d = i_g = 0$, no optimization}
-
-\begin{figure}[H]
-	\centering
-	\begin{subfigure}{0.45\textwidth}
-		\includegraphics[width=\textwidth]{../figures/v-Kd.pdf}
-	\end{subfigure}
-\hspace{\fill}
-\begin{subfigure}{0.45\textwidth}
-	\includegraphics[width=\textwidth]{../figures/v-Kg.pdf}
-\end{subfigure}
-\begin{subfigure}{0.45\textwidth}
-	\includegraphics[width=\textwidth]{../figures/v-Y.pdf}
-\end{subfigure}
-\caption{Results for value function, $i_d= 0, i_g=0$}
-\end{figure}
-
-\subsubsection{steady state}
-try set
-\begin{align*}
-	\alpha_d + i_d - \frac{\phi_d}{2} i_d^2 = 0 \Rightarrow i_d^* = 0.022\\
-	\alpha_g + i_g - \frac{\phi_g}{2} i_g^2 = 0 \Rightarrow i_g^* = 0.022
-\end{align*}
-
-
-
-\begin{figure}[H]
-	\centering
-	\begin{subfigure}{0.4\textwidth}
-		\includegraphics[width=\textwidth]{../figures/v-Kd-stat.pdf}
-	\end{subfigure}
-	\hspace{\fill}
-	\begin{subfigure}{0.4\textwidth}
-		\includegraphics[width=\textwidth]{../figures/v-Kg-stat.pdf}
-	\end{subfigure}
-	\begin{subfigure}{0.4\textwidth}
-		\includegraphics[width=\textwidth]{../figures/v-Y-stat.pdf}
-	\end{subfigure}
-	\caption{Results for value function,  $i_d^* = 0.022, i_g^*=0.022$}
-\end{figure}
-
-%
-%\begin{figure}[H]
-%	\centering
-%	\begin{subfigure}{0.4\textwidth}
-%		\includegraphics[width=\textwidth]{../figures/ig-Kd.pdf}
-%	\end{subfigure}
-%	\hspace{\fill}
-%	\begin{subfigure}{0.4\textwidth}
-%		\includegraphics[width=\textwidth]{../figures/ig-Kg.pdf}
-%	\end{subfigure}
-%	\begin{subfigure}{0.4\textwidth}
-%		\includegraphics[width=\textwidth]{../figures/ig-Y.pdf}
-%	\end{subfigure}
-%	\caption{Results for green investment}
-%\end{figure}
 
 \section{Pre jump}
+
+State variables $\log K, R, Y, \lambda$, HJB, controls $i_d$, $i_g$ and $i_\lambda / K (\tilde{i_\lambda})$:
+
+\begin{align*}
+	\delta v(\log K, R,  Y, \lambda; A_g) & =\max_{i_{g},i_{d} }\delta \log((A_d - i_d) (1 - R) + (A_g - i_g)R  -  \tilde{i}_\lambda \lambda ) + \delta \log K \\
+	& +\left(\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\} (1 - R)+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\} R  - \frac{\mid\sigma_{d}(1 - R)\mid ^2+ \mid \sigma_g R \mid
+		^2}{2}\right) v_k  \\
+	&+\frac{\mid \sigma_{d} (1 - R)\mid^2 + \mid \sigma_g R\mid^2}{2}v_{kk}\\
+	&+ \left( (\alpha_g + i_g  - \frac{\phi_{g}}{2}i_g^2) -  (\alpha_d + i_d - \frac{\phi_d}{2} i_d^2)\right) \left[ R(1 - R)\right] v_r \\
+	&+ \frac{1}{2} R^2 (1 - R)^2 \left[\sigma_d^2  + \sigma_g^2\right] v_{rr}\\
+	& +\beta_{f} (\eta A_d (1 - R) K )v_{Y}+\frac{1}{2}\varsigma^{2}(\eta A_d  (1 - R) K)^{2}v{}_{YY} \\
+	&- [\{\gamma_{1}+\gamma_{2}Y_{t}\}\beta_{f}(\eta A_d(1 - R)K)+\frac{\gamma_2}{2}\varsigma^{2}(\eta A_d (1 - R) K)^{2}]\\
+	& +(\varphi \tilde{i}_{\lambda} K - \alpha_\lambda)\lambda v_{\lambda}+\frac{(\sigma_{\lambda } \lambda)^{2}}{2}v_{\lambda \lambda}+\lambda  \left( v^{\text{post}} (\log K, R, Y; A_g') - v (\log K, R, Y, \lambda; A_g) \right)
+\end{align*}
+
+FOC
+
+\begin{align*}
+	mc =& \delta ((A_d - i_d) (1 - R) + (A_g - i_g)R - \tilde{i}_\lambda \lambda  )^{-1}\\
+	mc =& K \varphi v_\lambda
+\end{align*}
+
+\begin{align*}
+	mc  =& (1 - \phi_d i_d) \left(( v_k - R v_r \right) &\Rightarrow i_d &= \frac{1}{\phi_d} \left[ 1 - \frac{K \varphi v_\lambda}{v_k  - R v_r }\right] \\
+	mc =& (1 - \phi_g i_g) \left(v_k + (1 - R) v_l\right) &\Rightarrow i_g &= \frac{1}{\phi_g}\left[1 - \frac{K \varphi v_\lambda}{v_k + (1 - R) v_r}\right]
+\end{align*}
+
+\begin{align*}
+	\tilde{i}_\lambda = \frac{1}{\lambda} \left( (A_d - (\frac{1}{\phi_d} - K \frac{\varphi}{\phi_d}\frac{v_\lambda}{v_k - R v_r}) ) K_d + (A_g - (\frac{1}{\phi_g} - K\frac{\varphi}{\phi_g}\frac{v_\lambda}{v_k + (1 - R)v_r }) ) K_g - \frac{\delta}{K \varphi v_\lambda} \right)
+\end{align*}
 
 \appendix
 \section{State variables}
@@ -273,8 +263,8 @@ Capital:
 \begin{align*}
 	K_d \in& [0, 10, 000]\\
 	K_g \in& [0, 10,000]\\
-	\lambda \in& [0, 0.1]\\
-	Y \in& [0, 4]
+	Y \in& [0, 4]\\
+		\lambda \in& [0, 0.1]
 \end{align*}
 
 \section{Parameters}
