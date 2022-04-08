@@ -27,7 +27,7 @@ def _hjb_iteration(
     dvdyy = finiteDiff(v0, 1, 2, dy)
 
     temp = alpha - i - alpha * vartheta_bar * (1 - e / (alpha * lambda_bar * np.exp(k_mat))) ** theta
-    mc = 1 / temp
+    mc = delta / temp
 
     i_new =  (1 - mc / dvdk) / kappa
 
@@ -35,8 +35,8 @@ def _hjb_iteration(
 
     # Method 1 : Solve second order equation
     if vartheta_bar != 0 and theta == 3:
-        G = dvdy  - 1./ delta * d_Delta
-        F = dvdyy - 1./ delta * dd_Delta
+        G = dvdy  - d_Delta
+        F = dvdyy - dd_Delta
         temp = mc * vartheta_bar * theta / (lambda_bar * np.exp(k_mat))
         a = temp / (alpha * lambda_bar * np.exp(k_mat)) ** 2
         b = - 2 * temp / (alpha * lambda_bar * np.exp(k_mat)) + F  * sigma_y ** 2
@@ -80,7 +80,7 @@ def _hjb_iteration(
 
     consumption = alpha - i - alpha * vartheta_bar * ( 1 - e /(alpha * lambda_bar * np.exp(k_mat)))**theta
     consumption[consumption <= 1e-16] = 1e-16
-    D = np.log(consumption) + k_mat - 1./ delta * (d_Delta * np.sum(pi_c * theta_ell, axis=0) * e + .5 * dd_Delta * sigma_y ** 2 * e ** 2) + xi_a * entropy
+    D = delta * np.log(consumption) + delta * k_mat - (d_Delta * np.sum(pi_c * theta_ell, axis=0) * e + .5 * dd_Delta * sigma_y ** 2 * e ** 2) + xi_a * entropy
 
     h = - G * e * sigma_y / xi_b
 
@@ -98,16 +98,16 @@ def hjb_post_damage_post_tech(
     dy = y_grid[1] - y_grid[0]
     (k_mat, y_mat) = np.meshgrid(k_grid, y_grid, indexing = 'ij')
     
-    a_i = kappa / delta
-    b_i = - (1. + alpha * kappa) / delta
-    c_i = alpha / delta  - 1.
+    a_i = kappa
+    b_i = - (1. + alpha * kappa)
+    c_i = alpha  - delta
     i = (- b_i - np.sqrt(b_i ** 2 - 4 * a_i * c_i)) / (2 * a_i)
 
     i = np.ones_like(k_mat) * i
     e = np.zeros_like(k_mat)
 
     if v0 is None:
-        v0 =  1. /delta * k_mat - y_mat ** 2
+        v0 =  k_mat - delta * y_mat ** 2
 
     d_Delta  = gamma_1 + gamma_2 * y_mat + gamma_3 * (y_mat > y_bar) * (y_mat - y_bar)
     dd_Delta = gamma_2 + gamma_3 * (y_mat > y_bar)
@@ -144,12 +144,14 @@ def hjb_post_damage_post_tech(
 
 #     print("Converged. Total iteration %s: LHS Error: %s; RHS Error %s" % (count, lhs_error, rhs_error))
 
-    res = {'v': v,
-            "k": k_grid,
-            'y': y_grid,
-           'e': e,
-           'i': i,
-           'pi_c': pi_c,
-           'h': h}
+    res = {
+        'v': v,
+        'k': k_grid,
+        'y': y_grid,
+        'e': e,
+        'i': i,
+        'pi_c': pi_c,
+        'h': h,
+        }
 
     return res
