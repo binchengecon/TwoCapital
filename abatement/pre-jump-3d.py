@@ -270,6 +270,22 @@ while FC_Err > tol and epoch < max_iter:
         x_new[x_new < -1000] = - 1000
         x_new[x_new > 1 - 1e-16] = 1 - 1e-16
 
+     elif psi_1 != 1 and vartheta_bar != 0 and theta == 3:
+        
+        temp = b ** 2 - 4 * a * c
+        temp = temp * (temp > 0)
+        root1 = (- b - np.sqrt(temp)) / (2 * a)
+        root2 = (- b + np.sqrt(temp)) / (2 * a)
+        if root1.all() > 0 :
+            e_new = root1
+        else:
+            e_new = root2
+        temp = alpha - i - alpha * vartheta_bar * (1 - e / (alpha * lambda_bar * np.exp(k_mat))) ** theta - x
+        temp[temp < 1e-16] = 1e-16
+        mc = 1. / temp
+        i_new = - (mc / dvdk - 1) / kappa
+        x_new = (mc / dvdI * psi_0 * psi_1)**(1 / (psi_1 - 1))
+
     ii = i_new * fraction + i_star * (1 - fraction)
     ee = e_new * fraction + e_star * (1 - fraction)
     xx = x_new * fraction + x_star * (1 - fraction)
