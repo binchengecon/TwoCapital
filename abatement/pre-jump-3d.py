@@ -175,6 +175,8 @@ max_iter = 400000
 
 # exit()
 
+dGamma = gamma_1 + gamma_2 * Y_mat + gamma_3 * (Y_mat - y_bar) * (Y_mat > y_bar)
+ddGamma = gamma_2 + gamma_3 * (Y_mat > y_bar)
 while FC_Err > tol and epoch < max_iter:
     print("-----------------------------------")
     print("---------Epoch {}---------------".format(epoch))
@@ -198,8 +200,6 @@ while FC_Err > tol and epoch < max_iter:
     ddX3 = finiteDiff_3D(v0,2,2,hX3)
 
 
-    dGamma = gamma_1 + gamma_2 * Y_mat + gamma_3 * (Y_mat - y_bar) * (Y_mat > y_bar)
-    ddGamma = gamma_2 + gamma_3 * (Y_mat > y_bar)
 
     # if epoch > 2000:
         # epsilon = 0.1
@@ -270,8 +270,18 @@ while FC_Err > tol and epoch < max_iter:
         x_new[x_new < -1000] = - 1000
         x_new[x_new > 1 - 1e-16] = 1 - 1e-16
 
-     elif psi_1 != 1 and vartheta_bar != 0 and theta == 3:
-        
+    elif psi_1 != 1 and vartheta_bar != 0 and theta == 3:
+        G = dY -  dG
+        F = ddY - ddG
+        j_star = alpha * vartheta_bar * (1 - e_star / (alpha * lambda_bar * np.exp(K_mat)))**theta
+        j_star[j_star <= 1e-16] = 1e-16
+        consumption = alpha - i_star - j_star - x_star
+        consumption[consumption <= 1e-16] = 1e-16
+        mc  = delta / consumption
+        temp = mc * vartheta_bar * theta / (lambda_bar * np.exp(K_mat))
+        a = temp / (alpha * lambda_bar * np.exp(K_mat))**(theta - 1)
+        b = - 2 * temp / (alpha * lambda_bar * np.exp(K_mat)) +  F * sigma_y**2
+        c = temp + G * np.sum(theta_ell * pi_c, axis=0)
         temp = b ** 2 - 4 * a * c
         temp = temp * (temp > 0)
         root1 = (- b - np.sqrt(temp)) / (2 * a)
@@ -280,11 +290,8 @@ while FC_Err > tol and epoch < max_iter:
             e_new = root1
         else:
             e_new = root2
-        temp = alpha - i - alpha * vartheta_bar * (1 - e / (alpha * lambda_bar * np.exp(k_mat))) ** theta - x
-        temp[temp < 1e-16] = 1e-16
-        mc = 1. / temp
         i_new = - (mc / dvdk - 1) / kappa
-        x_new = (mc / dvdI * psi_0 * psi_1)**(1 / (psi_1 - 1))
+        x_new = (mc / (dL * psi_0 * psi_1) * np.exp(psi_1 * (L_mat - K_mat)) )**(1 / (psi_1 - 1))
 
     ii = i_new * fraction + i_star * (1 - fraction)
     ee = e_new * fraction + e_star * (1 - fraction)
@@ -295,9 +302,18 @@ while FC_Err > tol and epoch < max_iter:
     # ii = np.zeros(K_mat.shape)
     # ee = np.zeros(K_mat.shape)
     # xx = np.zeros(K_mat.shape)
-    # gg = np.exp(1 / xi_g * (v0 - V_post))
-    # gg[gg <=1e-16] = 1e-16
-    consumption = alpha - ii - alpha * vartheta_bar * (1 - ee / (alpha * lambda_bar * np.exp(K_mat)))**theta - xx
+    log_pi_c_ratio = - G * ee * theta_ell / xi_a
+    pi_c_ratio = log_pi_c_ratio - np.max(log_pi_c_ratio)
+    pi_c = np.exp(pi_c_ratio) * pi_c_o
+    pi_c = (pi_c <= 0) * 1e-16 + (pi_c > 0) * pi_c
+    pi_c = pi_c / np.sum(pi_c, axis=0)
+    entropy = np.sum(pi_c * (np.log(pi_c) - np.log(pi_c_o)), axis=0)
+    gg = np.exp(1 / xi_g * (v0 - V_post))
+    gg[gg <=1e-16] = 1e-16
+    gg[gg >= 1] = 1
+    jj =  alpha * vartheta_bar * (1 - ee / (alpha * lambda_bar * np.exp(K_mat)))**theta
+    jj[jj <= 1e-16] = 1e-16
+    consumption = alpha - ii - jj - xx
     consumption[consumption <= 1e-16] = 1e-16
     # Step (2), solve minimization problem in HJB and calculate drift distortion
     # See remark 2.1.3 for more details
@@ -306,7 +322,7 @@ while FC_Err > tol and epoch < max_iter:
         dVec = np.array([hX1, hX2, hX3])
         increVec = np.array([1, nX1, nX1 * nX2],dtype=np.int32)
         # These are constant
-        A   = - delta * np.ones(K_mat.shape)
+        A   = - delta * np.ones(K_mat.shape) - np.log(L_mat) * gg
         C_1 = 0.5 * sigma_k**2 * np.ones(K_mat.shape)
         C_2 = 0.5 * sigma_y**2 * ee**2
         C_3 = 0.5 * sigma_g**2 * np.ones(K_mat.shape)
@@ -355,10 +371,10 @@ while FC_Err > tol and epoch < max_iter:
     # Step (6) and (7) Formulating HJB False Transient parameters
     # See remark 2.1.4 for more details
     B_1 = mu_k + ii - 0.5 * kappa * ii**2 - 0.5 * sigma_k**2
-    B_2 = beta_f * ee
+    B_2 = np.sum(theta_ell * pi_c, axis=0) * ee
     B_3 = - zeta + psi_0 * (xx * np.exp(K_mat - L_mat))**psi_1 - 0.5 * sigma_g**2
 
-    D = np.log(consumption) + K_mat  - 1./ delta * dGamma * beta_f * ee  - 0.5 / delta * ddGamma * sigma_y**2 * ee**2 + np.exp(L_mat) * (V_post - v0)  #+ xi_g * np.exp(L_mat) * (1 - gg + gg * np.log(gg)) + np.exp(L_mat) * gg *(V_post)
+    D = delta * np.log(consumption) + delta * K_mat  - dG * np.sum(theta_ell * pi_c, axis=0) * ee  - 0.5 * ddG * sigma_y**2 * ee**2 + np.exp(L_mat) * V_post  + xi_g * np.exp(L_mat) * (1 - gg + gg * np.log(gg)) + np.exp(L_mat) * gg *(V_post)
 
     if linearsolver == 'eigen' or linearsolver == 'both':
         start_eigen = time.time()
