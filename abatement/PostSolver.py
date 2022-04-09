@@ -55,6 +55,11 @@ def _hjb_iteration(
         b = mc * temp + G * np.sum(pi_c * theta_ell, axis=0)
         e_new = - b / a
     else:
+        G = dvdy  - d_Delta
+        F = dvdyy - dd_Delta
+        temp = mc * vartheta_bar * theta / (lambda_bar * np.exp(k_mat))
+        b = - 2 * temp / (alpha * lambda_bar * np.exp(k_mat)) + F * sigma_y ** 2
+        c = temp + G * np.sum(pi_c * theta_ell, axis=0)
         e_new = c / (-b)
 
 #     # Method 2 : Fix a and solve

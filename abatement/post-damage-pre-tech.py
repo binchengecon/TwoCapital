@@ -51,8 +51,8 @@ lambda_bar   = 0.1206
 vartheta_bar = 0.0453
 
 gamma_1 = 1.7675/10000
-gamma_2 = .0022*2
-gamma_3 = 1/3
+gamma_2 = 0.0022 * 2
+gamma_3 = 0.3853 * 2
 
 
 theta_ell = pd.read_csv('../data/model144.csv', header=None).to_numpy()[:, 0]/1000.
@@ -61,7 +61,7 @@ sigma_y   = 1.2 * np.mean(theta_ell)
 beta_f    = 1.86 / 1000
 zeta      = 0.00
 psi_0     = 0.01
-psi_1     = 1
+psi_1     = 1/2
 sigma_g   = 0.016
 # Tech jump
 lambda_bar_first = lambda_bar / 2
@@ -72,18 +72,18 @@ vartheta_bar_second = 0.
 # Grids Specification
 # Coarse Grids
 K_min = 4.00
-K_max = 8.50
-hK    = 0.10
+K_max = 9.00
+hK    = 0.20
 K     = np.arange(K_min, K_max + hK, hK)
 nK    = len(K)
 Y_min = 0.
-Y_max = 3.
-hY    = 0.10 # make sure it is float instead of int
+Y_max = 5.
+hY    = 0.20 # make sure it is float instead of int
 Y     = np.arange(Y_min, Y_max + hY, hY)
 nY    = len(Y)
-L_min = - 4.
-L_max = - 1.
-hL    = 0.1
+L_min = - 5.
+L_max = - 0.
+hL    = 0.2
 L     = np.arange(L_min, L_max,  hL)
 nL    = len(L)
 
@@ -121,23 +121,26 @@ lowerLims = np.array([X1_min, X2_min, X3_min], dtype=np.float64)
 upperLims = np.array([X1_max, X2_max, X3_max], dtype=np.float64)
 
 
-model_args = (delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi_a, xi_b, gamma_1, gamma_2, gamma_3, y_bar, theta, lambda_bar_first, vartheta_bar_first)
+model_args = (delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi_a, xi_b, gamma_1, gamma_2, gamma_3, y_bar, theta, lambda_bar_second, vartheta_bar_second)
 
 
 # postjump = hjb_post_damage_post_tech(
-        # K, Y, model_args, v0=None,
+         # K, Y, model_args, v0=None,
         # epsilon=1., fraction=.2,tol=1e-8, max_iter=2000, print_iteration=True)
 
 # with open("./res_data/gamma/post_jump_" + filename, "wb") as f:
     # pickle.dump(postjump, f)
 
 # v_post = postjump["v"]
-# v_post = pickle.load(open("./res_data/gamma/post_jump_" + filename, "rb"))["v"]
-v_post = pickle.load(open("./res_data/gamma/post_jump_post_damage_0.3333333333333333_04-04:16", "rb"))["v"]
-v0 = np.zeros(K_mat.shape)
-for i in range(nL):
-    v0[:,:,i] = v_post
-V_post = v0
+# v_post = pickle.load(open("./res_data/gamma/techIII_carbon_neutral", "rb"))["v"]
+# res_post = pickle.load(open("./res_data/gamma/post_jump_post_damage_0.0_08-13:24", "rb"))
+res_post = pickle.load(open("./res_data/gamma/pre_jump_post_damage_0.7706_IItoIII", "rb"))
+V_post = res_post["v0"] # for I -> II
+v0 = V_post
+# v0 = np.zeros(K_mat.shape)
+# for i in range(nL):
+    # v0[:,:,i] = v_post
+# V_post = v0
 Guess = None
 pi_c = np.array([temp * np.ones_like(K_mat) for temp in pi_c_o])
 pi_c_o = pi_c.copy()
@@ -147,22 +150,32 @@ theta_ell = np.array([temp * np.ones(K_mat.shape) for temp in theta_ell])
 # Guess = pickle.load(open("./res_data/res-1-15-47", "rb"))
 # v0 = Guess["v0"]
 ############# step up of optimization
-# v0 = pickle.load(open("./res_data/gamma/pre_jump_post_damage_0_02-18:32", "rb"))["v0"]
-# v0 = 1 / delta * (K_mat + L_mat)  - 1 / delta * beta_f * Y_mat
+# Guess = pickle.load(open("./res_data/gamma/pre_jump_post_damage_0.0_08-16:09", "rb"))
+# v0 = Guess["v0"]
+
+# vartheta_bar = vartheta_bar_first
+# lambda_bar = lambda_bar_first
+# v0 = (K_mat + L_mat)  -  beta_f * Y_mat
 FC_Err   = 1
 epoch    = 0
 tol      = 1e-7
-epsilon  = 0.00000001
+epsilon  = 0.1
 fraction = 0.5
 
 i_star = np.zeros(K_mat.shape)
+# i_star = Guess["i_star"]
+i_star = res_post["i_star"]
 e_star = np.zeros(K_mat.shape)
+# e_star = Guess["e_star"]
+e_star = res_post["e_star"]
 x_star = np.zeros(K_mat.shape)
+# x_star = Guess["x_star"]
+x_star = res_post["x_star"]
 # csvfile = open("ResForRatio.csv", "w")
 # fieldnames = ["epoch", "iterations", "residual norm", "PDE_Err", "FC_Err"]
 # writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 # writer.writeheader()
-max_iter = 400000
+max_iter = 4000
 # file_iter = open("iter_c_compile.txt", "w")
 
 # res = solver_3d(K_mat, R_mat, Y_mat, # FOC_func, Coeff_func,
@@ -175,8 +188,8 @@ max_iter = 400000
 
 # exit()
 
-dGamma = gamma_1 + gamma_2 * Y_mat + gamma_3 * (Y_mat - y_bar) * (Y_mat > y_bar)
-ddGamma = gamma_2 + gamma_3 * (Y_mat > y_bar)
+dG  = gamma_1 + gamma_2 * Y_mat + gamma_3 * (Y_mat - y_bar) * (Y_mat > y_bar)
+ddG = gamma_2 + gamma_3 * (Y_mat > y_bar)
 while FC_Err > tol and epoch < max_iter:
     print("-----------------------------------")
     print("---------Epoch {}---------------".format(epoch))
@@ -222,7 +235,7 @@ while FC_Err > tol and epoch < max_iter:
     if epoch == 0:
         fraction = 1
     else:
-        fraction = epsilon
+        fraction = 0.01
 
     # else:
      # updating controls
@@ -290,7 +303,9 @@ while FC_Err > tol and epoch < max_iter:
             e_new = root1
         else:
             e_new = root2
-        i_new = - (mc / dvdk - 1) / kappa
+        e_new[e_new <= 1e-16] = 1e-16
+        i_new = - (mc / dK - 1) / kappa
+        i_new[i_new <= 1e-16] = 1e-16
         x_new = (mc / (dL * psi_0 * psi_1) * np.exp(psi_1 * (L_mat - K_mat)) )**(1 / (psi_1 - 1))
 
     ii = i_new * fraction + i_star * (1 - fraction)
@@ -322,7 +337,7 @@ while FC_Err > tol and epoch < max_iter:
         dVec = np.array([hX1, hX2, hX3])
         increVec = np.array([1, nX1, nX1 * nX2],dtype=np.int32)
         # These are constant
-        A   = - delta * np.ones(K_mat.shape) - np.log(L_mat) * gg
+        A   = - delta * np.ones(K_mat.shape) - np.exp(L_mat) * gg
         C_1 = 0.5 * sigma_k**2 * np.ones(K_mat.shape)
         C_2 = 0.5 * sigma_y**2 * ee**2
         C_3 = 0.5 * sigma_g**2 * np.ones(K_mat.shape)
