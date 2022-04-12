@@ -188,6 +188,8 @@ max_iter = 4000
 
 # exit()
 
+dVec = np.array([hX1, hX2, hX3])
+increVec = np.array([1, nX1, nX1 * nX2],dtype=np.int32)
 dG  = gamma_1 + gamma_2 * Y_mat + gamma_3 * (Y_mat - y_bar) * (Y_mat > y_bar)
 ddG = gamma_2 + gamma_3 * (Y_mat > y_bar)
 while FC_Err > tol and epoch < max_iter:
@@ -242,8 +244,8 @@ while FC_Err > tol and epoch < max_iter:
     if theta == 2 and psi_1 == 1:
         mc = dL * psi_1 * psi_0 * np.exp(K_mat - L_mat)
         temp2 = theta * vartheta_bar / lambda_bar * np.exp(- K_mat)
-        F = dY  - 1./ delta * dGamma
-        G = ddY - 1./ delta * ddGamma
+        F = dY  - dGamma
+        G = ddY - ddGamma
         Omega_1 = mc * temp2 + F * beta_f
         Omega_2 = mc * temp2 / (alpha * lambda_bar * np.exp(K_mat)) - F * sigma_y**2
         e_new =  Omega_1 / Omega_2
@@ -255,8 +257,8 @@ while FC_Err > tol and epoch < max_iter:
         # x_new[x_new <= 1e-15] = 1e-15
     elif theta == 3 and psi_1 == 1:
 
-        G = dY  - 1./ delta * dGamma
-        F = ddY - 1./ delta * ddGamma
+        G = dY  - dGamma
+        F = ddY - ddGamma
         mc = dL * psi_1 * psi_0 * np.exp(K_mat - L_mat)
         mc[mc <= 1e-16] = 1e-16
         temp = mc * vartheta_bar * theta / (lambda_bar * np.exp(K_mat))
@@ -332,15 +334,13 @@ while FC_Err > tol and epoch < max_iter:
     consumption[consumption <= 1e-16] = 1e-16
     # Step (2), solve minimization problem in HJB and calculate drift distortion
     # See remark 2.1.3 for more details
+    A   = - delta * np.ones(K_mat.shape) - np.exp(L_mat) * gg
+    C_1 = 0.5 * sigma_k**2 * np.ones(K_mat.shape)
+    C_2 = 0.5 * sigma_y**2 * ee**2
+    C_3 = 0.5 * sigma_g**2 * np.ones(K_mat.shape)
     start_time2 = time.time()
     if epoch == 0:
-        dVec = np.array([hX1, hX2, hX3])
-        increVec = np.array([1, nX1, nX1 * nX2],dtype=np.int32)
         # These are constant
-        A   = - delta * np.ones(K_mat.shape) - np.exp(L_mat) * gg
-        C_1 = 0.5 * sigma_k**2 * np.ones(K_mat.shape)
-        C_2 = 0.5 * sigma_y**2 * ee**2
-        C_3 = 0.5 * sigma_g**2 * np.ones(K_mat.shape)
         if linearsolver == 'petsc4py' or linearsolver == 'petsc' or linearsolver == 'both':
             petsc_mat = PETSc.Mat().create()
             petsc_mat.setType('aij')

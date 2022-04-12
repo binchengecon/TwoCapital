@@ -65,7 +65,8 @@ def _hjb_iteration(
 #     # Method 2 : Fix a and solve
 #     e_new = (a * e**2 + c) / (-b)
 
-    e_new = e_new * (e_new > 0) + 1e-8 * (e_new <= 0)
+    # e_new = e_new * (e_new > 0) + 1e-8 * (e_new <= 0)
+    e_new[e_new <= 1e-10] = 1e-10
     
     i = i_new * fraction + i * (1-fraction)
     e = e_new * fraction + e * (1-fraction)
@@ -73,8 +74,9 @@ def _hjb_iteration(
     log_pi_c_ratio = - G * e * theta_ell / xi_a
     pi_c_ratio = log_pi_c_ratio - np.max(log_pi_c_ratio)
     pi_c = np.exp(pi_c_ratio) * pi_c_o
+    pi_c[pi_c <= 1e-20] = 1e-20
     pi_c = pi_c / np.sum(pi_c, axis=0)
-    pi_c = (pi_c <= 0) * 1e-16 + (pi_c > 0) * pi_c
+    # pi_c = (pi_c <= 0) * 1e-16 + (pi_c > 0) * pi_c
     entropy = np.sum(pi_c * (np.log(pi_c) - np.log(pi_c_o)), axis=0)
 
     A    = np.ones_like(y_mat) * (- delta)
@@ -147,7 +149,7 @@ def hjb_post_damage_post_tech(
         if print_iteration:
             print("Iteration %s: LHS Error: %s; RHS Error %s" % (count, lhs_error, rhs_error))
 
-#     print("Converged. Total iteration %s: LHS Error: %s; RHS Error %s" % (count, lhs_error, rhs_error))
+    print("Converged. Total iteration %s: LHS Error: %s; RHS Error %s" % (count, lhs_error, rhs_error))
 
     res = {
         'v': v,
@@ -158,5 +160,81 @@ def hjb_post_damage_post_tech(
         'pi_c': pi_c,
         'h': h,
         }
+
+    return res
+
+def hjb_pre_damage_post_tech(
+        k_grid, y_grid, model_args=(), v0=None, epsilon=1., fraction=.1,
+        tol=1e-8, max_iter=10_000, print_iteration=True
+        ):
+
+    delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi_a, xi_b, xi_p, pi_d_o, v_i, gamma_1, gamma_2, theta, lambda_bar, vartheta_bar, y_bar_lower = model_args
+    dk = k_grid[1] - k_grid[0]
+    dy = y_grid[1] - y_grid[0]
+    (k_mat, y_mat) = np.meshgrid(k_grid, y_grid, indexing = 'ij')
+
+    a_i = kappa
+    b_i = - (1. + alpha * kappa)
+    c_i = alpha - 1.
+    i = (- b_i - np.sqrt(b_i ** 2 - 4 * a_i * c_i)) / (2 * a_i)
+
+    i = np.ones_like(k_mat) * i
+    e = np.zeros_like(k_mat)
+
+    if v0 is None:
+        v0 = k_mat -  np.average(theta_ell, axis=0) * y_mat ** 2
+
+    d_Delta  = gamma_1 + gamma_2 * y_mat
+    dd_Delta = gamma_2
+
+    # pi_c_o = np.array([temp * np.ones_like(y_mat) for temp in pi_c_o])
+    # pi_d_o = np.array([temp * np.ones_like(y_mat) for temp in pi_d_o])
+    # theta_ell = np.array([temp * np.ones_like(y_mat) for temp in theta_ell])
+    pi_c = pi_c_o.copy()
+
+    r1=1.5
+    r2=2.5
+    intensity = r1*(np.exp(r2/2*(y_mat - y_bar_lower)**2)-1)*(y_mat >= y_bar_lower)
+
+    state_space = np.hstack([k_mat.reshape(-1, 1, order = 'F'),
+                             y_mat.reshape(-1, 1, order = 'F')])
+
+    count = 0
+    error = 1.
+
+    while error > tol and count < max_iter:
+        pi_c, A, B_k, B_y, C_kk, C_yy, D, dvdk, dvdy, dvdkk, dvdyy, i, e, h= \
+            _hjb_iteration(v0, k_mat, y_mat, dk, dy, d_Delta, dd_Delta, theta, lambda_bar, vartheta_bar,
+                           delta, alpha, kappa, mu_k, sigma_k, pi_c_o, pi_c, theta_ell, sigma_y, xi_a, xi_b, i, e, fraction)
+
+        g = np.exp(1 / xi_p * (v0 - v_i))
+        g[g <= 1e-16] = 1e-16
+        A -= np.sum( pi_d_o * g , axis=0) * intensity
+        D += intensity * np.sum(pi_d_o * g * v_i, axis=0) + intensity * xi_p * np.sum(pi_d_o * (1 - g + g * np.log(g)), axis=0)
+        # D -= xi_p * intensity * (np.sum(pi_d_o * np.exp(- v_i / xi_p), axis=0) - np.exp(- v0 / xi_p)) / np.exp(- v0 / xi_p)
+
+        v = false_transient_one_iteration_cpp(state_space, A, B_k, B_y, C_kk, C_yy, D, v0, epsilon)
+
+        rhs_error = A * v0 + B_k * dvdk + B_y * dvdy + C_kk * dvdkk + C_yy * dvdyy + D
+        rhs_error = np.max(abs(rhs_error))
+        lhs_error = np.max(abs((v - v0)/epsilon))
+
+        error = lhs_error
+        v0 = v
+        count += 1
+
+        if print_iteration:
+            print("Iteration %s: LHS Error: %s; RHS Error %s" % (count, lhs_error, rhs_error))
+
+#     print("Converged. Total iteration %s: LHS Error: %s; RHS Error %s" % (count, lhs_error, rhs_error))
+
+    g = np.exp(1. / xi_p * (v - v_i))
+
+    res = {'v': v,
+           'e': e,
+           'i': i,
+           'g': g,
+           'pi_c': pi_c,
+           'h': h}
 
     return res
