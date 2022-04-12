@@ -60,13 +60,13 @@ def _hjb_iteration(
         temp = mc * vartheta_bar * theta / (lambda_bar * np.exp(k_mat))
         b = - 2 * temp / (alpha * lambda_bar * np.exp(k_mat)) + F * sigma_y ** 2
         c = temp + G * np.sum(pi_c * theta_ell, axis=0)
-        e_new = c / (-b)
+        # e_new = c / (-b)
+        e_new = np.zeros(k_mat.shape)
 
 #     # Method 2 : Fix a and solve
 #     e_new = (a * e**2 + c) / (-b)
 
-    # e_new = e_new * (e_new > 0) + 1e-8 * (e_new <= 0)
-    e_new[e_new <= 1e-10] = 1e-10
+    e_new = e_new * (e_new > 0) + 1e-16 * (e_new <= 0)
     
     i = i_new * fraction + i * (1-fraction)
     e = e_new * fraction + e * (1-fraction)
@@ -74,9 +74,8 @@ def _hjb_iteration(
     log_pi_c_ratio = - G * e * theta_ell / xi_a
     pi_c_ratio = log_pi_c_ratio - np.max(log_pi_c_ratio)
     pi_c = np.exp(pi_c_ratio) * pi_c_o
-    pi_c[pi_c <= 1e-20] = 1e-20
     pi_c = pi_c / np.sum(pi_c, axis=0)
-    # pi_c = (pi_c <= 0) * 1e-16 + (pi_c > 0) * pi_c
+    pi_c = (pi_c <= 0) * 1e-16 + (pi_c > 0) * pi_c
     entropy = np.sum(pi_c * (np.log(pi_c) - np.log(pi_c_o)), axis=0)
 
     A    = np.ones_like(y_mat) * (- delta)
@@ -92,6 +91,7 @@ def _hjb_iteration(
     h = - G * e * sigma_y / xi_b
 
     return pi_c, A, B_k, B_y, C_kk, C_yy, D, dvdk, dvdy, dvdkk, dvdyy, i, e, h
+
 
 
 def hjb_post_damage_post_tech(
@@ -199,19 +199,14 @@ def hjb_pre_damage_post_tech(
     state_space = np.hstack([k_mat.reshape(-1, 1, order = 'F'),
                              y_mat.reshape(-1, 1, order = 'F')])
 
-    count = 0
     error = 1.
-
+    count = 0
     while error > tol and count < max_iter:
         pi_c, A, B_k, B_y, C_kk, C_yy, D, dvdk, dvdy, dvdkk, dvdyy, i, e, h= \
             _hjb_iteration(v0, k_mat, y_mat, dk, dy, d_Delta, dd_Delta, theta, lambda_bar, vartheta_bar,
                            delta, alpha, kappa, mu_k, sigma_k, pi_c_o, pi_c, theta_ell, sigma_y, xi_a, xi_b, i, e, fraction)
 
-        g = np.exp(1 / xi_p * (v0 - v_i))
-        g[g <= 1e-16] = 1e-16
-        A -= np.sum( pi_d_o * g , axis=0) * intensity
-        D += intensity * np.sum(pi_d_o * g * v_i, axis=0) + intensity * xi_p * np.sum(pi_d_o * (1 - g + g * np.log(g)), axis=0)
-        # D -= xi_p * intensity * (np.sum(pi_d_o * np.exp(- v_i / xi_p), axis=0) - np.exp(- v0 / xi_p)) / np.exp(- v0 / xi_p)
+        D -= xi_p * intensity * (np.sum(pi_d_o * np.exp(- v_i / xi_p), axis=0) - np.exp(- v0 / xi_p)) / np.exp(- v0 / xi_p)
 
         v = false_transient_one_iteration_cpp(state_space, A, B_k, B_y, C_kk, C_yy, D, v0, epsilon)
 
