@@ -40,9 +40,9 @@ args = parser.parse_args()
 start_time = time.time()
 # Parameters as defined in the paper
 xi_a = 2. / 10000 # Smooth ambiguity
-xi_p = 1000. # Damage poisson
+xi_p = 0.01 # Damage poisson
 xi_b = 1000. # Brownian misspecification
-xi_g = 1000.  # Technology jump
+xi_g = 0.01  # Technology jump
 
 DataDir = "./res_data/xi_p_" + str(xi_p) + "_xi_g_" + str(xi_g) +  "/"
 if not os.path.exists(DataDir):
@@ -142,22 +142,22 @@ print("-------------------------------------------")
 # model_tech3_post_damage =  []
 # # for gamma_3_i in gamma_3_list:
 
-# model_args = (delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi_a, xi_b, gamma_1, gamma_2, 0., y_bar, theta, lambda_bar_second, vartheta_bar_second)
+model_args = (delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi_a, xi_b, gamma_1, gamma_2, 0., y_bar, theta, lambda_bar_second, vartheta_bar_second)
 
-# model_tech3_post_damage = hjb_post_damage_post_tech(
-         # K, Y, model_args, v0=None,
-        # epsilon=1., fraction=.2,tol=1e-8, max_iter=2000, print_iteration=False)
+model_tech3_post_damage = hjb_post_damage_post_tech(
+         K, Y, model_args, v0=None,
+        epsilon=1., fraction=.2,tol=1e-8, max_iter=2000, print_iteration=False)
 
 
 
-# v_post = model_tech3_post_damage["v"]
-# V_post_3D = np.zeros_like(K_mat)
-# for j in range(nL):
-    # V_post_3D[:,:,j] = v_post
+v_post = model_tech3_post_damage["v"]
+V_post_3D = np.zeros_like(K_mat)
+for j in range(nL):
+    V_post_3D[:,:,j] = v_post
 
-# # model_tech3_post_damage.append(v_post_i)
-# with open(DataDir + "model_tech3_post_damage", "wb") as f:
-    # pickle.dump(model_tech3_post_damage, f)
+# model_tech3_post_damage.append(v_post_i)
+with open(DataDir + "model_tech3_post_damage", "wb") as f:
+    pickle.dump(model_tech3_post_damage, f)
 
 model_tech3_post_damage = pickle.load(open(DataDir + "model_tech3_post_damage", "rb"))
 
@@ -169,22 +169,24 @@ theta_ell = np.array([temp * np.ones(K_mat.shape) for temp in theta_ell])
 print("-------------------------------------------")
 print("------------Post damage, Tech II-----------")
 print("-------------------------------------------")
-# model_tech2_post_damage = []
-# for i in range(len(gamma_3_list)):
-    # gamma_3_i = gamma_3_list[i]
-    # V_post_tech2 = V_post_3D
+Guess = pickle.load(open(DataDir + "model_tech2_post_damage", "rb"))
+model_tech2_post_damage = []
+for i in range(len(gamma_3_list)):
+    gamma_3_i = gamma_3_list[i]
+    V_post_tech2 = V_post_3D
 
-    # res = hjb_pre_tech(
-            # state_grid=(K, Y, L), 
-            # model_args=(delta, alpha, theta, vartheta_bar_first, lambda_bar_first, mu_k, kappa, sigma_k, theta_ell, pi_c_o, pi_c, sigma_y, zeta, psi_0, psi_1, sigma_g, V_post_tech2, gamma_1, gamma_2, gamma_3_i, y_bar, xi_a, xi_g, xi_p),
-            # V_post_damage=None,
-            # tol=1e-7, epsilon=0.1, fraction=0.01, smart_guess=None,
-            # )
+    res = hjb_pre_tech(
+            state_grid=(K, Y, L), 
+            model_args=(delta, alpha, theta, vartheta_bar_first, lambda_bar_first, mu_k, kappa, sigma_k, theta_ell, pi_c_o, pi_c, sigma_y, zeta, psi_0, psi_1, sigma_g, V_post_tech2, gamma_1, gamma_2, gamma_3_i, y_bar, xi_a, xi_g, xi_p),
+            V_post_damage=None,
+            v0=Guess[i]["v0"],
+            tol=1e-7, epsilon=0.1, fraction=0.01, smart_guess=Guess[i],
+            )
 
-    # model_tech2_post_damage.append(res)
+    model_tech2_post_damage.append(res)
 
-# with open(DataDir + "model_tech2_post_damage", "wb") as f:
-    # pickle.dump(model_tech2_post_damage, f)
+with open(DataDir + "model_tech2_post_damage", "wb") as f:
+    pickle.dump(model_tech2_post_damage, f)
 
 model_tech2_post_damage = pickle.load(open(DataDir + "model_tech2_post_damage", "rb"))
 
@@ -192,23 +194,25 @@ model_tech2_post_damage = pickle.load(open(DataDir + "model_tech2_post_damage", 
 print("-------------------------------------------")
 print("------------Post damage, Tech I------------")
 print("-------------------------------------------")
-# model_tech1_post_damage = []
-# for i in range(len(gamma_3_list)):
-    # gamma_3_i = gamma_3_list[i]
-    # res_i = model_tech2_post_damage[i]
-    # V_post_tech1 = res_i["v0"]
+Guess = pickle.load(open(DataDir + "model_tech1_post_damage", "rb"))
+model_tech1_post_damage = []
+for i in range(len(gamma_3_list)):
+    gamma_3_i = gamma_3_list[i]
+    res_i = model_tech2_post_damage[i]
+    V_post_tech1 = res_i["v0"]
 
-    # res = hjb_pre_tech(
-            # state_grid=(K, Y, L),
-            # model_args=(delta, alpha, theta, vartheta_bar, lambda_bar, mu_k, kappa, sigma_k, theta_ell, pi_c_o, pi_c, sigma_y, zeta, psi_0, psi_1, sigma_g, V_post_tech1, gamma_1, gamma_2, gamma_3_i, y_bar, xi_a, xi_g, xi_p),
-            # V_post_damage=None,
-            # tol=1e-7, epsilon=0.1, fraction=0.01, smart_guess=res_i,
-            # )
+    res = hjb_pre_tech(
+            state_grid=(K, Y, L),
+            model_args=(delta, alpha, theta, vartheta_bar, lambda_bar, mu_k, kappa, sigma_k, theta_ell, pi_c_o, pi_c, sigma_y, zeta, psi_0, psi_1, sigma_g, V_post_tech1, gamma_1, gamma_2, gamma_3_i, y_bar, xi_a, xi_g, xi_p),
+            V_post_damage=None,
+            v0=Guess[i]["v0"],
+            tol=1e-7, epsilon=0.1, fraction=0.01, smart_guess=Guess[i],
+            )
 
-    # model_tech1_post_damage.append(res)
+    model_tech1_post_damage.append(res)
 
-# with open(DataDir + "model_tech1_post_damage", "wb") as f:
-    # pickle.dump(model_tech1_post_damage, f)
+with open(DataDir + "model_tech1_post_damage", "wb") as f:
+    pickle.dump(model_tech1_post_damage, f)
 
 model_tech1_post_damage = pickle.load(open(DataDir + "model_tech1_post_damage", "rb"))
 
@@ -240,15 +244,15 @@ pi_c_o = np.ones(len(theta_ell)) / len(theta_ell)
 pi_c_o = np.array([temp * np.ones((nK, nY_short)) for temp in pi_c_o])
 theta_ell = np.array([temp * np.ones((nK, nY_short)) for temp in theta_ell])
 
-# model_tech3_pre_damage = hjb_pre_damage_post_tech(
-        # K, Y_short, 
-        # model_args=(delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi_a, xi_b, xi_p, pi_d_o, v_i, gamma_1, gamma_2, theta, lambda_bar_second, vartheta_bar_second, y_bar_lower),
-        # v0=np.mean(v_i, axis=0), epsilon=0.01, fraction=0.1,
-        # tol=1e-8, max_iter=15000, print_iteration=True
-        # )
+model_tech3_pre_damage = hjb_pre_damage_post_tech(
+        K, Y_short, 
+        model_args=(delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi_a, xi_b, xi_p, pi_d_o, v_i, gamma_1, gamma_2, theta, lambda_bar_second, vartheta_bar_second, y_bar_lower),
+        v0=np.mean(v_i, axis=0), epsilon=0.01, fraction=0.1,
+        tol=1e-8, max_iter=15000, print_iteration=True
+        )
 
-# with open(DataDir + "model_tech3_pre_damage", "wb") as f:
-    # pickle.dump(model_tech3_pre_damage, f)
+with open(DataDir + "model_tech3_pre_damage", "wb") as f:
+    pickle.dump(model_tech3_pre_damage, f)
 
 model_tech3_pre_damage = pickle.load(open(DataDir + "model_tech3_pre_damage", "rb"))
 
@@ -276,7 +280,7 @@ for i in range(nL):
 
 model_args =(delta, alpha, theta, vartheta_bar_first, lambda_bar_first, mu_k, kappa, sigma_k, theta_ell, pi_c_o, pi_c, sigma_y, zeta, psi_0, psi_1, sigma_g, v_tech3, gamma_1, gamma_2, gamma_3_list, y_bar, xi_a, xi_g, xi_p)
 
-Guess = pickle.load(open("./res_data/xi_p_1000.0_xi_g_1000.0/model_tech2_pre_damage", "rb"))
+Guess = pickle.load(open(DataDir + "model_tech2_pre_damage", "rb"))
 model_tech2_pre_damage = hjb_pre_tech(
         state_grid=(K, Y_short, L), 
         model_args=model_args, V_post_damage=v_i, 
@@ -300,7 +304,7 @@ for model in model_tech1_post_damage:
 v_i = np.array(v_i)
 v_tech2 = model_tech2_pre_damage["v0"][:, :nY_short, :]
 
-Guess = pickle.load(open("./res_data/xi_p_1000.0_xi_g_1000.0/model_tech1_pre_damage", "rb"))
+Guess = pickle.load(open(DataDir + "model_tech1_pre_damage", "rb"))
 model_args =(delta, alpha, theta, vartheta_bar, lambda_bar, mu_k, kappa, sigma_k, theta_ell, pi_c_o, pi_c, sigma_y, zeta, psi_0, psi_1, sigma_g, v_tech2, gamma_1, gamma_2, gamma_3_list, y_bar, xi_a, xi_g, xi_p)
 model_tech1_pre_damage = hjb_pre_tech(
         state_grid=(K, Y_short, L), 
