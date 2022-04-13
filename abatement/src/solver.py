@@ -113,14 +113,14 @@ def _FOC_update(v0, steps= (), states = (), args=(), controls=(), fraction=0.5):
         # x_new[x_new <= 1e-15] = 1e-15
     elif theta == 3 and psi_1 == 1:
 
-        G = dY  - dGamma
-        F = ddY - ddGamma
+        G = dY  - dG
+        F = ddY - ddG
         mc = dL * psi_1 * psi_0 * np.exp(K_mat - L_mat)
         mc[mc <= 1e-16] = 1e-16
         temp = mc * vartheta_bar * theta / (lambda_bar * np.exp(K_mat))
         a = temp / (alpha * lambda_bar * np.exp(K_mat)) ** (theta - 1)
         b = - 2 * temp / (alpha * lambda_bar * np.exp(K_mat)) + F * sigma_y ** 2
-        c = temp + G * beta_f
+        c = temp + G * np.sum(theta_ell * pi_c, axis=0)
         temp = b ** 2 - 4 * a * c
         temp[temp <=0] = 0
         # temp = temp * (temp > 0)
@@ -132,8 +132,10 @@ def _FOC_update(v0, steps= (), states = (), args=(), controls=(), fraction=0.5):
             e_new = root2
 
         i_new = (1 - mc/ dK) / kappa
-        temp3 = alpha - i_star - alpha * vartheta_bar * (1 - e_star / (alpha * lambda_bar * np.exp(K_mat)))**theta
-        x_new = temp3 - 1 / mc
+        j_star = alpha * vartheta_bar * (1 - e_star / (alpha * lambda_bar * np.exp(K_mat)))**theta
+        j_star[j_star <= 1e-16] = 1e-16
+        temp3 = alpha - i_star - j_star
+        x_new = temp3 - delta / mc
 
     elif psi_1 != 1 and vartheta_bar != 0 and theta == 3:
         G = dY -  dG
