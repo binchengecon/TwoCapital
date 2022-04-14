@@ -9,7 +9,7 @@
 \PassOptionsToPackage{normalem}{ulem}
 \usepackage{ulem}
 \usepackage{babel}
-\usepackage[toc, page]{appendix}
+%\usepackage[toc, page]{appendix}
 \usepackage{float}
 \usepackage{booktabs}
 \usepackage{caption, subcaption}
@@ -154,13 +154,11 @@ FOC
 	i_g =& \frac{1}{\phi_g} - \frac{mc}{\phi_g v_g}
 \end{align*}
 
-\subsection{Test HJB, possible transformation of state variables}
-
-\subsubsection{$\log K, L, Y$}
+\subsection{Transformation of state variables}
 
 \begin{gather*}
-	X = [\log K, L, Y]',  \quad \log K = \log(K_d + K_g), \quad  L = \log K_g - \log K_d\\
-	R = \frac{K_g}{K_d + K_g} = \frac{\exp(L)}{1 + \exp(L)} 
+	X = [\log K, L, Y]',  \quad \log K = \log(K_d + K_g), \quad
+	R = \frac{K_g}{K_d + K_g}
 \end{gather*}
 
 
@@ -175,24 +173,13 @@ FOC
 \end{align*}
 
 \begin{align*}
-	\dif L =& \dif (\log K_g - \log K_d) = \left( (\alpha_g + i_g  - \frac{\phi_{g}}{2}i_g^2 - \frac{|\sigma_g|^2}{2}) -  (\alpha_d + i_d - \frac{\phi_d}{2} i_d^2 - \frac{|\sigma_d|^2}{2})\right) \dif t  + (\sigma_g - \sigma_d) \dif W\\
-	\dif \exp(L) =&  \exp(L) \left( \dif L\right) + \frac{\exp(L)}{2} |\sigma_d - \sigma_g|^2 \dif t\\
-	\dif R = 
+	\dif R = \left((\alpha_d + i_d - \frac{\sigma_d^2}{2} )(1 - R) + (\alpha_g + i_g - \frac{\sigma_g^2}{2})R - R \sigma_g^2 + (1 - R) \sigma_d^2\right) dt + R(1 -R) (\sigma_d + \sigma_g) dW
 \end{align*}
 
 \begin{align*}
  	\dif Y = \eta A_d   (1 - R) K ( \beta_f \dif t +  \varsigma \dif W)
 \end{align*}
 
-\begin{align*}
-	\delta v(\log K, L,  Y; A_g') & =\max_{i_{g},i_{d} }\delta \log((A_d - i_d) (1 - R) + (A_g' - i_g)R  ) + \delta \log K \\
-	& +\left(\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\} (1 - R)+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\} R  - \frac{\mid\sigma_{d}(1 - R)+ \sigma_g R \mid
-		^2}{2}\right) v_k  \\
-	&+\frac{\mid \sigma_{d} (1 - R) + \sigma_g R\mid^2}{2}v_{kk}\\
-	&+ \left( (\alpha_g + i_g  - \frac{\phi_{g}}{2}i_g^2) -  (\alpha + i_d - \frac{\phi_d}{2} i_d^2)\right) v_l \\
-	& +\beta_{f} (\eta A_d (1 - R) K )v_{Y}+\frac{1}{2}\varsigma^{2}(\eta A_d  (1 - R) K)^{2}v{}_{YY} \\
-	&- [\{\gamma_{1}+\gamma_{2}Y_{t}\}\beta_{f}(\eta A_d(1 - R)K)+\frac{\gamma_2}{2}\varsigma^{2}(\eta A_d (1 - R) K)^{2}]
-\end{align*}
 
 
 
@@ -206,7 +193,8 @@ $\log K \in [4., 8.5] $, $R \in [0.14, 0.99]$ and $Y \in [0., 3.]$
 	& +\left(\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\} (1 - R)+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\} R  - \frac{\mid\sigma_{d}(1 - R)+ \sigma_g R \mid
 		^2}{2}\right) v_k  \\
 	&+\frac{\mid \sigma_{d} (1 - R) + \sigma_g R\mid^2}{2}v_{kk}\\
-	&+ \left( (\alpha_g + i_g  - \frac{\phi_{g}}{2}i_g^2) -  (\alpha + i_d - \frac{\phi_d}{2} i_d^2)\right) \left[ R(1 - R)\right] v_r \\
+	&+ \left( (\alpha_g + i_g  - \frac{\phi_{g}}{2}i_g^2) - R \sigma_g^2 -  (\alpha + i_d - \frac{\phi_d}{2} i_d^2) + (1 - R) \sigma_d^2\right) \left[ R(1 - R)\right] v_r \\
+	& + \frac{1}{2}R^2 (1 - R)^2 (\sigma_g^2 + \sigma_d^2)v_{rr}\\
 	& +\beta_{f} (\eta A_d (1 - R) K )v_{Y}+\frac{1}{2}\varsigma^{2}(\eta A_d  (1 - R) K)^{2}v{}_{YY} \\
 	&- [\{\gamma_{1}+\gamma_{2}Y_{t}\}\beta_{f}(\eta A_d(1 - R)K)+\frac{\gamma_2}{2}\varsigma^{2}(\eta A_d (1 - R) K)^{2}]
 \end{align*}
@@ -227,34 +215,43 @@ FOC
 
 \section{Pre jump}
 
-State variables $\log K, R, Y, \lambda$, HJB, controls $i_d$, $i_g$ and $i_\lambda / K (\tilde{i_\lambda})$:
+R\& D investment, $I_\lambda$, R\& D investment ratio $i_\lambda = \cfrac{I_\lambda}{K}$
+
+Technology jump intensity :
+
+$$
+d \log \lambda =  ( - \alpha_\lambda + \varphi i_\lambda \frac{K}{\lambda} - \frac{\sigma_g^2}{2} ) dt + \sigma_g dW
+$$
+
+
+State variables $\log K, R, Y, \log(\lambda)$,  controls $i_d$, $i_g$ and $i_\lambda$, HJB:
 
 \begin{align*}
-	\delta v(\log K, R,  Y, \lambda; A_g) & =\max_{i_{g},i_{d} }\delta \log((A_d - i_d) (1 - R) + (A_g - i_g)R  -  \tilde{i}_\lambda \lambda ) + \delta \log K \\
-	& +\left(\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\} (1 - R)+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\} R  - \frac{\mid\sigma_{d}(1 - R)\mid ^2+ \mid \sigma_g R \mid
+	\delta v(\log K, R,  Y, \log(\lambda); A_g) & =\max_{i_{g},i_{d}, i_\lambda}\delta \log((A_d - i_d) (1 - R) + (A_g - i_g)R  -  i_\lambda) + \delta \log K \\
+	& +\left(\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\} (1 - R)+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\} R  - \frac{\mid\sigma_{d}(1 - R) +  \sigma_g R \mid
 		^2}{2}\right) v_k  \\
-	&+\frac{\mid \sigma_{d} (1 - R)\mid^2 + \mid \sigma_g R\mid^2}{2}v_{kk}\\
-	&+ \left( (\alpha_g + i_g  - \frac{\phi_{g}}{2}i_g^2) -  (\alpha_d + i_d - \frac{\phi_d}{2} i_d^2)\right) \left[ R(1 - R)\right] v_r \\
+	&+\frac{\mid \sigma_{d} (1 - R) + \sigma_g R\mid^2}{2}v_{kk}\\
+	&+ \left( (\alpha_g + i_g  - \frac{\phi_{g}}{2}i_g^2) - R \sigma_g^2 -  (\alpha_d + i_d - \frac{\phi_d}{2} i_d^2) + (1 - R) \sigma_d^2 \right) \left[ R(1 - R)\right] v_r \\
 	&+ \frac{1}{2} R^2 (1 - R)^2 \left[\sigma_d^2  + \sigma_g^2\right] v_{rr}\\
 	& +\beta_{f} (\eta A_d (1 - R) K )v_{Y}+\frac{1}{2}\varsigma^{2}(\eta A_d  (1 - R) K)^{2}v{}_{YY} \\
-	&- [\{\gamma_{1}+\gamma_{2}Y_{t}\}\beta_{f}(\eta A_d(1 - R)K)+\frac{\gamma_2}{2}\varsigma^{2}(\eta A_d (1 - R) K)^{2}]\\
-	& +(\varphi \tilde{i}_{\lambda} K - \alpha_\lambda)\lambda v_{\lambda}+\frac{(\sigma_{\lambda } \lambda)^{2}}{2}v_{\lambda \lambda}+\lambda  \left( v^{\text{post}} (\log K, R, Y; A_g') - v (\log K, R, Y, \lambda; A_g) \right)
+	&- [\{\gamma_{1}+\gamma_{2}Y_{t} + \gamma_3 (Y_t - 2) \mathcal{I}\{ Y_t>2\} \}\beta_{f}(\eta A_d(1 - R)K)+\frac{\gamma_2 + \gamma_3 \mathcal{I}\{Y_t > 2\}}{2}\varsigma^{2}(\eta A_d (1 - R) K)^{2}]\\
+	& +(\varphi i_{\lambda} \frac{ K}{\lambda} - \alpha_\lambda - \frac{\sigma_\lambda^2}{2}) v_{\lambda}+\frac{ \sigma_{\lambda }^2}{2}v_{\lambda \lambda}+\lambda  \left( v^{\text{post}} (\log K, R, Y; A_g') - v (\log K, R, Y, \log(\lambda); A_g) \right)
 \end{align*}
 
 FOC
 
 \begin{align*}
-	mc =& \delta ((A_d - i_d) (1 - R) + (A_g - i_g)R - \tilde{i}_\lambda \lambda  )^{-1}\\
-	mc =& K \varphi v_\lambda
+	mc =& \delta ((A_d - i_d) (1 - R) + (A_g - i_g)R - i_\lambda)^{-1}\\
+	mc =& \cfrac{K}{L} \varphi v_\lambda
 \end{align*}
 
 \begin{align*}
-	mc  =& (1 - \phi_d i_d) \left(( v_k - R v_r \right) &\Rightarrow i_d &= \frac{1}{\phi_d} \left[ 1 - \frac{K \varphi v_\lambda}{v_k  - R v_r }\right] \\
-	mc =& (1 - \phi_g i_g) \left(v_k + (1 - R) v_l\right) &\Rightarrow i_g &= \frac{1}{\phi_g}\left[1 - \frac{K \varphi v_\lambda}{v_k + (1 - R) v_r}\right]
+	mc  =& (1 - \phi_d i_d) \left(( v_k - R v_r \right) &\Rightarrow i_d &= \frac{1}{\phi_d} \left[ 1 -\frac{K}{L} \frac{ \varphi v_\lambda}{v_k  - R v_r }\right] \\
+	mc =& (1 - \phi_g i_g) \left(v_k + (1 - R) v_l\right) &\Rightarrow i_g &= \frac{1}{\phi_g}\left[1 - \frac{K}{L}\frac{\varphi v_\lambda}{v_k + (1 - R) v_r}\right]
 \end{align*}
 
 \begin{align*}
-	\tilde{i}_\lambda = \frac{1}{\lambda} \left( (A_d - (\frac{1}{\phi_d} - K \frac{\varphi}{\phi_d}\frac{v_\lambda}{v_k - R v_r}) ) K_d + (A_g - (\frac{1}{\phi_g} - K\frac{\varphi}{\phi_g}\frac{v_\lambda}{v_k + (1 - R)v_r }) ) K_g - \frac{\delta}{K \varphi v_\lambda} \right)
+	i_\lambda = (A_d - (\frac{1}{\phi_d} - \frac{K}{L} \frac{\varphi}{\phi_d}\frac{v_\lambda}{v_k - R v_r}) ) (1-R) + (A_g - (\frac{1}{\phi_g} - \frac{K}{L}\frac{\varphi}{\phi_g}\frac{v_\lambda}{v_k + (1 - R)v_r }) ) R - \frac{L\delta}{K \varphi v_\lambda}
 \end{align*}
 
 \appendix
@@ -278,7 +275,7 @@ Economy
 		$\delta$ & 0.01\\
 		$(\alpha_d, \phi_d, \sigma_d)$ & ( -0.02, 8, 0.016)\\
 		$(\alpha_g, \phi_g, \sigma_g)$ & ( -0.02, 8, 0.016) \\
-		$(\alpha_\lambda, \varphi, \sigma_\lambda)$ & (0, 0.1, 0.016)\\
+		$(\alpha_\lambda, \varphi, \sigma_\lambda)$ & (0, 0.01, 0.016)\\
 		$A_d$ & 0.12\\
 		$(A_g, A_g')$ & (0.10, 0.15)\\
 		\bottomrule
