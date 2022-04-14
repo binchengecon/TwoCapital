@@ -39,12 +39,13 @@ args = parser.parse_args()
 
 start_time = time.time()
 # Parameters as defined in the paper
-xi_a = 2. / 10000 # Smooth ambiguity
-xi_p = 0.01 # Damage poisson
+xi_a = 2 / 10000. # Smooth ambiguity
+xi_p = 0.025 # Damage poisson
 xi_b = 1000. # Brownian misspecification
-xi_g = 0.01  # Technology jump
+xi_g = 0.025  # Technology jump
 
-DataDir = "./res_data/xi_p_" + str(xi_p) + "_xi_g_" + str(xi_g) +  "/"
+# DataDir = "./res_data/xi_p_" + str(xi_p) + "_xi_g_" + str(xi_g) +  "/"
+DataDir = "./res_data/new_xi_p_0.025_xi_g_0.025/"
 if not os.path.exists(DataDir):
     os.mkdir(DataDir)
 
@@ -244,15 +245,15 @@ pi_c_o = np.ones(len(theta_ell)) / len(theta_ell)
 pi_c_o = np.array([temp * np.ones((nK, nY_short)) for temp in pi_c_o])
 theta_ell = np.array([temp * np.ones((nK, nY_short)) for temp in theta_ell])
 
-model_tech3_pre_damage = hjb_pre_damage_post_tech(
-        K, Y_short, 
-        model_args=(delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi_a, xi_b, xi_p, pi_d_o, v_i, gamma_1, gamma_2, theta, lambda_bar_second, vartheta_bar_second, y_bar_lower),
-        v0=np.mean(v_i, axis=0), epsilon=0.01, fraction=0.1,
-        tol=1e-8, max_iter=15000, print_iteration=True
-        )
+# model_tech3_pre_damage = hjb_pre_damage_post_tech(
+        # K, Y_short, 
+        # model_args=(delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi_a, xi_b, xi_p, pi_d_o, v_i, gamma_1, gamma_2, theta, lambda_bar_second, vartheta_bar_second, y_bar_lower),
+        # v0=np.mean(v_i, axis=0), epsilon=0.01, fraction=0.1,
+        # tol=1e-8, max_iter=15000, print_iteration=True
+        # )
 
-with open(DataDir + "model_tech3_pre_damage", "wb") as f:
-    pickle.dump(model_tech3_pre_damage, f)
+# with open(DataDir + "model_tech3_pre_damage", "wb") as f:
+    # pickle.dump(model_tech3_pre_damage, f)
 
 model_tech3_pre_damage = pickle.load(open(DataDir + "model_tech3_pre_damage", "rb"))
 
