@@ -285,7 +285,7 @@ while FC_Err > tol and epoch < max_iter:
     B_g = ((alpha_g + i_g - 0.5 * phi_g * i_g**2) -  (alpha_d + i_d - 0.5* phi_d * i_d**2)) * R_mat * (1 - R_mat)
     B_y = beta_f * eta * A_d * np.exp(K_mat) * (1 - R_mat)
 
-    D = delta * np.log(consumption) + delta * K_mat  - (gamma_1 + gamma_2 * Y_mat + gamma_3 * (Y_mat -2) * (Y_mat > 2))* beta_f * eta * A_d * np.exp(K_mat) * (1 - R_mat)  - 0.5 * (gamma_2 + gamma_3 * (Y_mat > 0.2)) * (varsigma * eta * A_d * np.exp(K_mat) * (1 - R_mat) )**2
+    D = delta * np.log(consumption) + delta * K_mat  - (gamma_1 + gamma_2 * Y_mat + gamma_3 * (Y_mat -2) * (Y_mat > 2))* beta_f * eta * A_d * np.exp(K_mat) * (1 - R_mat)  - 0.5 * (gamma_2 + gamma_3 * (Y_mat > 2)) * (varsigma * eta * A_d * np.exp(K_mat) * (1 - R_mat) )**2
 
     if linearsolver == 'eigen' or linearsolver == 'both':
         start_eigen = time.time()

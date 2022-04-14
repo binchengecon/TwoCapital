@@ -38,6 +38,8 @@ print("Linear solver: " + linearsolver)
 
 
 start_time = time.time()
+xi_a = 1000.
+xi_g = 1000.
 # Parameters as defined in the paper
 with open("./data/PostJump/res-post", "rb") as f:
     postjump = pickle.load(f)
@@ -53,7 +55,9 @@ sigma_d = postjump["sigma_d"]
 sigma_g = postjump["sigma_g"]
 
 varsigma = postjump["varsigma"]
-beta_f = postjump["beta_f"]
+# beta_f = postjump["beta_f"]
+beta_f = pd.read_csv("../data/model144.csv", header=None).to_numpy()[:, 0]/1000.
+# beta_f = np.mean(beta_f)
 phi_d = postjump["phi_d"]
 phi_g = postjump["phi_g"]
 ########## arrival rate
@@ -69,26 +73,26 @@ eta = postjump["eta"]
 # log of Capital log K in the write-up
 K_min = postjump["K_min"]
 K_max = postjump["K_max"]
-hK = postjump["hK"]
-K = postjump["K"]
+hK    = postjump["hK"]
+K     = postjump["K"]
 # Capital ratio, Kg / (Kd + Kg)
 R_min = postjump["R_min"]
 R_max = postjump["R_max"]
-hR = postjump["hR"]
-R = postjump["R"]
+hR    = postjump["hR"]
+R     = postjump["R"]
 # Temperature, Y in the write-up
 Temp_min = postjump["Y_min"]
 Temp_max = postjump["Y_max"]
-hTemp = postjump["hY"]
-Temp = postjump["Y"]
+hTemp    = postjump["hY"]
+Temp     = postjump["Y"]
 # Post tech jump value function
-v_post = postjump["v0"]
+v_post   = postjump["v0"]
 
 # log of jump intensity, log lambda
 logL_min = - 4.
 logL_max = 0.
-hL = 0.5
-logL = np.arange(logL_min, logL_max, hL)
+hL       = 0.5
+logL     = np.arange(logL_min, logL_max, hL)
 
 X = K[10:]
 Y = R[:-40]
@@ -148,6 +152,10 @@ for i in range(len(W)):
     v0[:,:,:, i] = v_post[10:, :-40, :]
 V_post = v0
 
+# expand theta_ell
+theta_ell = np.array([temp * np.ones_like(K_mat) for temp in beta_f])
+pi_c_o = np.ones((len(beta_f), nX, nY, nZ, nW)) / len(beta_f)
+pi_c = pi_c_o.copy()
 
 # with open("./data/PreJump/varphi_0.05/varphi-0.05-gamma0.0-Agp-0.15-29-21-13", "rb") as f:
     # data = pickle.load(f)
@@ -164,11 +172,13 @@ epsilon  = 0.003
 fraction = 0.5
 max_iter = 4000
 
+# Emission proportional to dirty capital
+ee = eta * A_d * (1 - R_mat) * np.exp(K_mat)
 
+# First, second order derivatives of damage function
 dG  = gamma_1 + gamma_2 * Temp_mat + gamma_3 * (Temp_mat - y_bar) * (Temp_mat > y_bar)
 ddG = gamma_2 + gamma_3 * (Temp_mat > y_bar)
 
-# file_iter = open("iter_c_compile.txt", "w")
 while  FC_Err > tol and epoch < max_iter:
     print("-----------------------------------")
     print("---------Epoch {}---------------".format(epoch))
@@ -193,6 +203,7 @@ while  FC_Err > tol and epoch < max_iter:
     ddX = finiteDiff(v0,0,2,hX)
     ddY = finiteDiff(v0,1,2,hY)
     ddZ = finiteDiff(v0,2,2,hZ)
+    ddTemp = ddZ
     ddW = finiteDiff(v0,3,2,hW)
 
     # if epoch > 100:
@@ -268,6 +279,17 @@ while  FC_Err > tol and epoch < max_iter:
         # i_l = np.zeros(X_mat.shape)
         # i_l = 1e-5 * np.ones(X_mat.shape)
 
+    F = ddTemp - ddG
+    G = dTemp  - dG
+    log_pi_c_ratio = - G * ee * theta_ell / xi_a
+    pi_c_ratio = log_pi_c_ratio - np.max(log_pi_c_ratio)
+    pi_c = np.exp(pi_c_ratio) * pi_c_o
+    pi_c = (pi_c <= 0) * 1e-16 + (pi_c > 0) * pi_c
+    pi_c = pi_c / np.sum(pi_c, axis=0)
+    entropy = np.sum(pi_c * (np.log(pi_c) - np.log(pi_c_o)), axis=0)
+    # Technology
+    gg = np.exp(1 / xi_g * (v0 - V_post))
+    gg[gg <=1e-16] = 1e-16
     print("mc min: {:.10f}, mc max: {:.10f}".format(mc_min, mc_max))
     print("min id: {},\t min ig: {},\t min il: {}".format(np.min(i_d), np.min(i_g), np.min(i_l)))
     print("max id: {},\t max ig: {},\t max il: {}".format(np.max(i_d), np.max(i_g), np.max(i_l)))
@@ -282,9 +304,9 @@ while  FC_Err > tol and epoch < max_iter:
         A = - delta   * np.ones(K_mat.shape)  - np.exp(logL_mat)
         C_11 = 0.5 * (sigma_d * (1 - R_mat) + sigma_g * R_mat)**2
         C_22 = 0.5 * R_mat**2 * (1 - R_mat)**2 * (sigma_d + sigma_g)**2
-        C_33 = 0.5 * (varsigma * eta * A_d * np.exp(K_mat) * (1 - R_mat) )**2
+        C_33 = 0.5 * (varsigma * ee)**2
         C_44 = 0.5 *  sigma_l**2 * np.ones(X_mat.shape)
-        B_3 = beta_f * eta * A_d * np.exp(K_mat) * (1 - R_mat)
+        B_3 = np.sum(theta_ell * pi_c, axis=0) * ee
 
     if linearsolver == 'petsc4py' or linearsolver == 'petsc' or linearsolver == 'both':
         petsc_mat = PETSc.Mat().create()
@@ -350,7 +372,7 @@ while  FC_Err > tol and epoch < max_iter:
     print("max consum: {},\t min consum: {}\t".format(np.max(consumption), np.min(consumption)))
     consumption[consumption <= 0] = 1e-300
 
-    D = delta * np.log(consumption) + delta * K_mat - delta - dG * beta_f * eta * A_d * np.exp(K_mat) * (1 - R_mat)  - 0.5 * ddG * (varsigma * eta * A_d * np.exp(K_mat) * (1 - R_mat) )**2 + np.exp(logL_mat) * V_post
+    D = delta * np.log(consumption) + delta * K_mat - delta - dG * np.sum(theta_ell * pi_c, axis=0) * ee  - 0.5 * ddG * (varsigma * ee)**2 + np.exp(logL_mat) * V_post + xi_a * entropy
 
     if linearsolver == 'eigen' or linearsolver == 'both':
         start_eigen = time.time()
