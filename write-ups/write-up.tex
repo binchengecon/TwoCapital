@@ -67,7 +67,7 @@ U(C)=\delta \log(A_dK_d - i_dK_d + A_gK_g - i_gK_g  - i_\lambda \lambda 	) -\d
 where the $\log N_{t}$ follows from BBH2 as
 \begin{align*}
 \log N_{t} & =\Gamma(Y)\\
-\Gamma(y) & =\gamma_{1}y+\frac{\gamma_{2}}{2}y^{2}+\frac{\gamma_{3}}{2}\mathbf{1}_{y\ge\bar{y}}(y-\bar{y})^{2}
+\Gamma(y) & =\gamma_{1}y+\frac{\gamma_{2}}{2}y^{2}+\frac{\gamma_{3}}{2}\mathbb{I}_{y\ge\bar{y}}(y-\bar{y})^{2}
 \end{align*}
 
 
@@ -77,10 +77,10 @@ Taking these pieces together we get the HJB equation
 \begin{align*}
 \delta V(K_{d},K_{g},\lambda,Y,\log N ) & =\max_{i_{g},i_{d}, i_{\lambda}}\delta \log(A_dK_d - i_dK_d + A_gK_g - i_gK_g  - i_\lambda \lambda ) -\delta \log N\\
  & +\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\}V_{d}K_{d}+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\}V_{g}K_{g}+\frac{\sigma_{d}^{2}K_{d}^{2}}{2}V_{dd}+\frac{\sigma_{g}^{2}K_{g}^{2}}{2}V_{gg}\\
- & +\beta_{f}E_{d}V_{Y}+\frac{1}{2}\varsigma^{2}E_{d}^{2}V_{YY}+[\{\gamma_{1}+\gamma_{2}Y_{t} + \gamma_3 (Y_t - 2) \mathbf
- {I} \{Y_t > 2
+ & +\beta_{f}E_{d}V_{Y}+\frac{1}{2}\varsigma^{2}E_{d}^{2}V_{YY}+[\{\gamma_{1}+\gamma_{2}Y + \gamma_3 (Y - \bar{y}) \mathbf
+ {I} \{Y_t > \bar{y}
  \}\}\beta_{f}E_{d}\\
- &+\frac{\gamma_2 + \gamma_3 \mathbf{I}\{Y_t > 2 \} }{2} \varsigma^{2}E_{d}^{2}]V_{\log N}+\frac{\varsigma^{2}E_{d}^{2}}{2}V_{\log N\log N}\\
+ &+\frac{\gamma_2 + \gamma_3 \mathbf{I}\{Y >  \bar{y} \} }{2} \varsigma^{2}E_{d}^{2}]V_{\log N}+\frac{\varsigma^{2}E_{d}^{2}}{2}V_{\log N\log N}\\
  & +(\varphi i_{\lambda} - \alpha_\lambda)\lambda V_{\lambda}+\frac{(\sigma_{\lambda } \lambda)^{2}}{2}V_{\lambda \lambda}+\lambda  \left( V (K_d, K_g, \lambda, Y, \log N; A_g') - V (K_d, K_g, \lambda, Y, \log N; A_g) \right)
 \end{align*}
 
@@ -133,12 +133,11 @@ We solve post jump HJB:
 \begin{align*}
 	\delta v(K_{d}, K_{g}, Y; A_g') & =\max_{i_{g},i_{d} }\delta \log(A_dK_d - i_dK_d + A_g'K_g - i_gK_g  ) \\
 	& +\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\}v_{d}K_{d}+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\}v_{g}K_{g}+\frac{\sigma_{d}^{2}K_{d}^{2}}{2}v_{dd}+\frac{\sigma_{g}^{2}K_{g}^{2}}{2}v_{gg}\\
-	& +\beta_{f} (\eta A_d K_d )v_{Y}+\frac{1}{2}\varsigma^{2}(\eta A_d  K_d)^{2}v{}_{YY} - [\{\gamma_{1}+\gamma_{2}Y_{t}+ \gamma_3 (Y_t - 2) \mathbf
- {I} \{Y_t > 2
- \}\}\beta_{f}(\eta A_d K_d)]\\
+	& +\beta_{f} (\eta A_d K_d )v_{Y}+\frac{1}{2}\varsigma^{2}(\eta A_d  K_d)^{2}v{}_{YY} - [\{\gamma_{1}+\gamma_{2}Y+ \gamma_3 (Y - \bar{y}) \mathbf
+ {I} \{Y > \bar{y}\}\}\beta_{f}(\eta A_d K_d)]\\
  &
  -\frac{\gamma_2 + + \gamma_3 \mathbf
- {I} \{Y_t > 2
+ {I} \{Y > \bar{y}
  \}}{2}[ \varsigma^{2}(\eta A_d K_d)^{2}]
 \end{align*}
 
@@ -196,7 +195,7 @@ $\log K \in [4., 8.5] $, $R \in [0.14, 0.99]$ and $Y \in [0., 3.]$
 	&+ \left( (\alpha_g + i_g  - \frac{\phi_{g}}{2}i_g^2) - R \sigma_g^2 -  (\alpha + i_d - \frac{\phi_d}{2} i_d^2) + (1 - R) \sigma_d^2\right) \left[ R(1 - R)\right] v_r \\
 	& + \frac{1}{2}R^2 (1 - R)^2 (\sigma_g^2 + \sigma_d^2)v_{rr}\\
 	& +\beta_{f} (\eta A_d (1 - R) K )v_{Y}+\frac{1}{2}\varsigma^{2}(\eta A_d  (1 - R) K)^{2}v{}_{YY} \\
-	&- [\{\gamma_{1}+\gamma_{2}Y_{t}\}\beta_{f}(\eta A_d(1 - R)K)+\frac{\gamma_2}{2}\varsigma^{2}(\eta A_d (1 - R) K)^{2}]
+	&- [\{\gamma_{1}+\gamma_{2}Y + \gamma_3 (Y - \bar{y}) \mathbb{I}\{Y > \bar{y}\} \}\beta_{f}(\eta A_d(1 - R)K)+\frac{\gamma_2 + \gamma_3 \mathbb{I}\{ Y_t >  \bar{y}\}}{2}\varsigma^{2}(\eta A_d (1 - R) K)^{2}]
 \end{align*}
 
 
@@ -234,7 +233,7 @@ State variables $\log K, R, Y, \log(\lambda)$,  controls $i_d$, $i_g$ and $i_\la
 	&+ \left( (\alpha_g + i_g  - \frac{\phi_{g}}{2}i_g^2) - R \sigma_g^2 -  (\alpha_d + i_d - \frac{\phi_d}{2} i_d^2) + (1 - R) \sigma_d^2 \right) \left[ R(1 - R)\right] v_r \\
 	&+ \frac{1}{2} R^2 (1 - R)^2 \left[\sigma_d^2  + \sigma_g^2\right] v_{rr}\\
 	& +\beta_{f} (\eta A_d (1 - R) K )v_{Y}+\frac{1}{2}\varsigma^{2}(\eta A_d  (1 - R) K)^{2}v{}_{YY} \\
-	&- [\{\gamma_{1}+\gamma_{2}Y_{t} + \gamma_3 (Y_t - 2) \mathcal{I}\{ Y_t>2\} \}\beta_{f}(\eta A_d(1 - R)K)+\frac{\gamma_2 + \gamma_3 \mathcal{I}\{Y_t > 2\}}{2}\varsigma^{2}(\eta A_d (1 - R) K)^{2}]\\
+	&- [\{\gamma_{1}+\gamma_{2}Y + \gamma_3 (Y - \bar{y}) \mathbb{I}\{ Y>\bar{y}\} \}\beta_{f}(\eta A_d(1 - R)K)+\frac{\gamma_2 + \gamma_3 \mathbb{I}\{Y > \bar{y}\}}{2}\varsigma^{2}(\eta A_d (1 - R) K)^{2}]\\
 	& +(\varphi i_{\lambda} \frac{ K}{\lambda} - \alpha_\lambda - \frac{\sigma_\lambda^2}{2}) v_{\lambda}+\frac{ \sigma_{\lambda }^2}{2}v_{\lambda \lambda}+\lambda  \left( v^{\text{post}} (\log K, R, Y; A_g') - v (\log K, R, Y, \log(\lambda); A_g) \right)
 \end{align*}
 
@@ -242,26 +241,28 @@ FOC
 
 \begin{align*}
 	mc =& \delta ((A_d - i_d) (1 - R) + (A_g - i_g)R - i_\lambda)^{-1}\\
-	mc =& \cfrac{K}{L} \varphi v_\lambda
+	mc =& \cfrac{K}{\lambda} \varphi v_\lambda
 \end{align*}
 
 \begin{align*}
-	mc  =& (1 - \phi_d i_d) \left(( v_k - R v_r \right) &\Rightarrow i_d &= \frac{1}{\phi_d} \left[ 1 -\frac{K}{L} \frac{ \varphi v_\lambda}{v_k  - R v_r }\right] \\
-	mc =& (1 - \phi_g i_g) \left(v_k + (1 - R) v_l\right) &\Rightarrow i_g &= \frac{1}{\phi_g}\left[1 - \frac{K}{L}\frac{\varphi v_\lambda}{v_k + (1 - R) v_r}\right]
+	mc  =& (1 - \phi_d i_d) \left(( v_k - R v_r \right) &\Rightarrow i_d &= \frac{1}{\phi_d} \left[ 1 -\frac{K}{\lambda} \frac{ \varphi v_\lambda}{v_k  - R v_r }\right] \\
+	mc =& (1 - \phi_g i_g) \left(v_k + (1 - R) v_l\right) &\Rightarrow i_g &= \frac{1}{\phi_g}\left[1 - \frac{K}{\lambda}\frac{\varphi v_\lambda}{v_k + (1 - R) v_r}\right]
 \end{align*}
 
 \begin{align*}
-	i_\lambda = (A_d - (\frac{1}{\phi_d} - \frac{K}{L} \frac{\varphi}{\phi_d}\frac{v_\lambda}{v_k - R v_r}) ) (1-R) + (A_g - (\frac{1}{\phi_g} - \frac{K}{L}\frac{\varphi}{\phi_g}\frac{v_\lambda}{v_k + (1 - R)v_r }) ) R - \frac{L\delta}{K \varphi v_\lambda}
+	i_\lambda = (A_d - (\frac{1}{\phi_d} - \frac{K}{\lambda} \frac{\varphi}{\phi_d}\frac{v_\lambda}{v_k - R v_r}) ) (1-R) + (A_g - (\frac{1}{\phi_g} - \frac{K}{\lambda}\frac{\varphi}{\phi_g}\frac{v_\lambda}{v_k + (1 - R)v_r }) ) R - \frac{\lambda \delta}{K \varphi v_\lambda}
 \end{align*}
+
+
+
 
 \appendix
 \section{State variables}
-Capital:
 \begin{align*}
-	K_d \in& [0, 10, 000]\\
-	K_g \in& [0, 10,000]\\
+	\log(K) \in & [4, 8.5]\\
+	R \in & [0.01, 0.99]\\
 	Y \in& [0, 4]\\
-		\lambda \in& [0, 0.1]
+		\log(\lambda) \in& [-4 , 0]
 \end{align*}
 
 \section{Parameters}
@@ -293,7 +294,7 @@ Temperature and damage
 		$\varsigma$ & 1.2 * 1.86 / 1000\\
 		$\gamma_1$ &  0.00017675 \\
 		$\gamma_2$ &   2 * 0.0022 \\
-		$\gamma_3$ & 0\\
+		$\gamma_3$ & $\frac{1}{3} \frac{m-1}{19}, m = 1, 2, \dots, 20$\\
 		$\bar{y}$ & 2\\
 		\bottomrule
 	\end{tabular}
