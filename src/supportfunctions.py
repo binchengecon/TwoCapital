@@ -7,7 +7,7 @@ import warnings
 import time
 import pickle
 import SolveLinSys
-from numba import njit
+# from numba import njit
 
 def finiteDiff(data, dim, order, dlt, cap = None):  
     # compute the central difference derivatives for given input and dimensions
