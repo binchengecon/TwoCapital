@@ -69,7 +69,7 @@ Y_max = 5.00
 # range of capital
 K_min = 0.00
 K_max = 8.50
-R_min = 0.00
+R_min = 0.10
 R_max = 0.99
 # R_max = 0.50
 # hR = 0.05
@@ -106,16 +106,16 @@ lowerLims = np.array([K_min, R_min, Y_min], dtype=np.float64)
 upperLims = np.array([K_max, R_max, Y_max], dtype=np.float64)
 
 
-v0 = K_mat - beta_f * Y_mat
-# import pickle
-# data = pickle.load(open("../data/PostJump/Ag-0.15-gamma-0.0-25-23:37", "rb"))
-# v0 = data["v0"]
+v0 = K_mat +  (gamma_1 + gamma_2 * Y_mat)
+import pickle
+data = pickle.load(open("../data/PostJump/Ag-0.15-gamma-0.3333333333333333-26-15:37", "rb"))
+v0 = data["v0"]
 ############# step up of optimization
 FC_Err = 1
 epoch = 0
 tol = 1e-7
-epsilon  = 0.01
-fraction = 1.0  
+epsilon  = 0.0001
+fraction = 0.0001
 
 # csvfile = open("ResForRatio.csv", "w")
 # fieldnames = ["epoch", "iterations", "residual norm", "PDE_Err", "FC_Err"]
@@ -124,8 +124,8 @@ fraction = 1.0
 max_iter = 4000
 id_star = np.zeros_like(K_mat)
 ig_star = np.zeros_like(K_mat)
-# id_star = data["id_star"]
-# ig_star = data["ig_star"]
+id_star = data["id_star"]
+ig_star = data["ig_star"]
 # file_iter = open("iter_c_compile.txt", "w")
 
 # res = solver_3d(K_mat, R_mat, Y_mat, # FOC_func, Coeff_func,  
@@ -190,6 +190,8 @@ while FC_Err > tol and epoch < max_iter:
     multi_1 = dK + (1 - R_mat) * R_mat
     multi_2 = dK - R_mat * dR
 
+    multi_2[multi_2 <= 1e-8] = 1e-8
+
     aa = (1 - multi_1 / multi_2) / phi_d
     bb = phi_g / phi_d * multi_1 / multi_2
 
@@ -247,8 +249,8 @@ while FC_Err > tol and epoch < max_iter:
     # i_g[i_g <= -1 + 1e-15] = -1 + 1e-15
     # i_d[i_d >= 1 - 1e-15] = 1 - 1e-15
     # i_g[i_g >= 1 - 1e-15] = 1 - 1e-15
-    # i_d[i_d < 0] = 0
-    # i_g[i_g < 0] = 0
+    i_d[i_d < 0] = 0
+    i_g[i_g < 0] = 0
     print("min id: {:.12f};\t max ig: {:.12f}".format(np.min(i_d), np.min(i_g)) )
     print("max id: {:.12f};\t max ig: {:.12f}".format(np.max(i_d), np.max(i_g)))
     consumption = (A_d -i_d) * (1 - R_mat) + (A_g - i_g) * R_mat
