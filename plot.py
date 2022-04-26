@@ -98,8 +98,11 @@ savePic = True
 # plt.show()
 
 
-with open("data/res-petsc-10-12-7", "rb") as file:
-  data = pickle.load(file)
+with open("data/PostJump/Ag-0.15-gamma-0.3333333333333333-26-09:21", "rb") as file:
+    data = pickle.load(file)
+
+plt.plot(res["i_d"][:, :,10])
+plt.show()
 
 Kd = data["Kd"]
 Kd_max = data["Kd_max"]

@@ -19,7 +19,7 @@ import argparse
 
 
 parser = argparse.ArgumentParser(description="Set damage curvature value.")
-parser.add_argument("--gamma", type=float, help="Value of gamma_3")
+parser.add_argument("--gamma", type=int, help="Value of gamma_3")
 args = parser.parse_args()
 
 
@@ -56,19 +56,20 @@ eta = 0.17
 ###### damage
 gamma_1 = 0.00017675
 gamma_2 = 2. * 0.0022
-gamma_3 = args.gamma
+gamma_3_list = np.linspace(0., 1./3., 10)
+gamma_3 = gamma_3_list[args.gamma]
 
 y_bar = 2
 beta_f = 1.86 / 1000
 
 # Grids Specification
 # Coarse Grids
-Y_min = 0.
-Y_max = 3.
+Y_min = 0.00
+Y_max = 5.00
 # range of capital
-K_min = 4.00
+K_min = 0.00
 K_max = 8.50
-R_min = 0.14
+R_min = 0.00
 R_max = 0.99
 # R_max = 0.50
 # hR = 0.05
@@ -88,7 +89,7 @@ nR = len(R)
 # nlam = len(lam)
 now = datetime.now()
 current_time = now.strftime("%d-%H:%M")
-filename =  "Ag" + str(A_g) + "-" + "gamma" + '-' + str(gamma_3) + '-' + "{}".format(current_time)
+filename =  "Ag-" + str(A_g) + "-" + "gamma" + '-' + str(gamma_3) + '-' + "{}".format(current_time)
 
 
 print("Grid dimension: [{}, {}, {}]\n".format(nK, nR, nY))
@@ -105,26 +106,26 @@ lowerLims = np.array([K_min, R_min, Y_min], dtype=np.float64)
 upperLims = np.array([K_max, R_max, Y_max], dtype=np.float64)
 
 
-# v0 =1/delta * K_mat - beta_f * Y_mat**2
-import pickle
-data = pickle.load(open("../data/PostJump/Ag0.15-gamma-0.05-04-11:25", "rb"))
-v0 = data["v0"]
+v0 = K_mat - beta_f * Y_mat
+# import pickle
+# data = pickle.load(open("../data/PostJump/Ag-0.15-gamma-0.0-25-23:37", "rb"))
+# v0 = data["v0"]
 ############# step up of optimization
 FC_Err = 1
 epoch = 0
 tol = 1e-7
-epsilon  = 0.000001
-fraction = 0.01
+epsilon  = 0.01
+fraction = 1.0  
 
 # csvfile = open("ResForRatio.csv", "w")
 # fieldnames = ["epoch", "iterations", "residual norm", "PDE_Err", "FC_Err"]
 # writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 # writer.writeheader()
-max_iter = 10000
+max_iter = 4000
 id_star = np.zeros_like(K_mat)
 ig_star = np.zeros_like(K_mat)
-id_star = data["id_star"]
-ig_star = data["ig_star"]
+# id_star = data["id_star"]
+# ig_star = data["ig_star"]
 # file_iter = open("iter_c_compile.txt", "w")
 
 # res = solver_3d(K_mat, R_mat, Y_mat, # FOC_func, Coeff_func,  
@@ -163,10 +164,12 @@ while FC_Err > tol and epoch < max_iter:
         # pass
 
     # update control
-    if epoch == 0:
-        fraction = 0.5
-    else:
-        fraction = 0.5
+    # if epoch == 0:
+        # pass
+        # fraction = 1
+    # else:
+        # pass
+        # fraction = 1
         # i_d = np.zeros(K_mat.shape)
         # i_g = np.zeros(R_mat.shape)
         # consumption_0 = A_d * (1 - R_mat) + A_g * R_mat
@@ -184,10 +187,29 @@ while FC_Err > tol and epoch < max_iter:
 
     # else:
 
-    mc = 1 / ((A_d - id_star) * (1 - R_mat) + (A_g - ig_star) * R_mat)
-    i_d_new = (1 - mc / (-dR * R_mat + dK)) / phi_d
+    multi_1 = dK + (1 - R_mat) * R_mat
+    multi_2 = dK - R_mat * dR
+
+    aa = (1 - multi_1 / multi_2) / phi_d
+    bb = phi_g / phi_d * multi_1 / multi_2
+
+    AA = phi_g * ((1 - R_mat) * bb + R_mat)
+    BB = phi_g * ((1 - R_mat) * A_d + R_mat * A_g - (1 - R_mat) * aa) + (1 - R_mat) * bb + R_mat
+    CC = (1 - R_mat) * A_d + R_mat * A_g - (1 - R_mat) * aa - delta / multi_1
+    DELTA = BB**2 - 4 * AA * CC
+    DELTA[DELTA <= 0] = 0
+    i_g_new = (BB - np.sqrt(DELTA)) / (2 * AA)
+    # i_g[i_g <= 0] = (BB[i_g <= 0] + np.sqrt(DELTA[i_g<=0])) / (2 * AA[i_g <= 0])
+    i_d_new = aa + bb * i_g_new
+
+
+    
+
+
+    # mc = delta / ((A_d - id_star) * (1 - R_mat) + (A_g - ig_star) * R_mat)
+    # i_d_new = (1 - mc / (-dR * R_mat + dK)) / phi_d
     i_d = i_d_new * fraction + id_star * (1 - fraction)
-    i_g_new = (1 - mc / (dR * (1 - R_mat) + dK)) / phi_g
+    # i_g_new = (1 - mc / (dR * (1 - R_mat) + dK)) / phi_g
     i_g = i_g_new * fraction + ig_star * (1 - fraction)
      # # updating controls
         # Converged = 0
@@ -217,6 +239,8 @@ while FC_Err > tol and epoch < max_iter:
     # i_g[i_g >= A_g] = A_g - 1e-8
     print(np.min(i_d), np.min(i_g))
     print(np.max(i_d), np.max(i_g))
+    # i_d[i_d >= A_d] = A_d - 1e-15
+    # i_g[i_g >= A_g] = A_g - 1e-8
     # i_d = np.zeros(K_mat.shape)
     # i_g = np.zeros(R_mat.shape)
     # i_d[i_d <= -1 + 1e-15] = -1 + 1e-15
@@ -225,8 +249,8 @@ while FC_Err > tol and epoch < max_iter:
     # i_g[i_g >= 1 - 1e-15] = 1 - 1e-15
     # i_d[i_d < 0] = 0
     # i_g[i_g < 0] = 0
-    print(np.min(i_d), np.min(i_g))
-    print(np.max(i_d), np.max(i_g))
+    print("min id: {:.12f};\t max ig: {:.12f}".format(np.min(i_d), np.min(i_g)) )
+    print("max id: {:.12f};\t max ig: {:.12f}".format(np.max(i_d), np.max(i_g)))
     consumption = (A_d -i_d) * (1 - R_mat) + (A_g - i_g) * R_mat
     consumption[consumption < 1e-18] = 1e-18
     # i_d[i_d >= A_d] = A_d - 1e-8
@@ -291,8 +315,7 @@ while FC_Err > tol and epoch < max_iter:
     B_g = ((alpha_g + i_g - 0.5 * phi_g * i_g**2) -  (alpha_d + i_d - 0.5* phi_d * i_d**2) - R_mat * sigma_g**2 + (1 - R_mat)* sigma_d**2) * R_mat * (1 - R_mat)
     B_y = beta_f * eta * A_d * np.exp(K_mat) * (1 - R_mat)
 
-    D = delta * np.log(consumption) + delta * K_mat  - (gamma_1 + gamma_2 * Y_mat + gamma_3 * (Y_mat -2) * (Y_mat > 2))* beta_f * eta * A_d * np.exp(K_mat) * (1 - R_mat)  - 0.5 * (gamma_2 + gamma_3 * (Y_mat > 0.2)) * (varsigma * eta * A_d * np.exp(K_mat) * (1 - R_mat) )**2
-    D /= delta
+    D = delta * np.log(consumption) + delta * K_mat  - (gamma_1 + gamma_2 * Y_mat + gamma_3 * (Y_mat -2) * (Y_mat > 2))* beta_f * eta * A_d * np.exp(K_mat) * (1 - R_mat)  - 0.5 * (gamma_2 + gamma_3 * (Y_mat > 2)) * (varsigma * eta * A_d * np.exp(K_mat) * (1 - R_mat) )**2
 
     if linearsolver == 'eigen' or linearsolver == 'both':
         start_eigen = time.time()
