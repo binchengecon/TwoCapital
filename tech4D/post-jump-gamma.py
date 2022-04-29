@@ -68,7 +68,7 @@ Y_min = 0.00
 Y_max = 5.00
 # range of capital
 K_min = 0.00
-K_max = 8.50
+K_max = 9.00
 R_min = 0.10
 R_max = 0.99
 # R_max = 0.50
@@ -106,16 +106,16 @@ lowerLims = np.array([K_min, R_min, Y_min], dtype=np.float64)
 upperLims = np.array([K_max, R_max, Y_max], dtype=np.float64)
 
 
-v0 = K_mat +  (gamma_1 + gamma_2 * Y_mat)
+v0 = K_mat - (gamma_1 + gamma_2 * Y_mat)
 import pickle
-data = pickle.load(open("../data/PostJump/Ag-0.15-gamma-0.3333333333333333-26-15:37", "rb"))
+data = pickle.load(open("../data/PostJump/Ag-0.15-gamma-0.037037037037037035-28-16:23", "rb"))
 v0 = data["v0"]
 ############# step up of optimization
 FC_Err = 1
 epoch = 0
 tol = 1e-7
-epsilon  = 0.0001
-fraction = 0.0001
+epsilon  = 0.001
+fraction = 0.001
 
 # csvfile = open("ResForRatio.csv", "w")
 # fieldnames = ["epoch", "iterations", "residual norm", "PDE_Err", "FC_Err"]
