@@ -65,12 +65,12 @@ beta_f = 1.86 / 1000
 # Grids Specification
 # Coarse Grids
 Y_min = 0.00
-Y_max = 5.00
+Y_max = 3.00
 # range of capital
-K_min = 0.00
-K_max = 9.00
-R_min = 0.10
-R_max = 0.99
+K_min = 4.00
+K_max = 8.50
+R_min = 0.14
+R_max = 0.60
 # R_max = 0.50
 # hR = 0.05
 hK = 0.10
@@ -108,20 +108,20 @@ upperLims = np.array([K_max, R_max, Y_max], dtype=np.float64)
 
 v0 = K_mat - (gamma_1 + gamma_2 * Y_mat)
 import pickle
-data = pickle.load(open("../data/PostJump/Ag-0.15-gamma-0.037037037037037035-28-16:23", "rb"))
+data = pickle.load(open("../data/PostJump/Ag-0.15-gamma-0.037037037037037035-11-16:42", "rb"))
 v0 = data["v0"]
 ############# step up of optimization
 FC_Err = 1
 epoch = 0
 tol = 1e-7
-epsilon  = 0.001
-fraction = 0.001
+epsilon  = 0.005
+fraction = 0.005
 
 # csvfile = open("ResForRatio.csv", "w")
 # fieldnames = ["epoch", "iterations", "residual norm", "PDE_Err", "FC_Err"]
 # writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 # writer.writeheader()
-max_iter = 4000
+max_iter = 5000
 id_star = np.zeros_like(K_mat)
 ig_star = np.zeros_like(K_mat)
 id_star = data["id_star"]
@@ -164,45 +164,45 @@ while FC_Err > tol and epoch < max_iter:
         # pass
 
     # update control
-    # if epoch == 0:
-        # pass
+    if epoch == 0:
+        # # pass
         # fraction = 1
     # else:
-        # pass
-        # fraction = 1
-        # i_d = np.zeros(K_mat.shape)
-        # i_g = np.zeros(R_mat.shape)
-        # consumption_0 = A_d * (1 - R_mat) + A_g * R_mat
-        # consumption = consumption_0
-        # mc = delta / consumption
-        # i_d = 1 -  mc / (dK - R_mat *  dR)
-        # i_d /= phi_d
-        # i_d[i_d < 0] = 0
-        # # i_d[i_d > A_d] = A_d
-        # i_g = 1 - mc / (dK + (1 - R_mat) * dR)
-        # i_g /= phi_g
-        # # i_g[i_g < 0] = 0
-        # # i_g[i_g > A_g] = A_g
-        # q = delta * ((A_g * R_mat - i_g * R_mat) + (A_d * (1 - R_mat) - i_d * (1 - R_mat))) ** (-1)
+        # # pass
+        # fraction = 0.5
+        i_d = np.zeros(K_mat.shape)
+        i_g = np.zeros(R_mat.shape)
+        consumption_0 = A_d * (1 - R_mat) + A_g * R_mat
+        consumption = consumption_0
+        mc = delta / consumption
+        i_d = 1 -  mc / (dK - R_mat *  dR)
+        i_d /= phi_d
+        i_d[i_d < 0] = 0
+        # i_d[i_d > A_d] = A_d
+        i_g = 1 - mc / (dK + (1 - R_mat) * dR)
+        i_g /= phi_g
+        # i_g[i_g < 0] = 0
+        # i_g[i_g > A_g] = A_g
+        q = delta * ((A_g * R_mat - i_g * R_mat) + (A_d * (1 - R_mat) - i_d * (1 - R_mat))) ** (-1)
 
-    # else:
+    else:
 
-    multi_1 = dK + (1 - R_mat) * R_mat
-    multi_2 = dK - R_mat * dR
+        multi_1 = dK + (1 - R_mat) * R_mat
+        multi_2 = dK - R_mat * dR
 
-    multi_2[multi_2 <= 1e-8] = 1e-8
+        multi_2[multi_2 <= 1e-8] = 1e-8
 
-    aa = (1 - multi_1 / multi_2) / phi_d
-    bb = phi_g / phi_d * multi_1 / multi_2
+        aa = (1 - multi_1 / multi_2) / phi_d
+        bb = phi_g / phi_d * multi_1 / multi_2
 
-    AA = phi_g * ((1 - R_mat) * bb + R_mat)
-    BB = phi_g * ((1 - R_mat) * A_d + R_mat * A_g - (1 - R_mat) * aa) + (1 - R_mat) * bb + R_mat
-    CC = (1 - R_mat) * A_d + R_mat * A_g - (1 - R_mat) * aa - delta / multi_1
-    DELTA = BB**2 - 4 * AA * CC
-    DELTA[DELTA <= 0] = 0
-    i_g_new = (BB - np.sqrt(DELTA)) / (2 * AA)
-    # i_g[i_g <= 0] = (BB[i_g <= 0] + np.sqrt(DELTA[i_g<=0])) / (2 * AA[i_g <= 0])
-    i_d_new = aa + bb * i_g_new
+        AA = phi_g * ((1 - R_mat) * bb + R_mat)
+        BB = phi_g * ((1 - R_mat) * A_d + R_mat * A_g - (1 - R_mat) * aa) + (1 - R_mat) * bb + R_mat
+        CC = (1 - R_mat) * A_d + R_mat * A_g - (1 - R_mat) * aa - delta / multi_1
+        DELTA = BB**2 - 4 * AA * CC
+        DELTA[DELTA <= 0] = 0
+        i_g_new = (BB - np.sqrt(DELTA)) / (2 * AA)
+        # i_g[i_g <= 0] = (BB[i_g <= 0] + np.sqrt(DELTA[i_g<=0])) / (2 * AA[i_g <= 0])
+        i_d_new = aa + bb * i_g_new
 
 
     
@@ -210,9 +210,9 @@ while FC_Err > tol and epoch < max_iter:
 
     # mc = delta / ((A_d - id_star) * (1 - R_mat) + (A_g - ig_star) * R_mat)
     # i_d_new = (1 - mc / (-dR * R_mat + dK)) / phi_d
-    i_d = i_d_new * fraction + id_star * (1 - fraction)
+        i_d = i_d_new * fraction + id_star * (1 - fraction)
     # i_g_new = (1 - mc / (dR * (1 - R_mat) + dK)) / phi_g
-    i_g = i_g_new * fraction + ig_star * (1 - fraction)
+        i_g = i_g_new * fraction + ig_star * (1 - fraction)
      # # updating controls
         # Converged = 0
         # num = 0
@@ -222,6 +222,8 @@ while FC_Err > tol and epoch < max_iter:
             # i_d_1 = (1 - q / (-dR * R_mat + dK)) / phi_d
             # # i_d_1[i_d_1 >= A_d - 1e-15] = A_d - 1e-15
             # # i_g_1[i_g_1 >= A_g - 1e-15] = A_g - 1e-15
+            # i_d_1[i_d_1 <= 1e-15] = 1e-15
+            # # i_g_1[i_g_1 <= 1e-15] = 1e-15
 
             # if np.max(abs(i_g_1 - i_g)) <= 1e-12 and np.max(abs(i_d_1 - i_d)) <= 1e-12:
                 # Converged = 1
@@ -232,6 +234,7 @@ while FC_Err > tol and epoch < max_iter:
                 # i_d = i_d_1
                 # q = delta * (
                     # (A_g * R_mat - i_g * R_mat) + (A_d * (1-R_mat) - i_d * (1-R_mat))) ** (-1) * fraction + (1 - fraction) * q
+                # q[q <= 1e-16] = 1e-16
             # num += 1
             # # print(num)
         # print(np.max(abs(i_g_1 - i_g)) , np.max(abs(i_d_1 - i_d)))
@@ -251,10 +254,11 @@ while FC_Err > tol and epoch < max_iter:
     # i_g[i_g >= 1 - 1e-15] = 1 - 1e-15
     i_d[i_d < 0] = 0
     i_g[i_g < 0] = 0
-    print("min id: {:.12f};\t max ig: {:.12f}".format(np.min(i_d), np.min(i_g)) )
-    print("max id: {:.12f};\t max ig: {:.12f}".format(np.max(i_d), np.max(i_g)))
+    print("min id: {:.12f};\t max ig: {:.12f}\t".format(np.min(i_d), np.min(i_g)) )
+    print("max id: {:.12f};\t max ig: {:.12f}\t".format(np.max(i_d), np.max(i_g)))
     consumption = (A_d -i_d) * (1 - R_mat) + (A_g - i_g) * R_mat
     consumption[consumption < 1e-18] = 1e-18
+    print("min consum: {:.12f};\t max consum: {:.12f}\t".format(np.min(consumption), np.max(consumption)))
     # i_d[i_d >= A_d] = A_d - 1e-8
     # i_g[i_g >= A_g] = A_g - 1e-8
     # Step (2), solve minimization problem in HJB and calculate drift distortion

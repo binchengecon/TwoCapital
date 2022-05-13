@@ -3,7 +3,7 @@
 import os
 import sys
 import csv
-sys.path.append('./src')
+sys.path.append('../src')
 from supportfunctions import *
 sys.stdout.flush()
 import petsc4py
@@ -140,11 +140,11 @@ for i in range(len(W)):
 V_post = v0
 
 
-with open("./data/PreJump/varphi_0.05/varphi-0.05-gamma0.0-Agp-0.15-29-21-13", "rb") as f:
-    data = pickle.load(f)
-v0 = data["v0"]
+# with open("./data/PreJump/varphi_0.05/varphi-0.05-gamma0.0-Agp-0.15-29-21-13", "rb") as f:
+    # data = pickle.load(f)
+# v0 = data["v0"]
 # v0 = V_post
-continue_mode = True
+continue_mode = False
 
 csvfile = open("test3-logL.csv", "w")
 fieldnames = [
@@ -164,7 +164,7 @@ epoch    = 0
 tol      = 1e-6
 epsilon  = 0.003
 fraction = 0.5
-max_iter = 4000
+max_iter = 10000
 # file_iter = open("iter_c_compile.txt", "w")
 while  FC_Err > tol and epoch < max_iter:
     print("-----------------------------------")
