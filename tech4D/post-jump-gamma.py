@@ -107,9 +107,9 @@ upperLims = np.array([K_max, R_max, Y_max], dtype=np.float64)
 
 
 v0 = K_mat - (gamma_1 + gamma_2 * Y_mat)
-import pickle
-data = pickle.load(open("../data/PostJump/Ag-0.15-gamma-0.037037037037037035-11-16:42", "rb"))
-v0 = data["v0"]
+# import pickle
+# data = pickle.load(open("../data/PostJump/Ag-0.15-gamma-0.037037037037037035-11-16:42", "rb"))
+# v0 = data["v0"]
 ############# step up of optimization
 FC_Err = 1
 epoch = 0

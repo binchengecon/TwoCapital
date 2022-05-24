@@ -92,7 +92,7 @@ gamma_1 = postjump["gamma_1"]
 gamma_2 = postjump["gamma_2"]
 gamma_3 = postjump["gamma_3"]
 
-filename =  "varphi-" + str(varphi) +"-gamma" + str(gamma_3)  + '-' + "Agp" + "-" + str(A_g_prime) + "-{:d}-{:d}-{:d}".format(current_time.day, current_time.hour, current_time.minute)
+filename =  "varphi-" + str(varphi) +"-gamma-" + str(gamma_3)  + '-' + "Agp" + "-" + str(A_g_prime) + "-{:d}-{:d}-{:d}".format(current_time.day, current_time.hour, current_time.minute)
 
 hX = X[1] - X[0]
 nX = len(X)
@@ -140,11 +140,11 @@ for i in range(len(W)):
 V_post = v0
 
 
-# with open("./data/PreJump/varphi_0.05/varphi-0.05-gamma0.0-Agp-0.15-29-21-13", "rb") as f:
-    # data = pickle.load(f)
-# v0 = data["v0"]
+with open("./data/PreJump/varphi-0.01-gamma-0.0-Agp-0.15-24-11-10", "rb") as f:
+    data = pickle.load(f)
+v0 = data["v0"]
 # v0 = V_post
-continue_mode = False
+continue_mode = True
 
 csvfile = open("test3-logL.csv", "w")
 fieldnames = [
@@ -660,6 +660,6 @@ for key in dir():
         pass
 
 
-file = open("data/PreJump/" + filename, 'wb')
+file = open("./data/PreJump/" + filename, 'wb')
 pickle.dump(my_shelf, file)
 file.close()
