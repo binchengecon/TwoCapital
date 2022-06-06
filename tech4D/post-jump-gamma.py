@@ -1,5 +1,13 @@
+#########################################
+#########################################
 # Optimization of post jump HJB
-#Required packages
+#########################################
+
+
+#########################################
+# Library Loading
+#########################################
+
 import os
 import sys
 sys.path.append('../src')
@@ -7,7 +15,7 @@ import csv
 from supportfunctions import *
 sys.stdout.flush()
 import petsc4py
-petsc4py.init(sys.argv)
+#petsc4py.init(sys.argv)
 from petsc4py import PETSc
 import petsclinearsystem
 from scipy.sparse import spdiags
@@ -16,6 +24,7 @@ from scipy.sparse import csr_matrix
 from datetime import datetime
 from solver import solver_3d
 import argparse
+
 
 
 parser = argparse.ArgumentParser(description="Set damage curvature value.")
@@ -124,8 +133,8 @@ fraction = 0.005
 max_iter = 5000
 id_star = np.zeros_like(K_mat)
 ig_star = np.zeros_like(K_mat)
-id_star = data["id_star"]
-ig_star = data["ig_star"]
+#id_star = data["id_star"]
+#ig_star = data["ig_star"]
 # file_iter = open("iter_c_compile.txt", "w")
 
 # res = solver_3d(K_mat, R_mat, Y_mat, # FOC_func, Coeff_func,  
@@ -199,6 +208,10 @@ while FC_Err > tol and epoch < max_iter:
         BB = phi_g * ((1 - R_mat) * A_d + R_mat * A_g - (1 - R_mat) * aa) + (1 - R_mat) * bb + R_mat
         CC = (1 - R_mat) * A_d + R_mat * A_g - (1 - R_mat) * aa - delta / multi_1
         DELTA = BB**2 - 4 * AA * CC
+        if multi_2.any()<0:
+            import pdb
+            pde.set_trace()
+
         DELTA[DELTA <= 0] = 0
         i_g_new = (BB - np.sqrt(DELTA)) / (2 * AA)
         # i_g[i_g <= 0] = (BB[i_g <= 0] + np.sqrt(DELTA[i_g<=0])) / (2 * AA[i_g <= 0])
