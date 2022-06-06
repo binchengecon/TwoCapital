@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --account=pi-lhansen
 #SBATCH --mem=2G
-#SBATCH --cpus-per-task=25
+#SBATCH --cpus-per-task=1
 #SBATCH --partition=standard
 #SBATCH --time=2-00:00:00
 
