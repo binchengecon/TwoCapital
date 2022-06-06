@@ -7,8 +7,8 @@
 
 # Job specific information
 #SBATCH --job-name=job1
-#SBATCH --output=LogOut/log_postjump.out
-#SBATCH --error=LogErrorlog_postjump.err
+#SBATCH --output=/home/bcheng4/LogOut/log_postjump.out
+#SBATCH --error=/home/bcheng4/LogError/log_postjump.err
 
 #---------------------------------------------------------------------------------
 # Load necessary modules for the job
