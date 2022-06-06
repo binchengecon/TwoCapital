@@ -21,7 +21,6 @@ from scipy.sparse import spdiags
 from scipy.sparse import coo_matrix
 from scipy.sparse import csr_matrix
 from datetime import datetime
-from solver import solver_3d
 import argparse
 
 #########################################
