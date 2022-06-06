@@ -45,16 +45,21 @@ The key difference between the sectors is that production from Sector 1 generate
 	\dif Y_t = E_t ( \beta_f \dif t + \varsigma \dif W)
 \end{align*}
 
+<<<<<<< HEAD
 where  $\beta_f$ is the Matthews parameter and  $\eta$  is the scaling factor converting Sector $d$ output $ A_dK_d$ into emissions such that
+=======
+where  $\beta_f$ is the Matthews parameter and  $\eta$  is the scaling factor converting Sector $d$ output $A_dK_d$ into emissions such that
+>>>>>>> e82e3ac0b61deb49d652a057404199d584136eec
 
 $$
-E_t =  \eta A_dK_d
+E_t =  \eta A_d K_d
 $$
 
 Output can be used in for consumption, investment in either capital stock, or for R\&D into improving the productivity of Sector g :
 
 \begin{align*}
 C = A_dK_d - i_dK_d + A_gK_g - i_gK_g  - i_\lambda (K_d + K_g)	
+<<<<<<< HEAD
 \end{align*}
  
 
@@ -63,6 +68,15 @@ We assume exponential-quadratic damages to preferences so that our utility is au
 \[
 U(C)=\delta \log(A_dK_d - i_dK_d + A_gK_g - i_gK_g  - i_\lambda (K_d + K_g) 	) -\delta \log N_{t}
 \]
+=======
+\end{align*} 
+
+We assume exponential-quadratic damages to preferences so that our utility is augmented when accounting for climate damages. Flow utility is a log function over consumption, assuming perfect substitutability over output from the two sectors so that
+
+$$
+U(C)=\delta \log(A_dK_d - i_dK_d + A_gK_g - i_gK_g  - i_\lambda (K_d + K_g)) -\delta \log N_{t}
+$$
+>>>>>>> e82e3ac0b61deb49d652a057404199d584136eec
 
 where the $\log N_{t}$ follows from BBH2 as
 \begin{align*}
@@ -84,7 +98,7 @@ Taking these pieces together we get the HJB equation
  & +(\varphi i_{\lambda} - \alpha_\lambda)\lambda V_{\lambda}+\frac{(\sigma_{\lambda } \lambda)^{2}}{2}V_{\lambda \lambda}+\lambda  \left( V (K_d, K_g, \lambda, Y, \log N; A_g') - V (K_d, K_g, \lambda, Y, \log N; A_g) \right)
 \end{align*}
 
-The FOC for investment and R\&D are given by
+The FOC for investment and R\& D are given by
 
 \begin{align*}
 0  =& -  \delta (A_dK_d - i_dK_d + A_gK_g - i_gK_g  - i_\lambda \lambda)^{-1} + (1 - \phi_d i_d) V_d\\
