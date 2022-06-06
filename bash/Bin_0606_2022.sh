@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --account=pi-lhansen
-#SBATCH --mem=64G
+#SBATCH --mem=2G
 #SBATCH --cpus-per-task=25
-#SBATCH --partition=highmem
+#SBATCH --partition=standard
 #SBATCH --time=2-00:00:00
 
 # Job specific information
@@ -13,7 +13,8 @@
 #---------------------------------------------------------------------------------
 # Load necessary modules for the job
 
-module load python/booth/3.8/3.8.5
+module load python/booth/3.8/3.8.5 gcc
+
 
 #---------------------------------------------------------------------------------
 # Commands to execute below
