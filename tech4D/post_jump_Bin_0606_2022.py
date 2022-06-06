@@ -143,7 +143,7 @@ fraction = 0.005
 # fieldnames = ["epoch", "iterations", "residual norm", "PDE_Err", "FC_Err"]
 # writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 # writer.writeheader()
-max_iter = 6000
+max_iter = 10
 id_star = np.zeros_like(K_mat)
 ig_star = np.zeros_like(K_mat)
 #id_star = data["id_star"]
