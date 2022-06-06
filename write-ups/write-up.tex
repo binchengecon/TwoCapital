@@ -32,10 +32,10 @@ as follows:
 \end{align*}
 
 
-We also assume there is R\&D investment that leads to an increased arrival rate of a one time jump in Sector 2 productivity. The arrival rate is denoted as  t and evolves as follows
+We also assume there is R \& D investment that leads to an increased arrival rate of a one time jump in Sector 2 productivity. The arrival rate is denoted as t and evolves as follows
 
 \begin{align*}
-\dif \lambda_{t} / \lambda_t & =( \varphi  i_\lambda - \alpha_\lambda) \dif t+\sigma_{\lambda}\dif W
+\dif \lambda_{t} / \lambda_t & =( \varphi  i_\lambda  \frac{K_d + K_g}{\lambda}- \alpha_\lambda) \dif t+\sigma_{\lambda}\dif W
 \end{align*}
 
 
@@ -45,7 +45,7 @@ The key difference between the sectors is that production from Sector 1 generate
 	\dif Y_t = E_t ( \beta_f \dif t + \varsigma \dif W)
 \end{align*}
 
-where  $\beta_f$ is the Matthews parameter and  $\eta$  is the scaling factor converting Sector $d$ output $ A_dK_d$ into emissions such that 
+where  $\beta_f$ is the Matthews parameter and  $\eta$  is the scaling factor converting Sector $d$ output $ A_dK_d$ into emissions such that
 
 $$
 E_t =  \eta A_dK_d
@@ -54,14 +54,14 @@ $$
 Output can be used in for consumption, investment in either capital stock, or for R\&D into improving the productivity of Sector g :
 
 \begin{align*}
-C = A_dK_d - i_dK_d + A_gK_g - i_gK_g  - i_\lambda \lambda 	
+C = A_dK_d - i_dK_d + A_gK_g - i_gK_g  - i_\lambda (K_d + K_g)	
 \end{align*}
  
 
 We assume exponential-quadratic damages to preferences so that our utility is augmented when accounting for climate damages. Flow utility is a log function over consumption, assuming perfect substitutability over output from the two sectors so that
 
 \[
-U(C)=\delta \log(A_dK_d - i_dK_d + A_gK_g - i_gK_g  - i_\lambda \lambda 	) -\delta \log N_{t}
+U(C)=\delta \log(A_dK_d - i_dK_d + A_gK_g - i_gK_g  - i_\lambda (K_d + K_g) 	) -\delta \log N_{t}
 \]
 
 where the $\log N_{t}$ follows from BBH2 as
@@ -75,7 +75,7 @@ where the $\log N_{t}$ follows from BBH2 as
 Taking these pieces together we get the HJB equation
 
 \begin{align*}
-\delta V(K_{d},K_{g},\lambda,Y,\log N ) & =\max_{i_{g},i_{d}, i_{\lambda}}\delta \log(A_dK_d - i_dK_d + A_gK_g - i_gK_g  - i_\lambda \lambda ) -\delta \log N\\
+\delta V(K_{d},K_{g},\lambda,Y,\log N ) & =\max_{i_{g},i_{d}, i_{\lambda}}\delta \log(A_dK_d - i_dK_d + A_gK_g - i_gK_g  - i_\lambda (K_d + K_g) ) -\delta \log N\\
  & +\{\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}\}V_{d}K_{d}+\{\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}\}V_{g}K_{g}+\frac{\sigma_{d}^{2}K_{d}^{2}}{2}V_{dd}+\frac{\sigma_{g}^{2}K_{g}^{2}}{2}V_{gg}\\
  & +\beta_{f}E_{d}V_{Y}+\frac{1}{2}\varsigma^{2}E_{d}^{2}V_{YY}+[\{\gamma_{1}+\gamma_{2}Y + \gamma_3 (Y - \bar{y}) \mathbf
  {I} \{Y_t > \bar{y}
@@ -161,8 +161,6 @@ FOC
 \end{gather*}
 
 
-
-
 \begin{align*}
 	\dif (K_{d} + K_g) =& \left([\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}] K_d + [\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}] K_g \right)\dif t+\left(\sigma_{d}K_d + \sigma_g K_g \right)\dif W\\
 		\dif K / K =&  \left([\alpha_{d}+i_{d}-\frac{\phi_{d}}{2}i_{d}^{2}] (1 - R) + [\alpha_{g}+i_{g}-\frac{\phi_{g}}{2}i_{g}^{2}] R \right) \dif t+\left(\sigma_{d}(1 - R)+ \sigma_g R \right)\dif W \\
@@ -211,6 +209,11 @@ FOC
 \end{align*}
 
 
+Future plans:
+
+\begin{itemize}
+\item Non-zero $\gamma_3$
+\end{itemize}
 
 \section{Pre jump}
 
@@ -235,7 +238,7 @@ State variables $\log K, R, Y, \log(\lambda)$,  controls $i_d$, $i_g$ and $i_\la
 	& +\beta_{f} (\eta A_d (1 - R) K )v_{Y}+\frac{1}{2}\varsigma^{2}(\eta A_d  (1 - R) K)^{2}v{}_{YY} \\
 	&- [\{\gamma_{1}+\gamma_{2}Y + \gamma_3 (Y - \bar{y}) \mathbb{I}\{ Y>\bar{y}\} \}\beta_{f}(\eta A_d(1 - R)K)+\frac{\gamma_2 + \gamma_3 \mathbb{I}\{Y > \bar{y}\}}{2}\varsigma^{2}(\eta A_d (1 - R) K)^{2}]\\
 	& +(\varphi i_{\lambda} \frac{ K}{\lambda} - \alpha_\lambda - \frac{\sigma_\lambda^2}{2}) v_{\lambda}+\frac{ \sigma_{\lambda }^2}{2}v_{\lambda \lambda}+\lambda  \left( v^{\text{post}} (\log K, R, Y; A_g') - v (\log K, R, Y, \log(\lambda); A_g) \right)
-\end{align*}
+                                                                                                                                                                                                                                                                                                                                                                                                    \end{align*}
 
 FOC
 
