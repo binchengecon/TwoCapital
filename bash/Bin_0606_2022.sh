@@ -2,7 +2,7 @@
 #SBATCH --account=pi-lhansen
 #SBATCH --mem=64G
 #SBATCH --cpus-per-task=25
-#SBATCH --partition=standard
+#SBATCH --partition=highmem
 #SBATCH --time=2-00:00:00
 
 # Job specific information
