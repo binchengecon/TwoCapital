@@ -180,8 +180,8 @@ for gamma_3 in gamma_3_list:
     iteration_time_list = epoch_list.copy()
     PDE_Err_list = epoch_list.copy()
     FC_Err_list = epoch_list.copy()
-    petsc_total_list = epoch_list.copy()
-    petsc_normres_list = epoch_list.copy()
+    total_list = epoch_list.copy()
+    normres_list = epoch_list.copy()
     epoch = 0
     FC_Err = 1
     while FC_Err > tol and epoch < max_iter:
@@ -243,9 +243,6 @@ for gamma_3 in gamma_3_list:
             BB = phi_g * ((1 - R_mat) * A_d + R_mat * A_g - (1 - R_mat) * aa) + (1 - R_mat) * bb + R_mat
             CC = (1 - R_mat) * A_d + R_mat * A_g - (1 - R_mat) * aa - delta / multi_1
             DELTA = BB**2 - 4 * AA * CC
-            if multi_2.any()<0:
-                import pdb
-                pde.set_trace()
 
             DELTA[DELTA <= 0] = 0
             i_g_new = (BB - np.sqrt(DELTA)) / (2 * AA)
@@ -291,11 +288,6 @@ for gamma_3 in gamma_3_list:
         # i_d[i_d >= A_d] = A_d - 1e-15
         # i_g[i_g >= A_g] = A_g - 1e-8
 
-        print(np.min(i_d), np.min(i_g))
-        print(np.max(i_d), np.max(i_g))
-
-
-
         # i_d[i_d >= A_d] = A_d - 1e-15
         # i_g[i_g >= A_g] = A_g - 1e-8
         # i_d = np.zeros(K_mat.shape)
@@ -306,8 +298,6 @@ for gamma_3 in gamma_3_list:
         # i_g[i_g >= 1 - 1e-15] = 1 - 1e-15
         i_d[i_d < 0] = 0
         i_g[i_g < 0] = 0
-        print("min id: {:.12f};\t max ig: {:.12f}\t".format(np.min(i_d), np.min(i_g)) )
-        print("max id: {:.12f};\t max ig: {:.12f}\t".format(np.max(i_d), np.max(i_g)))
 
         min_id_list[epoch] = np.min(i_d)
         max_id_list[epoch] = np.max(i_d)
@@ -316,7 +306,6 @@ for gamma_3 in gamma_3_list:
         
         consumption = (A_d -i_d) * (1 - R_mat) + (A_g - i_g) * R_mat
         consumption[consumption < 1e-18] = 1e-18
-        print("min consum: {:.12f};\t max consum: {:.12f}\t".format(np.min(consumption), np.max(consumption)))
         
         min_consumption_list[epoch] = np.min(consumption)
         max_consumption_list[epoch] = np.max(consumption)
@@ -389,18 +378,17 @@ for gamma_3 in gamma_3_list:
             start_eigen = time.time()
             out_eigen = PDESolver(stateSpace, A, B_d, B_g, B_y, C_dd, C_gg, C_yy, D, v0, epsilon, solverType = 'False Transient')
             out_comp = out_eigen[2].reshape(v0.shape,order = "F")
-            print("Eigen solver: {:3f}s".format(time.time() - start_eigen))
-
             iteration_time_list[epoch] = time.time() - start_eigen
 
             if epoch % 1 == 0 and reporterror:
                 v = np.array(out_eigen[2])
                 res = np.linalg.norm(out_eigen[3].dot(v) - out_eigen[4])
-                print("Eigen residual norm: {:g}; iterations: {}".format(res, out_eigen[0]))
+                total_list[epoch]=0
+                normres_list[epoch] = res
                 PDE_rhs = A * v0 + B_d * dK + B_g * dR + B_y * dY + C_dd * ddK + C_gg * ddR + C_yy * ddY + D
                 PDE_Err = np.max(abs(PDE_rhs))
                 FC_Err = np.max(abs((out_comp - v0)))
-                print("Episode {:d} (Eigen): PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch, PDE_Err, FC_Err))
+
                 PDE_Err_list[epoch] = PDE_Err
                 FC_Err_list[epoch] = FC_Err
 
@@ -466,14 +454,14 @@ for gamma_3 in gamma_3_list:
 
             print("petsc4py total: {:.3f}s".format(end_ksp - bpoint1))
             print("PETSc preconditioned residual norm is {:g}; iterations: {}".format(ksp.getResidualNorm(), ksp.getIterationNumber()))
-            petsc_total_list[epoch] = end_ksp - bpoint1
-            petsc_normres_list[epoch] = ksp.getResidualNorm(), ksp.getIterationNumber()
+            total_list[epoch] = end_ksp - bpoint1
+            normres_list[epoch] = ksp.getResidualNorm()
             if epoch % 1 == 0 and reporterror:
                 # Calculating PDE error and False Transient error
                 PDE_rhs = A * v0 + B_d * dK + B_g * dR + B_y * dY + C_dd * ddK + C_gg * ddR + C_yy * ddY + D
                 PDE_Err = np.max(abs(PDE_rhs))
                 FC_Err = np.max(abs((out_comp - v0) / epsilon))
-                print("Epoch {:d} (PETSc): PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch, PDE_Err, FC_Err))
+
                 PDE_Err_list[epoch] = PDE_Err
                 FC_Err_list[epoch] = FC_Err
 
@@ -513,19 +501,15 @@ for gamma_3 in gamma_3_list:
             # print("ksp solve: {:.3f}s".format(end_ksp - start_ksp))
             num_iter = ksp.getIterationNumber()
             # file_iter.write("%s \n" % num_iter)
-            print("petsc total: {:.3f}s".format(end_ksp - bpoint1))
-            print("PETSc preconditioned residual norm is {:g}; iterations: {}".format(ksp.getResidualNorm(), ksp.getIterationNumber()))
-            petsc_total_list[epoch] = end_ksp - bpoint1
-            petsc_normres_list[epoch] = ksp.getResidualNorm(), ksp.getIterationNumber()
+            total_list[epoch] = end_ksp - bpoint1
+            normres_list[epoch] = ksp.getResidualNorm(), ksp.getIterationNumber()
             if epoch % 1 == 0 and reporterror:
                 # Calculating PDE error and False Transient error
                 PDE_rhs = A * v0 + B_d * dK + B_g * dR + B_y * dY + C_dd * ddK + C_gg * ddR + C_yy * ddY + D
                 PDE_Err = np.max(abs(PDE_rhs))
                 FC_Err = np.max(abs((out_comp - v0)/ epsilon))
-                print("Epoch {:d} (PETSc): PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch, PDE_Err, FC_Err))
                 PDE_Err_list[epoch] = PDE_Err
                 FC_Err_list[epoch] = FC_Err
-        print("Epoch time: {:.4f}".format(time.time() - start_ep))
         iteration_time_list[epoch] = time.time() - start_ep
 
         # step 9: keep iterating until convergence
@@ -546,7 +530,7 @@ for gamma_3 in gamma_3_list:
         print("Fianal epoch {:d}: PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch -1, PDE_Err, FC_Err))
     print("--- Total running time: %s seconds ---" % (time.time() - start_time))
 
-    Data_List = list(zip(epoch_list,max_id_list,min_id_list,max_ig_list,min_ig_list,iteration_time_list,PDE_Err_list,FC_Err_list,petsc_total_list,petsc_normres_list))
+    Data_List = list(zip(epoch_list,max_id_list,min_id_list,max_ig_list,min_ig_list,iteration_time_list,PDE_Err_list,FC_Err_list,total_list,normres_list))
 
     file_name = "gamma-" + str(gamma_3)
     file_header = ['epoch','maxid','minid','maxig','minig','iterationtime','PDEError','FCError','PetscTotal','PetscNormRes']
