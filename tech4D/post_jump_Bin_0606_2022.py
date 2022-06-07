@@ -21,7 +21,6 @@ from scipy.sparse import spdiags
 from scipy.sparse import coo_matrix
 from scipy.sparse import csr_matrix
 from datetime import datetime
-from solver import solver_3d
 import argparse
 
 #########################################
@@ -143,7 +142,7 @@ fraction = 0.005
 # fieldnames = ["epoch", "iterations", "residual norm", "PDE_Err", "FC_Err"]
 # writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 # writer.writeheader()
-max_iter = 6000
+max_iter = 10
 id_star = np.zeros_like(K_mat)
 ig_star = np.zeros_like(K_mat)
 #id_star = data["id_star"]
