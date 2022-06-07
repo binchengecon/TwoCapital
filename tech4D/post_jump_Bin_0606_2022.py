@@ -28,10 +28,6 @@ import argparse
 #########################################
  
 
-# parser = argparse.ArgumentParser(description="Set damage curvature value.")
-# parser.add_argument("--gamma", type=int, help="Value of gamma_3")
-# args = parser.parse_args()
-
 
 reporterror = True
 # Linear solver choices
@@ -138,26 +134,11 @@ tol = 1e-7
 epsilon  = 0.005
 fraction = 0.005
 
-# csvfile = open("ResForRatio.csv", "w")
-# fieldnames = ["epoch", "iterations", "residual norm", "PDE_Err", "FC_Err"]
-# writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-# writer.writeheader()
+
 max_iter = 6000
 id_star = np.zeros_like(K_mat)
 ig_star = np.zeros_like(K_mat)
-#id_star = data["id_star"]
-#ig_star = data["ig_star"]
-# file_iter = open("iter_c_compile.txt", "w")
 
-# res = solver_3d(K_mat, R_mat, Y_mat, # FOC_func, Coeff_func,  
-        # args=(delta, eta, A_d, A_g, alpha_d, alpha_g, sigma_d, sigma_g, phi_d, phi_g, gamma_1, \
-            # gamma_2, y_bar, varphi, varsigma, beta_f ),
-        # linearsolver="petsc",
-        # reporterror=True,
-        # v0=v0, tol=1e-6, max_iter=10000, epsilon=0.1, fraction=0.5,
-        # saveRes=True)
-
-# exit()
 #########################################
 # Result Storage Setup
 #########################################
