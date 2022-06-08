@@ -390,7 +390,7 @@ for ctpathnum in range(cearth_taucMatrixSize):
     TvmidBase = np.zeros(10000)
 
     for pathnum in range(ImpulsePathSize):
-s
+
 
         Ce = CeMatrix[pathnum,:]
         cearth, tauc = cearth_taucMatrix[ctpathnum]

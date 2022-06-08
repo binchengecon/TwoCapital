@@ -147,10 +147,10 @@ ig_star = np.zeros_like(K_mat)
 gamma_3_list = np.linspace(0., 1./3., 10)
 #########################################
 
+epoch_list = list(range(1,max_iter+1,1))
 
 for gamma_3 in gamma_3_list:
 
-    epoch_list = list(range(1,max_iter+1,1))
     min_id_list = epoch_list.copy()
     min_ig_list = epoch_list.copy()
     max_id_list = epoch_list.copy()
@@ -162,8 +162,10 @@ for gamma_3 in gamma_3_list:
     FC_Err_list = epoch_list.copy()
     total_list = epoch_list.copy()
     normres_list = epoch_list.copy()
+
     epoch = 0
     FC_Err = 1
+
     while FC_Err > tol and epoch < max_iter:
 
         start_ep = time.time()
@@ -180,20 +182,10 @@ for gamma_3 in gamma_3_list:
         ddR = finiteDiff(v0,1,2,hR)
         ddY = finiteDiff(v0,2,2,hY)
 
-        # if epoch > 5000:
-            # epsilon = 0.01
-        # elif epoch > 1000:
-            # epsilon = 0.1
-        # else:
-            # pass
 
         # update control
         if epoch == 0:
-            # # pass
-            # fraction = 1
-        # else:
-            # # pass
-            # fraction = 0.5
+
             i_d = np.zeros(K_mat.shape)
             i_g = np.zeros(R_mat.shape)
             consumption_0 = A_d * (1 - R_mat) + A_g * R_mat
@@ -202,18 +194,17 @@ for gamma_3 in gamma_3_list:
             i_d = 1 -  mc / (dK - R_mat *  dR)
             i_d /= phi_d
             i_d[i_d < 0] = 0
-            # i_d[i_d > A_d] = A_d
+
             i_g = 1 - mc / (dK + (1 - R_mat) * dR)
             i_g /= phi_g
-            # i_g[i_g < 0] = 0
-            # i_g[i_g > A_g] = A_g
+
+
             q = delta * ((A_g * R_mat - i_g * R_mat) + (A_d * (1 - R_mat) - i_d * (1 - R_mat))) ** (-1)
 
         else:
 
             multi_1 = dK + (1 - R_mat) * R_mat
             multi_2 = dK - R_mat * dR
-
             multi_2[multi_2 <= 1e-8] = 1e-8
 
             aa = (1 - multi_1 / multi_2) / phi_d
@@ -222,63 +213,24 @@ for gamma_3 in gamma_3_list:
             AA = phi_g * ((1 - R_mat) * bb + R_mat)
             BB = phi_g * ((1 - R_mat) * A_d + R_mat * A_g - (1 - R_mat) * aa) + (1 - R_mat) * bb + R_mat
             CC = (1 - R_mat) * A_d + R_mat * A_g - (1 - R_mat) * aa - delta / multi_1
-            DELTA = BB**2 - 4 * AA * CC
 
+            DELTA = BB**2 - 4 * AA * CC
             DELTA[DELTA <= 0] = 0
+
             i_g_new = (BB - np.sqrt(DELTA)) / (2 * AA)
-            # i_g[i_g <= 0] = (BB[i_g <= 0] + np.sqrt(DELTA[i_g<=0])) / (2 * AA[i_g <= 0])
             i_d_new = aa + bb * i_g_new
 
 
         
 
 
-        # mc = delta / ((A_d - id_star) * (1 - R_mat) + (A_g - ig_star) * R_mat)
-        # i_d_new = (1 - mc / (-dR * R_mat + dK)) / phi_d
             i_d = i_d_new * fraction + id_star * (1 - fraction)
-        # i_g_new = (1 - mc / (dR * (1 - R_mat) + dK)) / phi_g
             i_g = i_g_new * fraction + ig_star * (1 - fraction)
-        # # updating controls
-            # Converged = 0
-            # num = 0
-
-            # while Converged == 0 and num < 5000:
-                # i_g_1 = (1 - q / (dR * (1 - R_mat) + dK )) / phi_g
-                # i_d_1 = (1 - q / (-dR * R_mat + dK)) / phi_d
-                # # i_d_1[i_d_1 >= A_d - 1e-15] = A_d - 1e-15
-                # # i_g_1[i_g_1 >= A_g - 1e-15] = A_g - 1e-15
-                # i_d_1[i_d_1 <= 1e-15] = 1e-15
-                # # i_g_1[i_g_1 <= 1e-15] = 1e-15
-
-                # if np.max(abs(i_g_1 - i_g)) <= 1e-12 and np.max(abs(i_d_1 - i_d)) <= 1e-12:
-                    # Converged = 1
-                    # i_g = i_g_1
-                    # i_d = i_d_1
-                # else:
-                    # i_g = i_g_1
-                    # i_d = i_d_1
-                    # q = delta * (
-                        # (A_g * R_mat - i_g * R_mat) + (A_d * (1-R_mat) - i_d * (1-R_mat))) ** (-1) * fraction + (1 - fraction) * q
-                    # q[q <= 1e-16] = 1e-16
-                # num += 1
-                # # print(num)
-            # print(np.max(abs(i_g_1 - i_g)) , np.max(abs(i_d_1 - i_d)))
-
-            # print(diff)
-        # i_d[i_d >= A_d] = A_d - 1e-15
-        # i_g[i_g >= A_g] = A_g - 1e-8
-
-        # i_d[i_d >= A_d] = A_d - 1e-15
-        # i_g[i_g >= A_g] = A_g - 1e-8
-        # i_d = np.zeros(K_mat.shape)
-        # i_g = np.zeros(R_mat.shape)
-        # i_d[i_d <= -1 + 1e-15] = -1 + 1e-15
-        # i_g[i_g <= -1 + 1e-15] = -1 + 1e-15
-        # i_d[i_d >= 1 - 1e-15] = 1 - 1e-15
-        # i_g[i_g >= 1 - 1e-15] = 1 - 1e-15
+            
         i_d[i_d < 0] = 0
         i_g[i_g < 0] = 0
 
+        # Result Storage: id, ig
         min_id_list[epoch] = np.min(i_d)
         max_id_list[epoch] = np.max(i_d)
         min_ig_list[epoch] = np.min(i_g)
@@ -287,14 +239,14 @@ for gamma_3 in gamma_3_list:
         consumption = (A_d -i_d) * (1 - R_mat) + (A_g - i_g) * R_mat
         consumption[consumption < 1e-18] = 1e-18
         
+        # Result Storage: consumption
+
         min_consumption_list[epoch] = np.min(consumption)
         max_consumption_list[epoch] = np.max(consumption)
 
-        # i_d[i_d >= A_d] = A_d - 1e-8
-        # i_g[i_g >= A_g] = A_g - 1e-8
-        # Step (2), solve minimization problem in HJB and calculate drift distortion
-        # See remark 2.1.3 for more details
+
         start_time2 = time.time()
+
         if epoch == 0:
             dVec = np.array([hK, hR, hY])
             increVec = np.array([1, nK, nK * nR],dtype=np.int32)
@@ -303,6 +255,7 @@ for gamma_3 in gamma_3_list:
             C_dd = 0.5 * ( sigma_d * (1 - R_mat) + sigma_g * R_mat )**2
             C_gg = 0.5 * (1- R_mat)**2 * R_mat**2 * (sigma_d + sigma_g)**2
             C_yy = 0.5 * (eta * varsigma * A_d * np.exp(K_mat) * (1 - R_mat))** 2
+
             if linearsolver == 'petsc4py' or linearsolver == 'petsc' or linearsolver == 'both':
                 petsc_mat = PETSc.Mat().create()
                 petsc_mat.setType('aij')
@@ -345,8 +298,7 @@ for gamma_3 in gamma_3_list:
                     diag_yym = I_UB_y * C_yy_1d[:] / dVec[2] ** 2
 
 
-        # Step (6) and (7) Formulating HJB False Transient parameters
-        # See remark 2.1.4 for more details
+
 
         B_d = (alpha_d + i_d - 0.5* phi_d * i_d**2) * (1 - R_mat) +  (alpha_g + i_g - 0.5 * phi_g * i_g**2) * R_mat - C_dd
         B_g = ((alpha_g + i_g - 0.5 * phi_g * i_g**2) -  (alpha_d + i_d - 0.5* phi_d * i_d**2) - R_mat * sigma_g**2 + (1 - R_mat)* sigma_d**2) * R_mat * (1 - R_mat)
@@ -520,26 +472,3 @@ for gamma_3 in gamma_3_list:
         writer.writerows(Data_List)
 
 
-
-
-# exit()
-
-# import pickle
-# # filename = filename
-# my_shelf = {}
-# for key in dir():
-#     if isinstance(globals()[key], (int,float, float, str, bool, np.ndarray,list)):
-#         try:
-#             my_shelf[key] = globals()[key]
-#         except TypeError:
-#             #
-#             # __builtins__, my_shelf, and imported modules can not be shelved.
-#             #
-#             print('ERROR shelving: {0}'.format(key))
-#     else:
-#         pass
-
-
-# file = open("../data/PostJump/" + filename, 'wb')
-# pickle.dump(my_shelf, file)
-# file.close()

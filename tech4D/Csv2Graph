@@ -1,0 +1,56 @@
+
+from isort import file
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
+from mpl_toolkits.mplot3d.axes3d import Axes3D
+from numpy import loadtxt
+import numpy as np
+import sympy
+import csv
+import pandas as pd
+import string as str
+
+gamma_list = np.linspace(0,1/3,10)
+
+
+
+
+figwidth = 10
+fig, axs = plt.subplots(file_varnum, 1, sharex=True, figsize=(2  * figwidth, 2 *figwidth))
+
+for gamma in gamma_list:
+    
+    file_name = "gamma-" + str(gamma)
+    file = open("data/PostJump/"+file_name+'.csv')
+    file_header = ['epoch','maxid','minid','maxig','minig','iterationtime','PDEError','FCError','PetscTotal','PetscNormRes']
+    file_varnum = len(file_header)-1
+    var_list = 
+    epoch_list = 
+    ylabel_list = file_header[1:-1]
+    ytitle_list = ylabel_list.copy()
+
+    for varnum in range(file_varnum):
+        axs[varnum].plot(epoch_list,var_list[:,varnum])
+        axs[varnum].set_xlabel('Epoch',fontsize = 16)
+        axs[varnum].set_ylabel('%s' %ylabel_list[varnum],fontsize = 16)
+        axs[varnum].set_title('%s' %ytitle_list[varnum])
+        axs[varnum].grid(linestyle=':')
+        axs[varnum].legend()
+        
+    
+    plt.savefig(f"gamma_{gamma}.pdf")
+
+
+gamma =  gamma_list[1]       
+gamma
+file_name = "gamma-" +str(gamma)
+
+file = open("tech4D/data/PostJump/"+file_name+'.csv')
+readers = csv.reader(file,delimiter=',')
+header = next(readers)
+header
+data=np.array(list(readers)).astype(float)
+
+
+
