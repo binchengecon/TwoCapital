@@ -22,6 +22,7 @@ from scipy.sparse import coo_matrix
 from scipy.sparse import csr_matrix
 from datetime import datetime
 import argparse
+import numpy as np
 
 #########################################
 # Method Loading
@@ -61,8 +62,7 @@ sigma_g = 0.016
 varsigma = 1.2 * 1.86 / 1000
 phi_d = 8.
 phi_g = 8.
-########## Scaling factor
-eta = 0.17
+
 
 
 ###### damage
@@ -143,13 +143,19 @@ ig_star = np.zeros_like(K_mat)
 # Result Storage Setup
 #########################################
 
+########## Scaling factor
+# eta = 0.17
 #########################################
 gamma_3_list = np.linspace(0., 1./3., 10)
+eta_list     = np.array([0.1,0.01,0.001])
 #########################################
 
 epoch_list = list(range(1,max_iter+1,1))
 
-for gamma_3 in gamma_3_list:
+for gamma_3,eta in zip(gamma_3_list,eta_list):
+
+    file_name = "gamma-" + str(gamma_3)+"eta-" +str(eta)
+    file_header = ['epoch','maxid','minid','maxig','minig','iterationtime','PDEError','FCError','PetscTotal','PetscNormRes']
 
     min_id_list = epoch_list.copy()
     min_ig_list = epoch_list.copy()
@@ -162,6 +168,7 @@ for gamma_3 in gamma_3_list:
     FC_Err_list = epoch_list.copy()
     total_list = epoch_list.copy()
     normres_list = epoch_list.copy()
+
 
     epoch = 0
     FC_Err = 1
@@ -434,7 +441,7 @@ for gamma_3 in gamma_3_list:
             num_iter = ksp.getIterationNumber()
             # file_iter.write("%s \n" % num_iter)
             total_list[epoch] = end_ksp - bpoint1
-            normres_list[epoch] = ksp.getResidualNorm(), ksp.getIterationNumber()
+            normres_list[epoch] = ksp.getResidualNorm()
             if epoch % 1 == 0 and reporterror:
                 # Calculating PDE error and False Transient error
                 PDE_rhs = A * v0 + B_d * dK + B_g * dR + B_y * dY + C_dd * ddK + C_gg * ddR + C_yy * ddY + D
@@ -464,8 +471,6 @@ for gamma_3 in gamma_3_list:
 
     Data_List = list(zip(epoch_list,max_id_list,min_id_list,max_ig_list,min_ig_list,iteration_time_list,PDE_Err_list,FC_Err_list,total_list,normres_list))
 
-    file_name = "gamma-" + str(gamma_3)
-    file_header = ['epoch','maxid','minid','maxig','minig','iterationtime','PDEError','FCError','PetscTotal','PetscNormRes']
     with open("data/PostJump/"+file_name+'.csv','w+') as f:
         writer  = csv.writer(f)
         writer.writerow(file_header)
