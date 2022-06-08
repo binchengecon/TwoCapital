@@ -1,4 +1,5 @@
 
+from math import ceil
 from isort import file
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -41,7 +42,7 @@ for num in range(len(param_list)):
 
 
     figwidth = 10
-    fig, axs = plt.subplots(int(file_varnum/2), 2, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
+    fig, axs = plt.subplots(int(np.ceil(file_varnum/2)), 2, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
 
 
     for varnum in np.array(range(file_varnum)):
