@@ -148,6 +148,13 @@ ig_star = np.zeros_like(K_mat)
 #########################################
 gamma_3_list = np.linspace(0., 1./3., 10)
 eta_list     = np.array([0.1,0.01,0.001])
+
+(gamma_3_list,eta_list) = np.meshgrid(gamma_3_list,eta_list,indexing='ij')
+
+gamma_3_list = gamma_3_list.ravel(order='F')
+eta_list = eta_list.ravel(order='F')
+
+param_list = zip(gamma_3_list,eta_list)
 #########################################
 
 epoch_list = list(range(1,max_iter+1,1))
