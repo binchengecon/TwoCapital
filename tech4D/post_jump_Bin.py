@@ -134,7 +134,7 @@ epsilon  = 0.005
 fraction = 0.005
 
 
-max_iter = 6000
+max_iter = 10
 id_star = np.zeros_like(K_mat)
 ig_star = np.zeros_like(K_mat)
 
@@ -147,6 +147,7 @@ ig_star = np.zeros_like(K_mat)
 #########################################
 gamma_3_list = np.linspace(0., 1./3., 10)
 eta_list     = np.array([0.1,0.01,0.001])
+
 
 (gamma_3_list,eta_list) = np.meshgrid(gamma_3_list,eta_list,indexing='ij')
 
@@ -220,7 +221,7 @@ for gamma_3,eta in zip(gamma_3_list,eta_list):
 
         else:
 
-            multi_1 = dK + (1 - R_mat) * R_mat
+            multi_1 = dK + (1 - R_mat) * dR
             multi_2 = dK - R_mat * dR
             multi_2[multi_2 <= 1e-8] = 1e-8
 
@@ -244,17 +245,18 @@ for gamma_3,eta in zip(gamma_3_list,eta_list):
             i_d = i_d_new * fraction + id_star * (1 - fraction)
             i_g = i_g_new * fraction + ig_star * (1 - fraction)
             
-        i_d[i_d <= 1e-14] = 1e-14
-        i_g[i_g <= 1e-14] = 1e-14
+        # i_d[i_d <= 1e-14] = 1e-14
+        # i_g[i_g <= 1e-14] = 1e-14
         
-        i_d[i_d >= 1 / phi_d - 1e-14] = 1 / phi_d - 1e-14
-        i_g[i_g >= 1 / phi_g - 1e-14] = 1 / phi_g - 1e-14
+        # i_d[i_d >= 1 / phi_d - 1e-14] = 1 / phi_d - 1e-14
+        # i_g[i_g >= 1 / phi_g - 1e-14] = 1 / phi_g - 1e-14
         # Result Storage: id, ig
         min_id_list[epoch] = np.min(i_d)
         max_id_list[epoch] = np.max(i_d)
         min_ig_list[epoch] = np.min(i_g)
         max_ig_list[epoch] = np.max(i_g)
         
+        print(i_d.max(), i_g.max())
         consumption = (A_d -i_d) * (1 - R_mat) + (A_g - i_g) * R_mat
         consumption[consumption < 1e-18] = 1e-18
         
