@@ -160,7 +160,7 @@ epoch_list = list(range(1,max_iter+1,1))
 
 for gamma_3,eta in zip(gamma_3_list,eta_list):
 
-    file_name = "gamma-" + str(gamma_3)+"eta-" +str(eta)
+    file_name = "gamma_" + str(gamma_3)+"_"+"eta_" +str(eta)
     file_header = ['maxid','minid','maxig','minig','iterationtime','PDEError','FCError','PetscTotal','PetscNormRes']
 
     min_id_list = epoch_list.copy()
