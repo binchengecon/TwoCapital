@@ -15,53 +15,31 @@ import pandas as pd
 param_list = np.linspace(0,1/3,10)
 
 
+for num in range(len(param_list)):
+    gamma = param_list[num]
 
-# gamma =  param_list[2]       
-# gamma
-# file_name = "gamma-" + str(gamma)
-
-# file = pd.read_csv("../tech4D/data/PostJump/"+file_name+'.csv',header=0)
-# file_header = file.columns
-# file_header
-# data=np.array(list(readers)).astype(float)
-# file_varnum = len(file_header)
-
-# figwidth = 10
-# fig, axs = plt.subplots(int(file_varnum/2), 2, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
-
-
-# for varnum in np.array(range(file_varnum)):
-#     axs[varnum//2,varnum%2].plot(data[:,varnum])
-#     axs[varnum//2,varnum%2].set_ylabel('%s' %file_header[varnum],fontsize = 16)
-#     axs[varnum//2,varnum%2].set_title('%s' %file_header[varnum])
-#     axs[varnum//2,varnum%2].grid(linestyle=':')
-#     axs[varnum//2,varnum%2].legend()
-        
-# plt.savefig(f"../tech4D/data/PostJump/gamma_{gamma}.pdf")
-
-
-
-for num in range(10):
-    file_name = "./data/PostJump/"+"gamma-" + str(param_list[num])
+    file_name = "./data/PostJump/"+"gamma-" + str(gamma)
     file = open(file_name+'.csv','r')
-    reader = csv.reader(file)
-    header= next(reader)
-    header 
-    # file_header = file.columns
-    # file_varnum = len(file_header)
+    reader = csv.reader(file,delimiter=',')
+    file_header= next(reader)
+    file_varnum = len(file_header)
 
-    # figwidth = 10
-    # fig, axs = plt.subplots(int(file_varnum/2), 2, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
+    data = np.array(list(reader)).astype(float)
 
 
-    # for varnum in np.array(range(file_varnum)):
-    #     axs[varnum//2,varnum%2].plot(file.iloc[:,varnum])
-    #     axs[varnum//2,varnum%2].set_ylabel('%s' %file_header[varnum],fontsize = 16)
-    #     axs[varnum//2,varnum%2].set_title('%s' %file_header[varnum])
-    #     axs[varnum//2,varnum%2].grid(linestyle=':')
-    #     axs[varnum//2,varnum%2].legend()
-            
-    # plt.savefig(f"../tech4D/data/PostJump/gamma_{gamma}.pdf")
+    figwidth = 10
+    fig, axs = plt.subplots(int(file_varnum/2), 2, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
+
+
+    for varnum in np.array(range(file_varnum)):
+        axs[varnum//2,varnum%2].plot(data[:,varnum])
+        axs[varnum//2,varnum%2].set_ylabel('%s' %file_header[varnum],fontsize = 16)
+        axs[varnum//2,varnum%2].set_title('%s' %file_header[varnum])
+        axs[varnum//2,varnum%2].grid(linestyle=':')
+        axs[varnum//2,varnum%2].legend()
+    
+    
+    plt.savefig(f"../tech4D/data/PostJump/gamma_{str(gamma)[:5]}_eta_{0.17}.pdf")
 
 
 
