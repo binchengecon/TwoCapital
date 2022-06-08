@@ -31,7 +31,7 @@ for num in range(len(param_list)):
     gamma = param_list[num][0]
     eta=param_list[num][1]
 
-    file_name = "./data/PostJump/"+"gamma-" + str(gamma)
+    file_name = "./data/PostJump/"+"gamma-" + str(gamma)+"eta-"+str(eta)
     file = open(file_name+'.csv','r')
     reader = csv.reader(file,delimiter=',')
     file_header= next(reader)
