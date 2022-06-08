@@ -16,13 +16,16 @@ gamma_list = np.linspace(0,1/3,10)
 
 
 
-figwidth = 10
-fig, axs = plt.subplots(file_varnum, 1, sharex=True, figsize=(2  * figwidth, 2 *figwidth))
 
 for gamma in gamma_list:
-    
+
+    figwidth = 10
+    fig, axs = plt.subplots(file_varnum, 1, sharex=True, figsize=(2  * figwidth, 2 *figwidth))
+
     file_name = "gamma-" + str(gamma)
     file = open("data/PostJump/"+file_name+'.csv')
+
+
     file_header = ['epoch','maxid','minid','maxig','minig','iterationtime','PDEError','FCError','PetscTotal','PetscNormRes']
     file_varnum = len(file_header)-1
     var_list = 
@@ -51,6 +54,5 @@ readers = csv.reader(file,delimiter=',')
 header = next(readers)
 header
 data=np.array(list(readers)).astype(float)
-
 
 
