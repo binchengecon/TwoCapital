@@ -124,7 +124,6 @@ lowerLims = np.array([K_min, R_min, Y_min], dtype=np.float64)
 upperLims = np.array([K_max, R_max, Y_max], dtype=np.float64)
 
 
-v0 = K_mat - (gamma_1 + gamma_2 * Y_mat)
 
 
 ############# step up of optimization
@@ -172,7 +171,9 @@ for gamma_3,eta in zip(gamma_3_list,eta_list):
 
     epoch = 0
     FC_Err = 1
-
+    v0 = K_mat - (gamma_1 + gamma_2 * Y_mat)
+    id_star = np.zeros_like(K_mat)
+    ig_star = np.zeros_like(K_mat)    
     while FC_Err > tol and epoch < max_iter:
 
         start_ep = time.time()
