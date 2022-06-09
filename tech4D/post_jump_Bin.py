@@ -32,8 +32,7 @@ from param import max_iter
 from param import path_name
 from param import test_code
 
-print("%f\n"%max_iter)
-print("%s\n"%path_name)
+
 #########################################
 # Method Loading
 #########################################
