@@ -32,7 +32,7 @@ for num in range(len(param_list)):
     gamma = param_list[num][0]
     eta=param_list[num][1]
 
-    file_name = "./data/PostJump/"+"gamma-" + str(gamma)+"eta-"+str(eta)
+    file_name = "./data/PostJump/"+"gamma_" + str(gamma)+"_eta"+str(eta)
     file = open(file_name+'.csv','r')
     reader = csv.reader(file,delimiter=',')
     file_header= next(reader)
@@ -55,6 +55,37 @@ for num in range(len(param_list)):
     
     plt.savefig(f"../tech4D/data/PostJump/gamma_{str(gamma)[:5]}_eta_{eta}.pdf")
 
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+
+pdf_pages = PdfPages('gamma_eta_plot.pdf')
+
+for num in range(len(param_list)):
+
+    gamma = param_list[num][0]
+    eta=param_list[num][1]
+
+    file_name = "./data/PostJump/"+"gamma_" + str(gamma)+"_eta"+str(eta)
+    file = open(file_name+'.csv','r')
+    reader = csv.reader(file,delimiter=',')
+    file_header= next(reader)
+    file_varnum = len(file_header)
+
+    data = np.array(list(reader)).astype(float)
+
+    fig, axs = plt.subplots(int(np.ceil(file_varnum/2)), 2, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
+
+    plt.suptitle(file_name)
+    
+    for varnum in np.array(range(file_varnum)):
+        axs[varnum//2,varnum%2].plot(data[:,varnum])
+        axs[varnum//2,varnum%2].set_ylabel('%s' %file_header[varnum],fontsize = 16)
+        axs[varnum//2,varnum%2].set_title('%s' %file_header[varnum])
+        axs[varnum//2,varnum%2].grid(linestyle=':')
+        axs[varnum//2,varnum%2].legend()
+        plt.savefig(f"../tech4D/data/PostJump/gamma_{str(gamma)[:5]}_eta_{eta}.pdf")
+    pdf_pages.savefig(fig)
+    plt.close()
 
 
-
+ pdf_pages.close()          
