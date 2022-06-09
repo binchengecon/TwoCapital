@@ -1,7 +1,6 @@
 
 from cProfile import label
 from math import ceil
-from isort import file
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
@@ -59,7 +58,7 @@ param_list = list(zip(gamma_3_list,eta_list))
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-pdf_pages = PdfPages('../tech4D/data/PostJump/gamma_eta_plot.pdf')
+pdf_pages = PdfPages('tech4D/data/PostJump/gamma_eta_plot.pdf')
 
 for num in range(len(param_list)):
 
@@ -67,7 +66,7 @@ for num in range(len(param_list)):
     eta=param_list[num][1]
 
     file_name = "gamma_" + str(gamma)+"_eta_"+str(eta)
-    file = open("../tech4D/data/PostJump/"+file_name+'.csv','r')
+    file = open("tech4D/data/PostJump/"+file_name+'.csv','r')
     reader = csv.reader(file,delimiter=',')
     file_header= next(reader)
     file_varnum = len(file_header)

@@ -134,7 +134,7 @@ epsilon  = 0.005
 fraction = 0.005
 
 
-max_iter = 8000
+max_iter = 20000
 id_star = np.zeros_like(K_mat)
 ig_star = np.zeros_like(K_mat)
 
