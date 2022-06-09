@@ -1,18 +1,11 @@
+import os 
 
-tol = 1e-7
-epsilon  = 0.01
-fraction = 0.01
-max_iter = 12000
+print(os.getcwd())
+program = "python"
 
-path_name = "./tech4D/data/PostJump/"
-test_code = "_epsfrac"+ str(epsilon)[0:len(str(epsilon))]
+os.system('python ./tech4D/post_jump_Bin.py')
 
-
-
-import post_jump_Bin
-import Csv2Graph
+os.system('python ./tech4D/Csv2Graph.py')
 
 
 
-
-# import test

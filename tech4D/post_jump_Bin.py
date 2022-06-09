@@ -25,12 +25,12 @@ import argparse
 import numpy as np
 
 
-from main import tol
-from main import epsilon
-from main import fraction
-from main import max_iter
-from main import path_name
-from main import test_code
+from param import tol
+from param import epsilon
+from param import fraction
+from param import max_iter
+from param import path_name
+from param import test_code
 
 print("%f\n"%max_iter)
 print("%s\n"%path_name)

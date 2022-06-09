@@ -13,12 +13,12 @@ import csv
 import pandas as pd
 
 
-from main import tol
-from main import epsilon
-from main import fraction
-
-from main import path_name
-from main import test_code
+from param import tol
+from param import epsilon
+from param import fraction
+from param import max_iter
+from param import path_name
+from param import test_code
 
 #########################################
 gamma_3_list = np.linspace(0., 1./3., 10)
