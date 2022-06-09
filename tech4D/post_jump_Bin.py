@@ -24,6 +24,16 @@ from datetime import datetime
 import argparse
 import numpy as np
 
+
+from main import tol
+from main import epsilon
+from main import fraction
+from main import max_iter
+from main import path_name
+from main import test_code
+
+print("%f\n"%max_iter)
+print("%s\n"%path_name)
 #########################################
 # Method Loading
 #########################################
@@ -129,12 +139,15 @@ upperLims = np.array([K_max, R_max, Y_max], dtype=np.float64)
 ############# step up of optimization
 FC_Err = 1
 epoch = 0
-tol = 1e-7
-epsilon  = 0.005
-fraction = 0.005
+
+# tol = 1e-7
+# epsilon  = 0.005
+# fraction = 0.005
 
 
-max_iter = 20000
+# max_iter = 20000
+
+
 id_star = np.zeros_like(K_mat)
 ig_star = np.zeros_like(K_mat)
 
@@ -162,6 +175,7 @@ epoch_list = list(range(1,max_iter+1,1))
 for gamma_3,eta in zip(gamma_3_list,eta_list):
 
     file_name = "gamma_" + str(gamma_3)+"_"+"eta_" +str(eta)
+
     file_header = ['maxid','minid','maxig','minig','iterationtime','PDEError','FCError','PetscTotal','PetscNormRes']
 
     min_id_list = epoch_list.copy()
@@ -484,7 +498,7 @@ for gamma_3,eta in zip(gamma_3_list,eta_list):
 
     Data_List = list(zip(max_id_list,min_id_list,max_ig_list,min_ig_list,iteration_time_list,PDE_Err_list,FC_Err_list,total_list,normres_list))
 
-    with open("data/PostJump/"+file_name+'.csv','w+') as f:
+    with open(path_name+file_name+test_code +'.csv','w+') as f:
         writer  = csv.writer(f)
         writer.writerow(file_header)
         writer.writerows(Data_List)

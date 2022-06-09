@@ -13,6 +13,12 @@ import csv
 import pandas as pd
 
 
+from main import tol
+from main import epsilon
+from main import fraction
+
+from main import path_name
+from main import test_code
 
 #########################################
 gamma_3_list = np.linspace(0., 1./3., 10)
@@ -58,15 +64,15 @@ param_list = list(zip(gamma_3_list,eta_list))
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-pdf_pages = PdfPages('tech4D/data/PostJump/gamma_eta_plot.pdf')
+pdf_pages = PdfPages(path_name+'gamma_eta_plot'+test_code+'.pdf')
 
 for num in range(len(param_list)):
 
     gamma = param_list[num][0]
     eta=param_list[num][1]
 
-    file_name = "gamma_" + str(gamma)+"_eta_"+str(eta)
-    file = open("tech4D/data/PostJump/"+file_name+'.csv','r')
+    file_name = "gamma_" + str(gamma)+"_"+"eta_"+str(eta)
+    file = open(path_name+file_name+test_code+'.csv','r')
     reader = csv.reader(file,delimiter=',')
     file_header= next(reader)
     file_varnum = len(file_header)
