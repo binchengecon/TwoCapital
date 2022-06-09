@@ -1,4 +1,5 @@
 
+from cProfile import label
 from math import ceil
 from isort import file
 import matplotlib as mpl
@@ -78,7 +79,7 @@ for num in range(len(param_list)):
     plt.suptitle("$\gamma$="+str(gamma)[0:5]+" , $\eta$=" + str(eta),fontsize=16)
     
     for varnum in np.array(range(file_varnum)):
-        axs[varnum//2,varnum%2].plot(data[:,varnum])
+        axs[varnum//2,varnum%2].plot(np.array(range(len(data[:,varnum]))),data[:,varnum],label='')
         axs[varnum//2,varnum%2].set_xlabel('epoch')
         axs[varnum//2,varnum%2].set_ylabel('%s' %file_header[varnum])
         axs[varnum//2,varnum%2].set_title('%s' %file_header[varnum])
