@@ -1,0 +1,33 @@
+Grid dimension: [46, 47, 31]
+
+===============================================
+Fianal epoch 19999: PDE Error: 0.0202409772; False Transient Error: 0.0201747737
+--- Total running time: 837.4198794364929 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0668054978; False Transient Error: 0.0667995185
+--- Total running time: 1653.3141412734985 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0441896832; False Transient Error: 0.0442222774
+--- Total running time: 2468.712055206299 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0397829124; False Transient Error: 0.0393363286
+--- Total running time: 3277.2730238437653 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0427640532; False Transient Error: 0.0427627168
+--- Total running time: 4086.4419424533844 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0517372387; False Transient Error: 0.0517358167
+--- Total running time: 4865.496490240097 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0607084730; False Transient Error: 0.0607069696
+--- Total running time: 5654.6503648757935 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0696900657; False Transient Error: 0.0696884681
+--- Total running time: 6430.139595508575 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0786660169; False Transient Error: 0.0786643000
+--- Total running time: 7208.133905887604 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0876508515; False Transient Error: 0.0876490246
+--- Total running time: 7959.440556764603 seconds ---
+/home/bincheng/TwoCapital_Bin
