@@ -1,45 +1,8 @@
+from numpy import meshgrid
+from sklearn.cluster import mean_shift
 from param import *
 from library import *
 from function import *
-
-
-## Pattern = 1
-if ImpulsePattern == 0:
-    """Equivalent Impulse Horizon with Hetero-Value"""
-    # ImpulseMin = 0 
-    # ImpulseMax = 1100
-    # ImpulseStep = 100
-    # ImpulsePathSize = int((ImpulseMax-ImpulseMin)/ImpulseStep )
-
-    Carbon   = np.array([0, 100, 500, 1000, 5000, 10000, 50000, 100000])
-
-    ImpulsePathSize = len(Carbon)
-    CeMatrix = np.zeros((ImpulsePathSize,t_span))
-
-    CeMatrix[:,0] =     Carbon[:] /2.13
-
-elif ImpulsePattern ==1:
-    """Heterogenous Impulse Horizon with Homo-value"""
-    ImpulsePathSize = 10
-    ImpulseValue = 100
-    
-    CeMatrix = ImpulseValue*np.eye(ImpulsePathSize, t_span)
-
-elif ImpulsePattern ==2:
-    """Fixed Impulse Response"""
-    ImpulsePathSize = 2
-    ImpulseValue = 10
-    
-    CeMatrix = np.zeros((ImpulsePathSize, t_span))
-    CeMatrix[1,:] = ImpulseValue*np.ones((1,t_span))/2.13
-
-
-## cearth, tauc Path
-
-cearth_taucMatrix = [[35., 6603. ],
-                     [0.107, 20]    ]
-
-cearth_taucMatrixSize = len(cearth_taucMatrix)
 
 
 
@@ -86,6 +49,10 @@ for ctpathnum in range(cearth_taucMatrixSize):
 
 
     plt.tight_layout()
-    plt.savefig(f"ImpulsePtn_{ImpulsePattern}_cearth_{cearth}_tauc_{tauc}.pdf")
+    plt.savefig(f"./nonlinearCarbon/Year_{t_span}_ImpulsePtn_{ImpulsePattern}_cearth_{cearth}_tauc_{tauc}.pdf")
 
 
+cearth_taucMatrix_num, ImpulsePath_num= np.meshgrid(np.arange(cearth_taucMatrixSize),np.arange(ImpulsePathSize),indexing ='ij')
+statespace =  np.hstack([cearth_taucMatrix_num.reshape(-1,1,order = 'F'), ImpulsePath_num.reshape(-1,1,order = 'F')])
+for ctpathnum,pathnum in statespace:
+    print(ctpathnum,pathnum)

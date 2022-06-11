@@ -1,3 +1,6 @@
+from library import *
+
+
 ##################################################################
 ## Section 1.2: Parameter Initialization
 ##################################################################
@@ -100,5 +103,47 @@ acc = 5
 t_span = 100
 
 
+
+
+##################################################################
 ## Impulse Path
 ImpulsePattern = 0
+
+## Pattern = 1
+if ImpulsePattern == 0:
+    """Equivalent Impulse Horizon with Hetero-Value"""
+    # ImpulseMin = 0 
+    # ImpulseMax = 1100
+    # ImpulseStep = 100
+    # ImpulsePathSize = int((ImpulseMax-ImpulseMin)/ImpulseStep )
+
+    Carbon   = np.array([0, 100, 500, 1000, 5000, 10000, 50000, 100000])
+
+    ImpulsePathSize = len(Carbon)
+    CeMatrix = np.zeros((ImpulsePathSize,t_span))
+
+    CeMatrix[:,0] =     Carbon[:] /2.13
+
+elif ImpulsePattern ==1:
+    """Heterogenous Impulse Horizon with Homo-value"""
+    ImpulsePathSize = 10
+    ImpulseValue = 100
+    
+    CeMatrix = ImpulseValue*np.eye(ImpulsePathSize, t_span)
+
+elif ImpulsePattern ==2:
+    """Fixed Impulse Response"""
+    ImpulsePathSize = 2
+    ImpulseValue = 10
+    
+    CeMatrix = np.zeros((ImpulsePathSize, t_span))
+    CeMatrix[1,:] = ImpulseValue*np.ones((1,t_span))/2.13
+
+
+## cearth, tauc Path
+
+cearth_taucMatrix = [[35., 6603. ],
+                     [10, 1886]    ]
+
+cearth_taucMatrixSize = len(cearth_taucMatrix)
+
