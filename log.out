@@ -1,33 +1,123 @@
 Grid dimension: [46, 47, 31]
 
 ===============================================
-Fianal epoch 19999: PDE Error: 0.0202409772; False Transient Error: 0.0201747737
---- Total running time: 837.4198794364929 seconds ---
+Fianal epoch 19999: PDE Error: 0.0078681322; False Transient Error: 0.0078677314
+--- Total running time: 809.6127238273621 seconds ---
 ===============================================
-Fianal epoch 19999: PDE Error: 0.0668054978; False Transient Error: 0.0667995185
---- Total running time: 1653.3141412734985 seconds ---
+Fianal epoch 19999: PDE Error: 0.0370234140; False Transient Error: 0.0370250229
+--- Total running time: 1594.184812784195 seconds ---
 ===============================================
-Fianal epoch 19999: PDE Error: 0.0441896832; False Transient Error: 0.0442222774
---- Total running time: 2468.712055206299 seconds ---
+Fianal epoch 19999: PDE Error: 0.0540336962; False Transient Error: 0.0540366620
+--- Total running time: 2379.3375527858734 seconds ---
 ===============================================
-Fianal epoch 19999: PDE Error: 0.0397829124; False Transient Error: 0.0393363286
---- Total running time: 3277.2730238437653 seconds ---
+Fianal epoch 19999: PDE Error: 0.0716090846; False Transient Error: 0.0716135021
+--- Total running time: 3169.0039603710175 seconds ---
 ===============================================
-Fianal epoch 19999: PDE Error: 0.0427640532; False Transient Error: 0.0427627168
---- Total running time: 4086.4419424533844 seconds ---
+Fianal epoch 19999: PDE Error: 0.0892742513; False Transient Error: 0.0892801365
+--- Total running time: 3962.8068132400513 seconds ---
 ===============================================
-Fianal epoch 19999: PDE Error: 0.0517372387; False Transient Error: 0.0517358167
---- Total running time: 4865.496490240097 seconds ---
+Fianal epoch 19999: PDE Error: 0.1069287456; False Transient Error: 0.1069361041
+--- Total running time: 4783.491528272629 seconds ---
 ===============================================
-Fianal epoch 19999: PDE Error: 0.0607084730; False Transient Error: 0.0607069696
---- Total running time: 5654.6503648757935 seconds ---
+Fianal epoch 19999: PDE Error: 0.1246133119; False Transient Error: 0.1246221484
+--- Total running time: 5607.998021364212 seconds ---
 ===============================================
-Fianal epoch 19999: PDE Error: 0.0696900657; False Transient Error: 0.0696884681
---- Total running time: 6430.139595508575 seconds ---
+Fianal epoch 19999: PDE Error: 0.1422664855; False Transient Error: 0.1422768020
+--- Total running time: 6429.061332702637 seconds ---
 ===============================================
-Fianal epoch 19999: PDE Error: 0.0786660169; False Transient Error: 0.0786643000
---- Total running time: 7208.133905887604 seconds ---
+Fianal epoch 19999: PDE Error: 0.1598476524; False Transient Error: 0.1598594503
+--- Total running time: 7230.99085688591 seconds ---
 ===============================================
-Fianal epoch 19999: PDE Error: 0.0876508515; False Transient Error: 0.0876490246
---- Total running time: 7959.440556764603 seconds ---
+Fianal epoch 19999: PDE Error: 0.1775864920; False Transient Error: 0.1775997744
+--- Total running time: 8023.234920978546 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0027938721; False Transient Error: 0.0027937387
+--- Total running time: 8810.555836439133 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0222579834; False Transient Error: 0.0222614727
+--- Total running time: 9601.044702291489 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0280882071; False Transient Error: 0.0280895086
+--- Total running time: 10392.962666988373 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0318582238; False Transient Error: 0.0318595383
+--- Total running time: 11183.162246227264 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0360861737; False Transient Error: 0.0360877672
+--- Total running time: 11973.919521331787 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0405762681; False Transient Error: 0.0405782117
+--- Total running time: 12763.773657560349 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0451868114; False Transient Error: 0.0451891298
+--- Total running time: 13551.803233146667 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0498888361; False Transient Error: 0.0498915414
+--- Total running time: 14314.878999471664 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0546305684; False Transient Error: 0.0546336659
+--- Total running time: 15138.354470729828 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0594145484; False Transient Error: 0.0594180422
+--- Total running time: 15961.903751134872 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0028502633; False Transient Error: 0.0028501294
+--- Total running time: 16778.81247472763 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0028356514; False Transient Error: 0.0028355132
+--- Total running time: 17599.416533708572 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0028347549; False Transient Error: 0.0028346195
+--- Total running time: 18427.6431517601 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0028647775; False Transient Error: 0.0028648963
+--- Total running time: 19252.109260082245 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0040561780; False Transient Error: 0.0040562813
+--- Total running time: 20073.948477506638 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0051372182; False Transient Error: 0.0051372800
+--- Total running time: 20898.509897232056 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0060785813; False Transient Error: 0.0060785641
+--- Total running time: 21730.51559996605 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0068358367; False Transient Error: 0.0068356834
+--- Total running time: 22557.100811481476 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0107413453; False Transient Error: 0.0107444767
+--- Total running time: 23370.270788669586 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0128956085; False Transient Error: 0.0128966629
+--- Total running time: 24197.03445458412 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0028632731; False Transient Error: 0.0028631408
+--- Total running time: 24996.994307756424 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0028601024; False Transient Error: 0.0028599697
+--- Total running time: 25798.18531870842 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0028569344; False Transient Error: 0.0028568013
+--- Total running time: 26602.84559726715 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0028537689; False Transient Error: 0.0028536354
+--- Total running time: 27406.632800340652 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0028506059; False Transient Error: 0.0028504721
+--- Total running time: 28210.66110754013 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0028474456; False Transient Error: 0.0028473115
+--- Total running time: 29013.54271006584 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0028473085; False Transient Error: 0.0028471754
+--- Total running time: 29816.2659368515 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0028472834; False Transient Error: 0.0028471500
+--- Total running time: 30621.77852678299 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0028472583; False Transient Error: 0.0028471247
+--- Total running time: 31426.67909836769 seconds ---
+===============================================
+Fianal epoch 19999: PDE Error: 0.0028472332; False Transient Error: 0.0028470993
+--- Total running time: 32230.59626507759 seconds ---
 /home/bincheng/TwoCapital_Bin
