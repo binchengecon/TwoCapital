@@ -52,7 +52,3 @@ for ctpathnum in range(cearth_taucMatrixSize):
     plt.savefig(f"./nonlinearCarbon/Year_{t_span}_ImpulsePtn_{ImpulsePattern}_cearth_{cearth}_tauc_{tauc}.pdf")
 
 
-cearth_taucMatrix_num, ImpulsePath_num= np.meshgrid(np.arange(cearth_taucMatrixSize),np.arange(ImpulsePathSize),indexing ='ij')
-statespace =  np.hstack([cearth_taucMatrix_num.reshape(-1,1,order = 'F'), ImpulsePath_num.reshape(-1,1,order = 'F')])
-for ctpathnum,pathnum in statespace:
-    print(ctpathnum,pathnum)
