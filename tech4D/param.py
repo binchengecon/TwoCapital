@@ -11,8 +11,5 @@ gamma_3_list = np.linspace(0., 1./3., 10)
 # gamma_3_list = np.linspace(0., 1./3., 1)
 eta_list     = np.array([0.1,0.05,0.01,0.001])
 # eta_list     = np.array([0.001])
-<<<<<<< HEAD
-=======
 
 
->>>>>>> 26dc1dd2e84288406d6424f59c401936a29625d1
