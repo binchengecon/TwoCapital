@@ -84,18 +84,18 @@ beta_f = 1.86 / 1000
 
 # Grids Specification
 # Coarse Grids
-Y_min = 0.00
-Y_max = 3.00
+Y_min = 1e-8
+Y_max = 2.5
 # range of capital
 K_min = 4.00
-K_max = 8.50
+K_max = 7.5
 R_min = 0.14
-R_max = 0.60
+R_max = 0.99
 # R_max = 0.50
 # hR = 0.05
 hK = 0.10
 hR = 0.01
-hY = 0.10 # make sure it is float instead of int
+hY = 0.05 # make sure it is float instead of int
 
 # R = np.arange(R_min, R_max + hR, hR)
 # nR = len(R)
@@ -157,9 +157,10 @@ ig_star = np.zeros_like(K_mat)
 ########## Scaling factor
 # eta = 0.17
 #########################################
-gamma_3_list = np.linspace(0., 1./3., 10)
-eta_list     = np.array([0.1,0.05,0.01,0.001])
-
+# gamma_3_list = np.linspace(0., 1./3., 10)
+gamma_3_list = np.linspace(0., 1./3., 5)
+# eta_list     = np.array([0.1,0.05,0.01,0.001])
+eta_list     = np.array([0.001])
 
 (gamma_3_list,eta_list) = np.meshgrid(gamma_3_list,eta_list,indexing='ij')
 
@@ -236,7 +237,7 @@ for gamma_3,eta in zip(gamma_3_list,eta_list):
 
             multi_1 = dK + (1 - R_mat) * dR
             multi_2 = dK - R_mat * dR
-            multi_2[multi_2 <= 1e-8] = 1e-8
+            multi_2[multi_2 <= 0.01] = 0.01
 
             aa = (1 - multi_1 / multi_2) / phi_d
             bb = phi_g / phi_d * multi_1 / multi_2

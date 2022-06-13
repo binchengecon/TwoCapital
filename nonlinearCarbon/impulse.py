@@ -22,9 +22,15 @@ for ctpathnum in range(cearth_taucMatrixSize):
         tv, Tvmid, Cv = model(Ts, Cs, cearth, tauc, Ce)
 
         plotnum = ImpulsePattern*pathnum
-
+        
+        
+        Coef_Correction = 1
+        
         if pathnum ==0:
             TvmidBase = Tvmid
+
+        else :
+            Coef_Correction = Carbon[-1]/Carbon[pathnum]
 
         axs[0].plot(tv, Tvmid, label=f"ImpulseValue_{CeMatrix[pathnum,plotnum]*2.13}")
         axs[0].set_xlabel('Time (year)',fontsize = 16)
@@ -38,7 +44,7 @@ for ctpathnum in range(cearth_taucMatrixSize):
         axs[1].set_title('Carbon Concentration Dynamics')
         axs[1].grid(linestyle=':')
         axs[1].legend()
-        axs[2].plot(tv, Tvmid-TvmidBase, label=f"ImpulseValue_{CeMatrix[pathnum,plotnum]*2.13}_Compared2_0")
+        axs[2].plot(tv, (Tvmid-TvmidBase)*Coef_Correction, label=f"ImpulseValue_{CeMatrix[pathnum,plotnum]*2.13}_Compared2_0")
         axs[2].set_xlabel('Time (year)',fontsize = 16)
         axs[2].set_ylabel('Degree Celsius',fontsize = 16)
         axs[2].set_title('Impulse Response per Teratonne of Carbon')
