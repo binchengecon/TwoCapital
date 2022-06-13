@@ -158,7 +158,7 @@ ig_star = np.zeros_like(K_mat)
 # eta = 0.17
 #########################################
 # gamma_3_list = np.linspace(0., 1./3., 10)
-gamma_3_list = np.linspace(0., 1./3., 5)
+gamma_3_list = np.linspace(0., 1./3., 1)
 # eta_list     = np.array([0.1,0.05,0.01,0.001])
 eta_list     = np.array([0.001])
 
