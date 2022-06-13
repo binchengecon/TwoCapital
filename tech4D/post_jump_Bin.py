@@ -44,7 +44,6 @@ reporterror = True
 #
 linearsolver = 'petsc'
 
-linearsolver_list = ['petsc', 'petsc4py', 'eigen', 'both']
 
 start_time = time.time()
 
@@ -133,14 +132,10 @@ upperLims = np.array([K_max, R_max, Y_max], dtype=np.float64)
 ############# step up of optimization
 FC_Err = 1
 epoch = 0
-
 # tol = 1e-7
 # epsilon  = 0.005
 # fraction = 0.005
-
-
 # max_iter = 20000
-
 
 id_star = np.zeros_like(K_mat)
 ig_star = np.zeros_like(K_mat)
@@ -148,12 +143,6 @@ ig_star = np.zeros_like(K_mat)
 #########################################
 # Result Storage Setup
 #########################################
-
-########## Scaling factor
-# eta = 0.17
-#########################################
-
-
 (gamma_3_list,eta_list) = np.meshgrid(gamma_3_list,eta_list,indexing='ij')
 
 gamma_3_list = gamma_3_list.ravel(order='F')
@@ -161,7 +150,6 @@ eta_list = eta_list.ravel(order='F')
 
 param_list = zip(gamma_3_list,eta_list)
 #########################################
-
 epoch_list = list(range(1,max_iter+1,1))
 
 for gamma_3,eta in zip(gamma_3_list,eta_list):
