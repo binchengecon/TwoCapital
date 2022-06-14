@@ -1,4 +1,4 @@
-from library import *
+import numpy as np
 
 
 tol = 1e-7
