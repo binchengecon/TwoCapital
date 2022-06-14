@@ -154,9 +154,9 @@ param_list = zip(gamma_3_list,eta_list,epsilon_list)
 #########################################
 epoch_list = list(range(1,max_iter+1,1))
 
-def model(gamma_3, eta, fraction, epsilon ):
+def model(gamma_3, eta, epsilon ):
     file_name = "gamma_" + str(gamma_3)+"_"+"eta_" +str(eta)
-
+    fraction = epsilon
     # file_header = ['maxid','minid','maxig','minig','iterationtime','PDEError','FCError','PetscTotal','PetscNormRes']
 
     file_header = ['maxid','minid','maxig','minig','maxconsumption','minconsumption','maxmulti1','minmulti1','maxmulti2','minmulti2','PDEError','FCError']
@@ -496,6 +496,7 @@ def model(gamma_3, eta, fraction, epsilon ):
         ig_star = i_g
         v0 = out_comp
         epoch += 1
+
     if reporterror:
         print("===============================================")
         print("Fianal epoch {:d}: PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch -1, PDE_Err, FC_Err))
