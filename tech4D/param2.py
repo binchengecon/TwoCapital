@@ -2,7 +2,7 @@ Attemp = 1
 
 # Attemp = 1: add more output of variable like multi1,2 to diagnose where the problem is.
 
-from library import *
+import numpy as np
 
 
 tol = 1e-7
