@@ -40,10 +40,10 @@ def print2pdf(epsilon):
 
     pdf_pages = PdfPages(path_name+'gamma_eta_plot'+test_code+'.pdf')
 
-    for num in range(len(param_list)):
+    for gamma,eta in param_list:
 
-        gamma = param_list[num][0]
-        eta=param_list[num][1]
+        # gamma = param_list[num][0]
+        # eta=param_list[num][1]
 
         file_name = "gamma_" + str(gamma)+"_"+"eta_"+str(eta)
         file = open(path_name+file_name+test_code+'.csv','r')
@@ -51,7 +51,7 @@ def print2pdf(epsilon):
         file_header= next(reader)
         file_varnum = len(file_header)
         data = np.array(list(reader)).astype(float)
-        file_length = len(data[:,varnum])
+        file_length = len(data[:,1])
 
         figwidth = 10
         fig, axs = plt.subplots(int(np.ceil(file_varnum/2)), 2, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
