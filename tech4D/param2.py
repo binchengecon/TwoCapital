@@ -1,3 +1,7 @@
+Attemp = 1
+
+# Attemp = 1: add more output of variable like multi1,2 to diagnose where the problem is.
+
 from library import *
 
 
@@ -6,7 +10,7 @@ epsilon  = 0.1
 fraction = 0.1
 max_iter = 20000
 path_name = "./tech4D/data/PostJump/"
-test_code = "_epsfrac_"+ str(epsilon)[0:len(str(epsilon))]+"_Paral"
+test_code = "_epsfrac_"+ str(epsilon)[0:len(str(epsilon))]+"_Paral"+"_Attemp_" +str(Attemp)
 
 gamma_3_list = np.linspace(0., 1./3., 10)
 # gamma_3_list = np.linspace(0., 1./3., 1)
