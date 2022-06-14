@@ -25,6 +25,7 @@ import argparse
 import numpy as np
 import joblib
 from joblib import Parallel, delayed
+
 from param2 import *
 
 
@@ -130,15 +131,15 @@ upperLims = np.array([K_max, R_max, Y_max], dtype=np.float64)
 
 
 ############# step up of optimization
-FC_Err = 1
-epoch = 0
+# FC_Err = 1
+# epoch = 0
 # tol = 1e-7
 # epsilon  = 0.005
 # fraction = 0.005
 # max_iter = 20000
 
-id_star = np.zeros_like(K_mat)
-ig_star = np.zeros_like(K_mat)
+# id_star = np.zeros_like(K_mat)
+# ig_star = np.zeros_like(K_mat)
 
 #########################################
 # Result Storage Setup
@@ -155,19 +156,31 @@ epoch_list = list(range(1,max_iter+1,1))
 def model(gamma_3,eta):
     file_name = "gamma_" + str(gamma_3)+"_"+"eta_" +str(eta)
 
-    file_header = ['maxid','minid','maxig','minig','iterationtime','PDEError','FCError','PetscTotal','PetscNormRes']
+    # file_header = ['maxid','minid','maxig','minig','iterationtime','PDEError','FCError','PetscTotal','PetscNormRes']
+
+    file_header = ['maxid','minid','maxig','minig','maxconsumption','minconsumption','maxmulti1','minmulti1','maxmulti2','minmulti2','PDEError','FCError']
 
     min_id_list = epoch_list.copy()
     min_ig_list = epoch_list.copy()
+
     max_id_list = epoch_list.copy()
     max_ig_list = epoch_list.copy()
+
     min_consumption_list = epoch_list.copy()
     max_consumption_list = epoch_list.copy()
-    iteration_time_list = epoch_list.copy()
+
+    min_multi1_list = epoch_list.copy()
+    max_multi1_list = epoch_list.copy()
+
+    min_multi2_list = epoch_list.copy()
+    max_multi2_list = epoch_list.copy()
+
     PDE_Err_list = epoch_list.copy()
     FC_Err_list = epoch_list.copy()
+
     total_list = epoch_list.copy()
     normres_list = epoch_list.copy()
+    iteration_time_list = epoch_list.copy()
 
 
     epoch = 0
@@ -177,6 +190,7 @@ def model(gamma_3,eta):
 
     id_star = np.zeros_like(K_mat)
     ig_star = np.zeros_like(K_mat)    
+
     while FC_Err > tol and epoch < max_iter:
 
         start_ep = time.time()
@@ -211,7 +225,12 @@ def model(gamma_3,eta):
 
 
             q = delta * ((A_g * R_mat - i_g * R_mat) + (A_d * (1 - R_mat) - i_d * (1 - R_mat))) ** (-1)
+            
+            min_multi1_list[epoch]=0
+            max_multi1_list[epoch]=0
 
+            min_multi2_list[epoch]=0
+            max_multi2_list[epoch]=0
         else:
 
             multi_1 = dK + (1 - R_mat) * dR
@@ -231,7 +250,11 @@ def model(gamma_3,eta):
             i_g_new = (BB - np.sqrt(DELTA)) / (2 * AA)
             i_d_new = aa + bb * i_g_new
 
+            min_multi1_list[epoch]=multi_1.min()
+            max_multi1_list[epoch]=multi_1.max()
 
+            min_multi2_list[epoch]=multi_2.min()
+            max_multi2_list[epoch]=multi_2.max()
         
 
 
@@ -244,6 +267,7 @@ def model(gamma_3,eta):
         i_d[i_d >= 1 / phi_d - 1e-14] = 1 / phi_d - 1e-14
         i_g[i_g >= 1 / phi_g - 1e-14] = 1 / phi_g - 1e-14
         # Result Storage: id, ig
+        
         min_id_list[epoch] = np.min(i_d)
         max_id_list[epoch] = np.max(i_d)
         min_ig_list[epoch] = np.min(i_g)
@@ -475,7 +499,7 @@ def model(gamma_3,eta):
         print("Fianal epoch {:d}: PDE Error: {:.10f}; False Transient Error: {:.10f}" .format(epoch -1, PDE_Err, FC_Err))
     print("--- Total running time: %s seconds ---" % (time.time() - start_time))
 
-    Data_List = list(zip(max_id_list,min_id_list,max_ig_list,min_ig_list,iteration_time_list,PDE_Err_list,FC_Err_list,total_list,normres_list))
+    Data_List = list(zip(max_id_list,min_id_list,max_ig_list,min_ig_list,max_consumption_list,min_consumption_list,max_multi1_list,min_multi1_list,max_multi2_list,min_multi2_list,PDE_Err_list,FC_Err_list))
 
     with open(path_name+file_name+test_code +'.csv','w+') as f:
         writer  = csv.writer(f)
