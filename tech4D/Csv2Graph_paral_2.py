@@ -50,8 +50,9 @@ def print2pdf(epsilon):
         reader = csv.reader(file,delimiter=',')
         file_header= next(reader)
         file_varnum = len(file_header)
-        file_length = len(data[:,varnum])
         data = np.array(list(reader)).astype(float)
+        file_length = len(data[:,varnum])
+
         figwidth = 10
         fig, axs = plt.subplots(int(np.ceil(file_varnum/2)), 2, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
         if file_length < max_iter:
