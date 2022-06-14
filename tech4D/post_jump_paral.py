@@ -226,16 +226,16 @@ def model(gamma_3,eta):
 
             q = delta * ((A_g * R_mat - i_g * R_mat) + (A_d * (1 - R_mat) - i_d * (1 - R_mat))) ** (-1)
             
-            min_multi1_list[epoch]=0
-            max_multi1_list[epoch]=0
+            min_multi1_list[epoch]=1
+            max_multi1_list[epoch]=1
 
-            min_multi2_list[epoch]=0
-            max_multi2_list[epoch]=0
+            min_multi2_list[epoch]=1
+            max_multi2_list[epoch]=1
         else:
 
             multi_1 = dK + (1 - R_mat) * dR
             multi_2 = dK - R_mat * dR
-            multi_2[multi_2 <= 0.01] = 0.01
+            # multi_2[multi_2 <= 0.01] = 0.01
 
             aa = (1 - multi_1 / multi_2) / phi_d
             bb = phi_g / phi_d * multi_1 / multi_2
