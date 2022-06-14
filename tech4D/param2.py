@@ -1,7 +1,7 @@
-Attemp = 2
+Attemp = 1
 
-# Attemp = 1: add more output of variable like multi1,2 to diagnose where the problem is.
-# Attemp = 2: change starting multi* as 1, then delete multi2[<1e-8]=1e-8 to see the explosion. This is for presentation to Lars.
+# Attemp = 1: add more output of variable like multi1,2 to diagnose where the problem is.  change starting multi* as 1.
+# Attemp = 2:delete multi2[<1e-8]=1e-8 to see the explosion. This is for presentation to Lars.
 
 import numpy as np
 
