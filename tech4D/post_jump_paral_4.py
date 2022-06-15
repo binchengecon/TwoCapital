@@ -237,7 +237,7 @@ def model(gamma_3, eta, epsilon ):
 
             multi_1 = dK + (1 - R_mat) * dR
             multi_2 = dK - R_mat * dR
-            multi_2[multi_2 <= 0.01] = 0.01
+            # multi_2[multi_2 <= 0.01] = 0.01
 
             aa = (1 - multi_1 / multi_2) / phi_d
             bb = phi_g / phi_d * multi_1 / multi_2
