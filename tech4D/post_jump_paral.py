@@ -500,7 +500,7 @@ def model(gamma_3,eta):
     print("--- Total running time: %s seconds ---" % (time.time() - start_time))
 
     Data_List = list(zip(max_id_list,min_id_list,max_ig_list,min_ig_list,max_consumption_list,min_consumption_list,max_multi1_list,min_multi1_list,max_multi2_list,min_multi2_list,PDE_Err_list,FC_Err_list))
-
+    Data_List = Data_List[0:epoch]
     with open(path_name+file_name+test_code +'.csv','w+') as f:
         writer  = csv.writer(f)
         writer.writerow(file_header)
