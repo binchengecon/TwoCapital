@@ -9,7 +9,7 @@ import numpy as np
 tol = 1e-7
 epsilon  = 0.1
 fraction = epsilon
-max_iter = 60000
+max_iter = 35000
 path_name = "./tech4D/data/PostJump/"
 test_code = "_epsfrac_"+ str(epsilon)[0:len(str(epsilon))]+"_Paral"+"_Attemp_" +str(Attemp)
 
