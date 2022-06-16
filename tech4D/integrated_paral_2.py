@@ -35,7 +35,7 @@ Attemp = 5
 # Attemp = 5: freeze id=0 and see what is the effect.
 
 tol = 1e-7
-max_iter = 2
+max_iter = 30000
 path_name = "./tech4D/data/PostJump/"
 
 # test_code = "_epsfrac_"+ str(epsilon)[0:len(str(epsilon))]+"_Paral"+"_Attemp_" +str(Attemp)
