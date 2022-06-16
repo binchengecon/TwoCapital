@@ -35,7 +35,7 @@ Attemp = 5
 # Attemp = 5: freeze id=0 and see what is the effect.
 
 tol = 1e-7
-max_iter = 30000
+max_iter = 2
 path_name = "./tech4D/data/PostJump/"
 
 # test_code = "_epsfrac_"+ str(epsilon)[0:len(str(epsilon))]+"_Paral"+"_Attemp_" +str(Attemp)
@@ -163,13 +163,13 @@ upperLims = np.array([K_max, R_max, Y_max], dtype=np.float64)
 # #########################################
 # # Result Storage Setup
 # #########################################
-# (gamma_3_list,eta_list,epsilon_list) = np.meshgrid(gamma_3_list,eta_list,epsilon_list,indexing='ij')
+(gamma_3_list,eta_list,epsilon_list) = np.meshgrid(gamma_3_list,eta_list,epsilon_list,indexing='ij')
 
-# gamma_3_list = gamma_3_list.ravel(order='F')
-# eta_list = eta_list.ravel(order='F')
-# epsilon_list = epsilon_list.ravel(order='F')
+gamma_3_list = gamma_3_list.ravel(order='F')
+eta_list = eta_list.ravel(order='F')
+epsilon_list = epsilon_list.ravel(order='F')
 
-# param_list = zip(gamma_3_list,eta_list,epsilon_list)
+param_list = zip(gamma_3_list,eta_list,epsilon_list)
 #########################################
 epoch_list = list(range(1,max_iter+1,1))
 
