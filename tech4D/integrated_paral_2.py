@@ -544,27 +544,23 @@ def model(gamma_3, eta, epsilon ):
                 print('ERROR shelving: {0}'.format(key))
         else:
             pass
-    for key in globals():
-        if isinstance(globals()[key], (int, float, bool, np.ndarray,list)):
-            try:
-                my_shelf[key] = globals()[key]
-            except TypeError:
-                #
-                # __builtins__, my_shelf, and imported modules can not be shelved.
-                #
-                print('ERROR shelving: {0}'.format(key))
-        else:
-            pass
+    # for key in globals():
+    #     if isinstance(globals()[key], (int, float, bool, np.ndarray,list)):
+    #         try:
+    #             my_shelf[key] = globals()[key]
+    #         except TypeError:
+    #             #
+    #             # __builtins__, my_shelf, and imported modules can not be shelved.
+    #             #
+    #             print('ERROR shelving: {0}'.format(key))
+    #     else:
+    #         pass
 
 
     file = open(path_name+file_name+test_code, 'wb')
     pickle.dump(my_shelf, file)
     file.close()
 
-    # my_shelf ={}
-
-    # for key in dir():
-    #     my_shelf[key] = key
 
 
 
