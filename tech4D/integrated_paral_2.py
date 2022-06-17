@@ -637,6 +637,15 @@ def print2pdf(epsilon):
         data = np.array(list(reader)).astype(float)
         file_length = len(data[:,1])
 
+        file_pickle = open(path_name+file_name+test_code,'rb')
+        res = pickle.load(file_pickle)
+        i_g = res['i_g']
+        indices_max =np.where(i_g==i_g.max())
+        indices_min = np.where(i_g==i_g.min())
+
+        plt.text(0.05,0.95,indices_max, transform=fig.transFigure, size=24)
+        plt.text(0.05,0.95,indices_min, transform=fig.transFigure, size=24)
+        
         figwidth = 10
         fig, axs = plt.subplots(int(np.ceil(file_varnum/2)), 2, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
         if file_length < max_iter:
@@ -654,7 +663,7 @@ def print2pdf(epsilon):
         pdf_pages.savefig(fig)
         plt.close()
 
-        
+
 
     pdf_pages.close()          
 
