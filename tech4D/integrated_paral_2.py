@@ -28,7 +28,7 @@ from joblib import Parallel, delayed
 import pickle
 
 from joblib import load, dump
-Attemp = 6
+Attemp = 7
 
 # Attemp = 1: add more output of variable like multi1,2 to diagnose where the problem is.  change starting multi* as 1.
 # Attemp = 2: delete multi2[<1e-8]=1e-8 to see the explosion. This is for presentation to Lars.
@@ -36,6 +36,7 @@ Attemp = 6
 # Attemp = 4: delete multi2[<1e-8] and see the effect, previous results didnt get stored.
 # Attemp = 5: freeze id=0 and see what is the effect.
 # Attemp = 6: add pickle to save ultimate convergent result
+# Attemp = 7: solve pickle saving bugs with parallel computation, and only graph with i_g still.
 
 tol = 1e-7
 max_iter = 30000
