@@ -544,17 +544,17 @@ def model(gamma_3, eta, epsilon ):
                 print('ERROR shelving: {0}'.format(key))
         else:
             pass
-    # for key in globals():
-    #     if isinstance(globals()[key], (int, float, bool, np.ndarray,list)):
-    #         try:
-    #             my_shelf[key] = globals()[key]
-    #         except TypeError:
-    #             #
-    #             # __builtins__, my_shelf, and imported modules can not be shelved.
-    #             #
-    #             print('ERROR shelving: {0}'.format(key))
-    #     else:
-    #         pass
+    for key in globals():
+        if isinstance(globals()[key], (int, float, bool, np.ndarray)):
+            try:
+                my_shelf[key] = globals()[key]
+            except TypeError:
+                #
+                # __builtins__, my_shelf, and imported modules can not be shelved.
+                #
+                print('ERROR shelving: {0}'.format(key))
+        else:
+            pass
 
 
     file = open(path_name+file_name+test_code, 'wb')
@@ -654,6 +654,7 @@ def print2pdf(epsilon):
         pdf_pages.savefig(fig)
         plt.close()
 
+        
 
     pdf_pages.close()          
 
