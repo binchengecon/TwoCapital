@@ -38,7 +38,7 @@ Attemp = 6
 # Attemp = 6: add pickle to save ultimate convergent result
 
 tol = 1e-7
-max_iter = 1
+max_iter = 30000
 path_name = "./tech4D/data/PostJump/"
 
 # test_code = "_epsfrac_"+ str(epsilon)[0:len(str(epsilon))]+"_Paral"+"_Attemp_" +str(Attemp)
