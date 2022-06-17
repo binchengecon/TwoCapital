@@ -545,7 +545,7 @@ def model(gamma_3, eta, epsilon ):
             pass
 
 
-    file = open("../data/PostJump/" + path_name+file_name+test_code, 'wb')
+    file = open(path_name+file_name+test_code, 'wb')
     pickle.dump(my_shelf, file)
     file.close()
 
@@ -647,4 +647,5 @@ number_of_cpu = joblib.cpu_count()
 delayed_funcs = [delayed(print2pdf)(epsilon) for epsilon in epsilon_list]
 parallel_pool = Parallel(n_jobs=number_of_cpu)
 res = parallel_pool(delayed_funcs)
+
 
