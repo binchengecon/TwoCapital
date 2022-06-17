@@ -26,13 +26,14 @@ import numpy as np
 import joblib
 from joblib import Parallel, delayed
 
-Attemp = 5
+Attemp = 6
 
 # Attemp = 1: add more output of variable like multi1,2 to diagnose where the problem is.  change starting multi* as 1.
 # Attemp = 2: delete multi2[<1e-8]=1e-8 to see the explosion. This is for presentation to Lars.
 # Attemp = 3: Maybe epsilon=0.1 worked, I need to check.
 # Attemp = 4: delete multi2[<1e-8] and see the effect, previous results didnt get stored.
 # Attemp = 5: freeze id=0 and see what is the effect.
+# Attemp = 6: add pickle to save ultimate convergent result
 
 tol = 1e-7
 max_iter = 30000
