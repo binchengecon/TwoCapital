@@ -25,7 +25,9 @@ import argparse
 import numpy as np
 import joblib
 from joblib import Parallel, delayed
+import pickle
 
+from joblib import load, dump
 Attemp = 6
 
 # Attemp = 1: add more output of variable like multi1,2 to diagnose where the problem is.  change starting multi* as 1.
@@ -36,7 +38,7 @@ Attemp = 6
 # Attemp = 6: add pickle to save ultimate convergent result
 
 tol = 1e-7
-max_iter = 30000
+max_iter = 1
 path_name = "./tech4D/data/PostJump/"
 
 # test_code = "_epsfrac_"+ str(epsilon)[0:len(str(epsilon))]+"_Paral"+"_Attemp_" +str(Attemp)
@@ -529,13 +531,12 @@ def model(gamma_3, eta, epsilon ):
         writer.writerow(file_header)
         writer.writerows(Data_List)
     
-    import pickle
     # filename = filename
     my_shelf = {}
     for key in dir():
-        if isinstance(globals()[key], (int,float, float, str, bool, np.ndarray,list)):
+        if isinstance(key, (int, float, str, bool, np.ndarray,list)):
             try:
-                my_shelf[key] = globals()[key]
+                my_shelf[key] = key
             except TypeError:
                 #
                 # __builtins__, my_shelf, and imported modules can not be shelved.
@@ -549,12 +550,19 @@ def model(gamma_3, eta, epsilon ):
     pickle.dump(my_shelf, file)
     file.close()
 
+    # my_shelf ={}
+    # # my_shelf = {'i_g':i_g, 
+    # #             }
+    # for key in dir():
+    #     my_shelf[key] = key
+
+
 
 
 
 number_of_cpu = joblib.cpu_count()
 delayed_funcs = [delayed(model)(gamma_3, eta, epsilon) for gamma_3, eta, epsilon in param_list]
-parallel_pool = Parallel(n_jobs=number_of_cpu)
+parallel_pool = Parallel(n_jobs=number_of_cpu,require='sharedmem')
 res = parallel_pool(delayed_funcs)
 
 
