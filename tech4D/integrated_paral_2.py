@@ -643,11 +643,14 @@ def print2pdf(epsilon):
         indices_max =np.where(i_g==i_g.max())
         indices_min = np.where(i_g==i_g.min())
 
-        plt.text(0.05,0.95,indices_max, transform=fig.transFigure, size=24)
-        plt.text(0.05,0.95,indices_min, transform=fig.transFigure, size=24)
-        
+
+
         figwidth = 10
         fig, axs = plt.subplots(int(np.ceil(file_varnum/2)), 2, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
+
+        plt.text(0.05,0.95,"ig is maximal at grid point:"+" K=" +str(indices_max[0]) +","" R=" +str(indices_max[1])+","+" Y=" +str(indices_max[2]), transform=fig.transFigure, size=12)
+        plt.text(0.05,0.93,"ig is minimal at grid point:"+" K=" +str(indices_min[0]) +","" R=" +str(indices_min[1])+","+" Y=" +str(indices_min[2]), transform=fig.transFigure, size=12)
+
         if file_length < max_iter:
             plt.suptitle("$\gamma$="+str(gamma)[0:5]+" , $\eta$=" + str(eta)+"_Success",fontsize=16)
         else :
