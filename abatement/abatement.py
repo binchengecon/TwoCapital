@@ -2,7 +2,7 @@
 #Required packages
 import os
 import sys
-sys.path.append('../src')
+sys.path.append('./src')
 import csv
 from supportfunctions import *
 from supportfunctions import finiteDiff_3D
