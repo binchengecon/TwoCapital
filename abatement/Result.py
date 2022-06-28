@@ -1,7 +1,10 @@
 import numpy as np
 import pandas as pd
 import sys
+print(sys.path)
+
 sys.path.append('./src')
+
 import pickle
 import plotly.graph_objects as go
 import plotly.offline as pyo
@@ -210,7 +213,7 @@ def simulate_pre(
     beta_f   = 1.86 / 1000
     sigma_y  = 1.2 * 1.86 / 1000
     
-    theta_ell = pd.read_csv("../data/model144.csv", header=None).to_numpy()[:, 0]/1000.
+    theta_ell = pd.read_csv("./data/model144.csv", header=None).to_numpy()[:, 0]/1000.
     pi_c_o = np.ones(len(theta_ell)) / len(theta_ell)
     pi_c_o = np.array([temp * np.ones(K_mat.shape) for temp in pi_c_o])
     theta_ell = np.array([temp * np.ones(K_mat.shape) for temp in theta_ell])
@@ -408,20 +411,19 @@ vartheta_bar_second = 0.
 
 K_min = 4.00
 K_max = 9.00
-hK    = 0.10
+hK    = 0.20
 K     = np.arange(K_min, K_max + hK, hK)
 nK    = len(K)
 Y_min = 0.
 Y_max = 5.
-hY    = 0.10 # make sure it is float instead of int
+hY    = 0.20 # make sure it is float instead of int
 Y     = np.arange(Y_min, Y_max + hY, hY)
 nY    = len(Y)
 L_min = - 5.
 L_max = - 0.
-hL    = 0.10
+hL    = 0.2
 L     = np.arange(L_min, L_max,  hL)
 nL    = len(L)
-
 
 id_2 = np.abs(Y - y_bar).argmin()
 Y_min_short = 0.
@@ -435,7 +437,7 @@ stateSpace = np.hstack([K_mat.reshape(-1,1,order = 'F'), Y_mat.reshape(-1,1,orde
 
 
 
-PDF_Dir = "./pdf_2tech/"
+PDF_Dir = "./abatement/pdf_2tech/"
 
 if not os.path.exists(PDF_Dir):
     os.mkdir(PDF_Dir)
@@ -449,7 +451,7 @@ xi_p = 0.025 # Damage poisson
 xi_b = 1000. # Brownian misspecification
 xi_g = 0.025  # Technology jump
 
-Data_Dir = "./data_2tech/xi_a_{}_xi_g_{}_" .format(xi_a,xi_g)
+Data_Dir = "./abatement/data_2tech/xi_a_{}_xi_g_{}_" .format(xi_a,xi_g)
 
 
 
@@ -468,71 +470,72 @@ x = tech1["x_star"]
 pi_c = tech1["pi_c"]
 g_tech = tech1["g_tech"]
 g_damage =  tech1["g_damage"]
+print("where am i: simulate_pre")
 # g_damage = np.ones((1, nK, nY, nL))
 res1 = simulate_pre(grid = (K, Y_short, L), model_args = model_args, 
                              controls = (i,e,x, g_tech, g_damage, pi_c), 
-                             T0=0, T=25, dt=1/365,)
+                             T0=0, T=25, dt=1/30,)
+print("where am i: finish simulate_pre")
+
+# # Parameters as defined in the paper
+# xi_a = 2/10000.  # Smooth ambiguity
+# xi_p = 0.050 # Damage poisson
+# xi_b = 1000. # Brownian misspecification
+# xi_g = 0.050  # Technology jump
+
+# Data_Dir = "./data_2tech/xi_a_{}_xi_g_{}_" .format(xi_a,xi_g)
 
 
-# Parameters as defined in the paper
-xi_a = 2/10000.  # Smooth ambiguity
-xi_p = 0.050 # Damage poisson
-xi_b = 1000. # Brownian misspecification
-xi_g = 0.050  # Technology jump
 
-Data_Dir = "./data_2tech/xi_a_{}_xi_g_{}_" .format(xi_a,xi_g)
-
-
-
-# Tech I, pre damage, 25 years technlogy jump
-with open(Data_Dir + "model_tech1_pre_damage", "rb") as f:
-    tech1 = pickle.load(f)
+# # Tech I, pre damage, 25 years technlogy jump
+# with open(Data_Dir + "model_tech1_pre_damage", "rb") as f:
+#     tech1 = pickle.load(f)
     
 
-with open(Data_Dir + "model_tech3_pre_damage", "rb") as f:
-    tech3 = pickle.load(f)
+# with open(Data_Dir + "model_tech3_pre_damage", "rb") as f:
+#     tech3 = pickle.load(f)
 
-model_args = (delta, mu_k, kappa,sigma_k, beta_f, zeta, psi_0, psi_1, sigma_g, theta, lambda_bar, vartheta_bar)
-i = tech1["i_star"]
-e = tech1["e_star"]
-x = tech1["x_star"]
-pi_c = tech1["pi_c"]
-g_tech = tech1["g_tech"]
-g_damage =  tech1["g_damage"]
-# g_damage = np.ones((1, nK, nY, nL))
-res2 = simulate_pre(grid = (K, Y_short, L), model_args = model_args, 
-                             controls = (i,e,x, g_tech, g_damage, pi_c), 
-                             T0=0, T=25, dt=1/365,)
+# model_args = (delta, mu_k, kappa,sigma_k, beta_f, zeta, psi_0, psi_1, sigma_g, theta, lambda_bar, vartheta_bar)
+# i = tech1["i_star"]
+# e = tech1["e_star"]
+# x = tech1["x_star"]
+# pi_c = tech1["pi_c"]
+# g_tech = tech1["g_tech"]
+# g_damage =  tech1["g_damage"]
+# # g_damage = np.ones((1, nK, nY, nL))
+# res2 = simulate_pre(grid = (K, Y_short, L), model_args = model_args, 
+#                              controls = (i,e,x, g_tech, g_damage, pi_c), 
+#                              T0=0, T=25, dt=1/365,)
 
-# Parameters as defined in the paper
-xi_a = 1000.  # Smooth ambiguity
-xi_p = 1000. # Damage poisson
-xi_b = 1000. # Brownian misspecification
-xi_g = 1000.  # Technology jump
+# # Parameters as defined in the paper
+# xi_a = 1000.  # Smooth ambiguity
+# xi_p = 1000. # Damage poisson
+# xi_b = 1000. # Brownian misspecification
+# xi_g = 1000.  # Technology jump
 
-Data_Dir = "./data_2tech/xi_a_{}_xi_g_{}_" .format(xi_a,xi_g)
+# Data_Dir = "./data_2tech/xi_a_{}_xi_g_{}_" .format(xi_a,xi_g)
 
 
 
-# Tech I, pre damage, 25 years technlogy jump
-with open(Data_Dir + "model_tech1_pre_damage", "rb") as f:
-    tech1 = pickle.load(f)
+# # Tech I, pre damage, 25 years technlogy jump
+# with open(Data_Dir + "model_tech1_pre_damage", "rb") as f:
+#     tech1 = pickle.load(f)
     
 
-with open(Data_Dir + "model_tech3_pre_damage", "rb") as f:
-    tech3 = pickle.load(f)
+# with open(Data_Dir + "model_tech3_pre_damage", "rb") as f:
+#     tech3 = pickle.load(f)
 
-model_args = (delta, mu_k, kappa,sigma_k, beta_f, zeta, psi_0, psi_1, sigma_g, theta, lambda_bar, vartheta_bar)
-i = tech1["i_star"]
-e = tech1["e_star"]
-x = tech1["x_star"]
-pi_c = tech1["pi_c"]
-g_tech = tech1["g_tech"]
-g_damage =  tech1["g_damage"]
-# g_damage = np.ones((1, nK, nY, nL))
-res3 = simulate_pre(grid = (K, Y_short, L), model_args = model_args, 
-                             controls = (i,e,x, g_tech, g_damage, pi_c), 
-                             T0=0, T=25, dt=1/365,)
+# model_args = (delta, mu_k, kappa,sigma_k, beta_f, zeta, psi_0, psi_1, sigma_g, theta, lambda_bar, vartheta_bar)
+# i = tech1["i_star"]
+# e = tech1["e_star"]
+# x = tech1["x_star"]
+# pi_c = tech1["pi_c"]
+# g_tech = tech1["g_tech"]
+# g_damage =  tech1["g_damage"]
+# # g_damage = np.ones((1, nK, nY, nL))
+# res3 = simulate_pre(grid = (K, Y_short, L), model_args = model_args, 
+#                              controls = (i,e,x, g_tech, g_damage, pi_c), 
+#                              T0=0, T=25, dt=1/365,)
 
             
 
@@ -541,32 +544,32 @@ figwidth = 10
 fig1, axs1 = plt.subplots(3, 1, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
 
 
-axs1[1].plot(res1["years"], res1["x"],label='')
-axs1[1].plot(res2["years"], res2["x"],label='')
-axs1[1].plot(res3["years"], res3["x"],label='')
+axs1[0].plot(res1["years"], res1["x"],label='')
+# axs1[1].plot(res2["years"], res2["x"],label='')
+# axs1[1].plot(res3["years"], res3["x"],label='')
+axs1[0].set_xlabel('Years')
+axs1[0].set_ylabel("R&D investment")
+axs1[0].set_title("R&D investment")
+axs1[0].grid(linestyle=':')
+axs1[0].legend()
+
+axs1[1].plot(res1["years"], res1["i"],label='')
+# axs1[2].plot(res2["years"], res2["i"],label='')
+# axs1[2].plot(res3["years"], res3["i"],label='')
 axs1[1].set_xlabel('Years')
-axs1[1].set_ylabel("R&D investment")
-axs1[1].set_title("R&D investment")
+axs1[1].set_ylabel("Capital investment")
+axs1[1].set_title("Capital investment")
 axs1[1].grid(linestyle=':')
 axs1[1].legend()
 
-axs1[2].plot(res1["years"], res1["i"],label='')
-axs1[2].plot(res2["years"], res2["i"],label='')
-axs1[2].plot(res3["years"], res3["i"],label='')
+axs1[2].plot(res1["years"], res1["e"],label='')
+# axs1[3].plot(res2["years"], res2["e"],label='')
+# axs1[3].plot(res3["years"], res3["e"],label='')
 axs1[2].set_xlabel('Years')
-axs1[2].set_ylabel("Capital investment")
-axs1[2].set_title("v")
+axs1[2].set_ylabel("Emission")
+axs1[2].set_title("Emission")
 axs1[2].grid(linestyle=':')
 axs1[2].legend()
-
-axs1[3].plot(res1["years"], res1["e"],label='')
-axs1[3].plot(res2["years"], res2["e"],label='')
-axs1[3].plot(res3["years"], res3["e"],label='')
-axs1[3].set_xlabel('Years')
-axs1[3].set_ylabel("Emission")
-axs1[3].set_title("Emission")
-axs1[3].grid(linestyle=':')
-axs1[3].legend()
 
 
 pdf_pages.savefig(fig1)
@@ -575,23 +578,23 @@ plt.close()
 fig2, axs2 = plt.subplots(2, 1, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
 
 
-axs2[1].plot(res1["years"], res1["states"][:, 1],label='')
-axs2[1].plot(res2["years"], res2["states"][:, 1],label='')
-axs2[1].plot(res3["years"], res3["states"][:, 1],label='')
+axs2[0].plot(res1["years"], res1["states"][:, 1],label='')
+# axs2[1].plot(res2["years"], res2["states"][:, 1],label='')
+# axs2[1].plot(res3["years"], res3["states"][:, 1],label='')
+axs2[0].set_xlabel('Years')
+axs2[0].set_ylabel("Temperature anomaly")
+axs2[0].set_title("Temperature anomaly")
+axs2[0].grid(linestyle=':')
+axs2[0].legend()
+
+axs2[1].plot(res1["years"], np.exp(res1["states"][:, 2]),label='')
+# axs2[2].plot(res2["years"], np.exp(res2["states"][:, 2]),label='')
+# axs2[2].plot(res3["years"], np.exp(res3["states"][:, 2]),label='')
 axs2[1].set_xlabel('Years')
-axs2[1].set_ylabel("Temperature anomaly")
-axs2[1].set_title("Temperature anomaly")
+axs2[1].set_ylabel("Technology jump intensity")
+axs2[1].set_title("Technology jump intensity")
 axs2[1].grid(linestyle=':')
 axs2[1].legend()
-
-axs2[2].plot(res1["years"], np.exp(res1["states"][:, 2]),label='')
-axs2[2].plot(res2["years"], np.exp(res2["states"][:, 2]),label='')
-axs2[2].plot(res3["years"], np.exp(res3["states"][:, 2]),label='')
-axs2[2].set_xlabel('Years')
-axs2[2].set_ylabel("Technology jump intensity")
-axs2[2].set_title("Technology jump intensity")
-axs2[2].grid(linestyle=':')
-axs2[2].legend()
 
 
 pdf_pages.savefig(fig2)
@@ -601,23 +604,23 @@ plt.close()
 fig3, axs3 = plt.subplots(2, 1, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
 
 
-axs3[1].plot(res1["years"], res1["distorted_tech_prob"],label='')
-axs3[1].plot(res2["years"], res2["distorted_tech_prob"],label='')
-axs3[1].plot(res3["years"], res3["distorted_tech_prob"],label='')
+axs3[0].plot(res1["years"], res1["distorted_tech_prob"],label='')
+# axs3[1].plot(res2["years"], res2["distorted_tech_prob"],label='')
+# axs3[1].plot(res3["years"], res3["distorted_tech_prob"],label='')
+axs3[0].set_xlabel('Years')
+axs3[0].set_ylabel("Distorted probability of first technology jump")
+axs3[0].set_title("Distorted probability of first technology jump")
+axs3[0].grid(linestyle=':')
+axs3[0].legend()
+
+axs3[1].plot(res1["years"], res1["distorted_damage_prob"],label='')
+# axs3[2].plot(res2["years"], res2["distorted_damage_prob"],label='')
+# axs3[2].plot(res3["years"], res3["distorted_damage_prob"],label='')
 axs3[1].set_xlabel('Years')
-axs3[1].set_ylabel("Distorted probability of first technology jump")
-axs3[1].set_title("Distorted probability of first technology jump")
+axs3[1].set_ylabel("Distorted probability of damage changes")
+axs3[1].set_title("Distorted probability of damage changes")
 axs3[1].grid(linestyle=':')
 axs3[1].legend()
-
-axs3[2].plot(res1["years"], res1["distorted_damage_prob"],label='')
-axs3[2].plot(res2["years"], res2["distorted_damage_prob"],label='')
-axs3[2].plot(res3["years"], res3["distorted_damage_prob"],label='')
-axs3[2].set_xlabel('Years')
-axs3[2].set_ylabel("Distorted probability of damage changes")
-axs3[2].set_title("Distorted probability of damage changes")
-axs3[2].grid(linestyle=':')
-axs3[2].legend()
 
 
 pdf_pages.savefig(fig3)
