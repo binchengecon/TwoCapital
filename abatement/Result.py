@@ -474,7 +474,7 @@ g_damage =  tech1["g_damage"]
 # g_damage = np.ones((1, nK, nY, nL))
 res1 = simulate_pre(grid = (K, Y_short, L), model_args = model_args, 
                              controls = (i,e,x, g_tech, g_damage, pi_c), 
-                             T0=0, T=25, dt=1/30,)
+                             T0=0, T=25, dt=1/30)
 # print("where am i: finish simulate_pre")
 
 # Parameters as defined in the paper
@@ -505,7 +505,7 @@ g_damage =  tech1["g_damage"]
 # g_damage = np.ones((1, nK, nY, nL))
 res2 = simulate_pre(grid = (K, Y_short, L), model_args = model_args, 
                              controls = (i,e,x, g_tech, g_damage, pi_c), 
-                             T0=0, T=25, dt=1/365,)
+                             T0=0, T=25, dt=1/30)
 
 # Parameters as defined in the paper
 xi_a = 1000.  # Smooth ambiguity
@@ -535,7 +535,7 @@ g_damage =  tech1["g_damage"]
 # g_damage = np.ones((1, nK, nY, nL))
 res3 = simulate_pre(grid = (K, Y_short, L), model_args = model_args, 
                              controls = (i,e,x, g_tech, g_damage, pi_c), 
-                             T0=0, T=25, dt=1/365,)
+                             T0=0, T=25, dt=1/30)
 
             
 
