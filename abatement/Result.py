@@ -12,7 +12,7 @@ from scipy.interpolate import RegularGridInterpolator
 from scipy.interpolate import CubicSpline
 from matplotlib.backends.backend_pdf import PdfPages
 from src.supportfunctions import finiteDiff_3D
-
+import os
 
 def PDESolver(stateSpace, A, B_r, B_f, B_k, C_rr, C_ff, C_kk, D, v0, ε = 1, tol = -10, smartguess = False, solverType = 'False Transient'):
 
@@ -431,99 +431,196 @@ nY_short    = len(Y_short)
 
 (K_mat, Y_mat, L_mat) = np.meshgrid(K, Y_short, L, indexing="ij")
 
+stateSpace = np.hstack([K_mat.reshape(-1,1,order = 'F'), Y_mat.reshape(-1,1,order = 'F'), L_mat.reshape(-1, 1, order='F')])
 
-Data_Dir = "./abatement/data/"
-Pdf_Dir = "./abatement/pdf/"
 
+
+PDF_Dir = "./pdf_2tech/"
+
+if not os.path.exists(PDF_Dir):
+    os.mkdir(PDF_Dir)
+
+pdf_pages = PdfPages(PDF_Dir+'Mitigation_1.pdf')
+
+
+# Parameters as defined in the paper
+xi_a = 2/10000.  # Smooth ambiguity
+xi_p = 0.025 # Damage poisson
+xi_b = 1000. # Brownian misspecification
+xi_g = 0.025  # Technology jump
+
+Data_Dir = "./data_2tech/xi_a_{}_xi_g_{}_" .format(xi_a,xi_g)
+
+
+
+# Tech I, pre damage, 25 years technlogy jump
 with open(Data_Dir + "model_tech1_pre_damage", "rb") as f:
     tech1 = pickle.load(f)
     
 
-with open(Data_Dir + "model_tech2_pre_damage", "rb") as f:
-    tech2 = pickle.load(f)
+with open(Data_Dir + "model_tech3_pre_damage", "rb") as f:
+    tech3 = pickle.load(f)
+
+model_args = (delta, mu_k, kappa,sigma_k, beta_f, zeta, psi_0, psi_1, sigma_g, theta, lambda_bar, vartheta_bar)
+i = tech1["i_star"]
+e = tech1["e_star"]
+x = tech1["x_star"]
+pi_c = tech1["pi_c"]
+g_tech = tech1["g_tech"]
+g_damage =  tech1["g_damage"]
+# g_damage = np.ones((1, nK, nY, nL))
+res1 = simulate_pre(grid = (K, Y_short, L), model_args = model_args, 
+                             controls = (i,e,x, g_tech, g_damage, pi_c), 
+                             T0=0, T=25, dt=1/365,)
+
+
+# Parameters as defined in the paper
+xi_a = 2/10000.  # Smooth ambiguity
+xi_p = 0.050 # Damage poisson
+xi_b = 1000. # Brownian misspecification
+xi_g = 0.050  # Technology jump
+
+Data_Dir = "./data_2tech/xi_a_{}_xi_g_{}_" .format(xi_a,xi_g)
+
+
+
+# Tech I, pre damage, 25 years technlogy jump
+with open(Data_Dir + "model_tech1_pre_damage", "rb") as f:
+    tech1 = pickle.load(f)
+    
 
 with open(Data_Dir + "model_tech3_pre_damage", "rb") as f:
     tech3 = pickle.load(f)
 
-# with open("./res_data/xi_a_1000.0_xi_g_1000.0/pre_damage_xi_p_1000.0/model_tech3_pre_damage", "rb") as f:
-#     tech3 = pickle.load(f)
+model_args = (delta, mu_k, kappa,sigma_k, beta_f, zeta, psi_0, psi_1, sigma_g, theta, lambda_bar, vartheta_bar)
+i = tech1["i_star"]
+e = tech1["e_star"]
+x = tech1["x_star"]
+pi_c = tech1["pi_c"]
+g_tech = tech1["g_tech"]
+g_damage =  tech1["g_damage"]
+# g_damage = np.ones((1, nK, nY, nL))
+res2 = simulate_pre(grid = (K, Y_short, L), model_args = model_args, 
+                             controls = (i,e,x, g_tech, g_damage, pi_c), 
+                             T0=0, T=25, dt=1/365,)
 
-stateSpace = np.hstack([K_mat.reshape(-1,1,order = 'F'), Y_mat.reshape(-1,1,order = 'F'), L_mat.reshape(-1, 1, order='F')])
+# Parameters as defined in the paper
+xi_a = 1000.  # Smooth ambiguity
+xi_p = 1000. # Damage poisson
+xi_b = 1000. # Brownian misspecification
+xi_g = 1000.  # Technology jump
 
-v0 = tech1["v0"]
-i_star = tech1["i_star"]
-e_star = tech1["e_star"]
-x_star = tech1["x_star"]
-
-theta_ell = pd.read_csv("../data/model144.csv", header=None).to_numpy()[:, 0]/1000.
-pi_c_o = np.ones(len(theta_ell)) / len(theta_ell)
-pi_c_o = np.array([temp * np.ones(K_mat.shape) for temp in pi_c_o])
-theta_ell = np.array([temp * np.ones(K_mat.shape) for temp in theta_ell])
-args = (delta, alpha, kappa, mu_k, sigma_k, gamma_1, gamma_2, theta_ell, pi_c_o, sigma_y,  theta, vartheta_bar, lambda_bar)
-
-v, ME_base, diff = decompose(v0, stateSpace, (K_mat, Y_mat, L_mat), (i_star, e_star, x_star), args=args)
-
-dvdy = finiteDiff_3D(v0, 1, 1, hY)
-ddvdyy = finiteDiff_3D(v, 1, 2, hY)
+Data_Dir = "./data_2tech/xi_a_{}_xi_g_{}_" .format(xi_a,xi_g)
 
 
-dG  = gamma_1 + gamma_2 * e_star
-ddG = gamma_2
-RHS = - dvdy * np.sum(pi_c_o * theta_ell, axis=0) - ddvdyy * sigma_y**2 * e_star + dG * np.sum(theta_ell * pi_c_o, axis=0) + ddG * sigma_y**2 * e_star
-j_star = 1 - e_star / (alpha * lambda_bar * np.exp(K_mat))
-j_star[j_star <= 1e-16] = 1e-16
-mc = delta / (alpha - i_star - alpha * vartheta_bar * j_star**theta - x_star)
 
-LHS = mc * theta * vartheta_bar /(lambda_bar * np.exp(K_mat)) * j_star**(theta-1)
+# Tech I, pre damage, 25 years technlogy jump
+with open(Data_Dir + "model_tech1_pre_damage", "rb") as f:
+    tech1 = pickle.load(f)
+    
 
-model_args = (0.01, -0.043, 6.67, 0.0095, 1.86/1000)
+with open(Data_Dir + "model_tech3_pre_damage", "rb") as f:
+    tech3 = pickle.load(f)
 
-i = tech3["i"]
-e = tech3["e"]
-res = simulate_post(grid = (K, Y_short), model_args = model_args, controls = (i,e), T=40, dt=1/12)
-###############################Graphic Presentation######
+model_args = (delta, mu_k, kappa,sigma_k, beta_f, zeta, psi_0, psi_1, sigma_g, theta, lambda_bar, vartheta_bar)
+i = tech1["i_star"]
+e = tech1["e_star"]
+x = tech1["x_star"]
+pi_c = tech1["pi_c"]
+g_tech = tech1["g_tech"]
+g_damage =  tech1["g_damage"]
+# g_damage = np.ones((1, nK, nY, nL))
+res3 = simulate_pre(grid = (K, Y_short, L), model_args = model_args, 
+                             controls = (i,e,x, g_tech, g_damage, pi_c), 
+                             T0=0, T=25, dt=1/365,)
 
-pdf_pages = PdfPages(Pdf_Dir+'pre_tech1_plot'+'.pdf')
-
+            
 
 figwidth = 10
-fig, axs = plt.subplots(int(np.ceil(file_varnum/2)), 2, sharex=True, figsize=(2  * figwidth, 2 *figwidth)) 
 
-axs[varnum//2,varnum%2].plot(Y ,tech1["e_star"][:, :, -1])
-plt.plot(Y_short, tech2["e_star"][:, :, -4].T)
-
-plt.plot(tech3["v"][:, 0], label="tech3")
-plt.plot(tech2["v0"][:,11, 5])
-plt.plot(tech1["v0"][:,11, 5])
-plt.legend()
-
-plt.plot(tech1["i_star"][:, 11, 5].T)
-
-plt.plot(Y_short, tech1["e_star"][:, :, 5].T)
-
-plt.plot(res["states"][:, 0])
-
-years = res["years"]
-tm = len(years)
-plt.plot(years, res["e"])
-plt.xlabel("Years")
-plt.title("Post jump emission")
-
-years = res["years"]
-tm = len(years)
-plt.plot(years, res["i"] * np.exp(res["states"][:, 0]) )
-plt.xlabel("Years")
-plt.title("Post jump investment")
-
-plt.plot(years, res["states"][:,0])
-
-plt.plot(e[:,0])
+fig1, axs1 = plt.subplots(3, 1, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
 
 
-pdf_pages.savefig(fig)
+axs1[1].plot(res1["years"], res1["x"],label='')
+axs1[1].plot(res2["years"], res2["x"],label='')
+axs1[1].plot(res3["years"], res3["x"],label='')
+axs1[1].set_xlabel('Years')
+axs1[1].set_ylabel("R&D investment")
+axs1[1].set_title("R&D investment")
+axs1[1].grid(linestyle=':')
+axs1[1].legend()
+
+axs1[2].plot(res1["years"], res1["i"],label='')
+axs1[2].plot(res2["years"], res2["i"],label='')
+axs1[2].plot(res3["years"], res3["i"],label='')
+axs1[2].set_xlabel('Years')
+axs1[2].set_ylabel("Capital investment")
+axs1[2].set_title("v")
+axs1[2].grid(linestyle=':')
+axs1[2].legend()
+
+axs1[3].plot(res1["years"], res1["e"],label='')
+axs1[3].plot(res2["years"], res2["e"],label='')
+axs1[3].plot(res3["years"], res3["e"],label='')
+axs1[3].set_xlabel('Years')
+axs1[3].set_ylabel("Emission")
+axs1[3].set_title("Emission")
+axs1[3].grid(linestyle=':')
+axs1[3].legend()
 
 
+pdf_pages.savefig(fig1)
+plt.close()
+
+fig2, axs2 = plt.subplots(2, 1, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
 
 
+axs2[1].plot(res1["years"], res1["states"][:, 1],label='')
+axs2[1].plot(res2["years"], res2["states"][:, 1],label='')
+axs2[1].plot(res3["years"], res3["states"][:, 1],label='')
+axs2[1].set_xlabel('Years')
+axs2[1].set_ylabel("Temperature anomaly")
+axs2[1].set_title("Temperature anomaly")
+axs2[1].grid(linestyle=':')
+axs2[1].legend()
 
-pdf_pages.close()
+axs2[2].plot(res1["years"], np.exp(res1["states"][:, 2]),label='')
+axs2[2].plot(res2["years"], np.exp(res2["states"][:, 2]),label='')
+axs2[2].plot(res3["years"], np.exp(res3["states"][:, 2]),label='')
+axs2[2].set_xlabel('Years')
+axs2[2].set_ylabel("Technology jump intensity")
+axs2[2].set_title("Technology jump intensity")
+axs2[2].grid(linestyle=':')
+axs2[2].legend()
+
+
+pdf_pages.savefig(fig2)
+plt.close()
+
+
+fig3, axs3 = plt.subplots(2, 1, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
+
+
+axs3[1].plot(res1["years"], res1["distorted_tech_prob"],label='')
+axs3[1].plot(res2["years"], res2["distorted_tech_prob"],label='')
+axs3[1].plot(res3["years"], res3["distorted_tech_prob"],label='')
+axs3[1].set_xlabel('Years')
+axs3[1].set_ylabel("Distorted probability of first technology jump")
+axs3[1].set_title("Distorted probability of first technology jump")
+axs3[1].grid(linestyle=':')
+axs3[1].legend()
+
+axs3[2].plot(res1["years"], res1["distorted_damage_prob"],label='')
+axs3[2].plot(res2["years"], res2["distorted_damage_prob"],label='')
+axs3[2].plot(res3["years"], res3["distorted_damage_prob"],label='')
+axs3[2].set_xlabel('Years')
+axs3[2].set_ylabel("Distorted probability of damage changes")
+axs3[2].set_title("Distorted probability of damage changes")
+axs3[2].grid(linestyle=':')
+axs3[2].legend()
+
+
+pdf_pages.savefig(fig3)
+plt.close()
+
+pdf_pages.close()          

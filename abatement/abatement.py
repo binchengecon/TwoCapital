@@ -40,14 +40,15 @@ args = parser.parse_args()
 
 start_time = time.time()
 # Parameters as defined in the paper
-xi_a = 2  # Smooth ambiguity
+xi_a = 2/10000.  # Smooth ambiguity
 xi_p = 0.025 # Damage poisson
 xi_b = 1000. # Brownian misspecification
 xi_g = 0.025  # Technology jump
 
 # DataDir = "./res_data/xi_p_" + str(xi_p) + "_xi_g_" + str(xi_g) +  "/"
 # DataDir = "./abatement/data/"+"xi_a_"+str(xi_a*10000.) +"_xi_p_" + str(xi_p) + "_xi_g_" + str(xi_g)+"_"
-DataDir = "./abatement/data_Bin/"
+DataDir = "./abatement/data/xi_a_{}_xi_g_{}_".format(xi_a,xi_g)
+
 if not os.path.exists(DataDir):
     os.mkdir(DataDir)
 
