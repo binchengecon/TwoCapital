@@ -3,13 +3,13 @@ file for post HJB with k and y
 """
 import os
 import sys
+sys.path.append("../src/")
 import numpy as np
 import pandas as pd
 from numba import njit
+from supportfunctions import finiteDiff
 import SolveLinSys
 from scipy import optimize
-from sympy import ordered
-from src.supportfunctions import finiteDiff
 
 def false_transient_one_iteration_cpp(stateSpace, A, B1, B2, C1, C2, D, v0, ε):
     A = A.reshape(-1, 1, order='F')
@@ -40,16 +40,18 @@ def maxover_ie(K,Y,dvdk,dvdy,dvdyy,G,F,theta, lambda_bar, vartheta_bar, delta, a
         # print("Value of H: {}" .format(np.shape(H)))
         # print("i,e = ({},{})".format(i,e))
         temp = 0
+        print(alpha-i-alpha*vartheta_bar*(1-e/(alpha*lambda_bar*K))**theta)
         temp += delta*np.log(alpha-i-alpha*vartheta_bar*(1-e/(alpha*lambda_bar*K))**theta)
         temp +=(i-kappa/2*i**2)*dvdk
         temp += G*H*e
         temp += sigma_y ** 2 /2*F *e**2
+        temp += xi_a*np.sum(pi_l*(np.log(pi_l)-np.log(pi_c_o)),axis=0)
 
         return -temp
 
-    x0 = [0,0]
-    bound_i = (0,.1)
-    bound_e = (0,.1)
+    x0 = [alpha/2,0]
+    bound_i = (0,alpha)
+    bound_e = (-np.inf,np.inf)
 
     def cons(variable):
         i,e = variable
@@ -59,7 +61,7 @@ def maxover_ie(K,Y,dvdk,dvdy,dvdyy,G,F,theta, lambda_bar, vartheta_bar, delta, a
 
     con = optimize.NonlinearConstraint(cons,0,np.inf)
 
-    result = optimize.minimize(maxover_ie_temp,x0,method='Nelder-Mead',bounds=[bound_i,bound_e])
+    result = optimize.minimize(maxover_ie_temp,x0,method='L-BFGS-B',bounds=(bound_i,bound_e))
     # result = optimize.fmin_cobyla(maxover_ie,x0,[cons],rhoend=1e-7)
     # print(result)
     # print(result.x)
@@ -277,8 +279,8 @@ def _hjb_iteration(
 
     for num in range(len(K_1d)):
 
-        # itemp[num],etemp[num] = maxover_ie(K_1d[num],Y_1d[num],dvdk_1d[num],dvdy_1d[num],dvdyy_1d[num],G_1d[num],F_1d[num],theta, lambda_bar, vartheta_bar, delta, alpha, kappa, mu_k, sigma_k, pi_c_o, pi_c, theta_ell[:,1,1], sigma_y, xi_a, xi_b)
-        itemp[num],etemp[num] = eqsover_ie(K_1d[num],Y_1d[num],dvdk_1d[num],dvdy_1d[num],dvdyy_1d[num],G_1d[num],F_1d[num],theta, lambda_bar, vartheta_bar, delta, alpha, kappa, mu_k, sigma_k, pi_c_o, pi_c, theta_ell[:,1,1], sigma_y, xi_a, xi_b)
+        itemp[num],etemp[num] = maxover_ie(K_1d[num],Y_1d[num],dvdk_1d[num],dvdy_1d[num],dvdyy_1d[num],G_1d[num],F_1d[num],theta, lambda_bar, vartheta_bar, delta, alpha, kappa, mu_k, sigma_k, pi_c_o[:,1,1], pi_c, theta_ell[:,1,1], sigma_y, xi_a, xi_b)
+        # itemp[num],etemp[num] = eqsover_ie(K_1d[num],Y_1d[num],dvdk_1d[num],dvdy_1d[num],dvdyy_1d[num],G_1d[num],F_1d[num],theta, lambda_bar, vartheta_bar, delta, alpha, kappa, mu_k, sigma_k, pi_c_o, pi_c, theta_ell[:,1,1], sigma_y, xi_a, xi_b)
         # print("num {}" .format(num))
 
     # print("-------------------------------------------")
