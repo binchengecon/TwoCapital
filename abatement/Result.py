@@ -474,7 +474,7 @@ g_damage =  tech1["g_damage"]
 # g_damage = np.ones((1, nK, nY, nL))
 res1 = simulate_pre(grid = (K, Y_short, L), model_args = model_args, 
                              controls = (i,e,x, g_tech, g_damage, pi_c), 
-                             T0=0, T=25, dt=1/30)
+                             T0=0, T=40, dt=1/30)
 # print("where am i: finish simulate_pre")
 
 # Parameters as defined in the paper
@@ -505,7 +505,7 @@ g_damage =  tech1["g_damage"]
 # g_damage = np.ones((1, nK, nY, nL))
 res2 = simulate_pre(grid = (K, Y_short, L), model_args = model_args, 
                              controls = (i,e,x, g_tech, g_damage, pi_c), 
-                             T0=0, T=25, dt=1/30)
+                             T0=0, T=40, dt=1/30)
 
 # Parameters as defined in the paper
 xi_a = 1000.  # Smooth ambiguity
@@ -535,7 +535,7 @@ g_damage =  tech1["g_damage"]
 # g_damage = np.ones((1, nK, nY, nL))
 res3 = simulate_pre(grid = (K, Y_short, L), model_args = model_args, 
                              controls = (i,e,x, g_tech, g_damage, pi_c), 
-                             T0=0, T=25, dt=1/30)
+                             T0=0, T=40, dt=1/30)
 
             
 
@@ -545,7 +545,7 @@ fig1, axs1 = plt.subplots(3, 1, sharex=True, figsize=(2  * figwidth, 2 *figwidth
 
 
 axs1[0].plot(res1["years"], res1["x"],label=r'$\xi_p=\xi_g=0.025$')
-axs1[0].plot(res2["years"], res2["x"],label='r$\xi_p=\xi_g=0.050$')
+axs1[0].plot(res2["years"], res2["x"],label=r'$\xi_p=\xi_g=0.050$')
 axs1[0].plot(res3["years"], res3["x"],label='baseline')
 axs1[0].set_xlabel('Years')
 axs1[0].set_ylabel("R&D investment")
@@ -555,7 +555,7 @@ axs1[0].legend(loc='upper left')
 
 
 axs1[1].plot(res1["years"], res1["i"],label=r'$\xi_p=\xi_g=0.025$')
-axs1[1].plot(res2["years"], res2["i"],label='r$\xi_p=\xi_g=0.050$')
+axs1[1].plot(res2["years"], res2["i"],label=r'$\xi_p=\xi_g=0.050$')
 axs1[1].plot(res3["years"], res3["i"],label='baseline')
 axs1[1].set_xlabel('Years')
 axs1[1].set_ylabel("Capital investment")
@@ -565,7 +565,7 @@ axs1[1].legend(loc='upper left')
 
 
 axs1[2].plot(res1["years"], res1["e"],label=r'$\xi_p=\xi_g=0.025$')
-axs1[2].plot(res2["years"], res2["e"],label='r$\xi_p=\xi_g=0.050$')
+axs1[2].plot(res2["years"], res2["e"],label=r'$\xi_p=\xi_g=0.050$')
 axs1[2].plot(res3["years"], res3["e"],label='baseline')
 axs1[2].set_xlabel('Years')
 axs1[2].set_ylabel("Emission")
@@ -581,7 +581,7 @@ fig2, axs2 = plt.subplots(2, 1, sharex=True, figsize=(2  * figwidth, 2 *figwidth
 
 
 axs2[0].plot(res1["years"], res1["states"][:, 1],label=r'$\xi_p=\xi_g=0.025$')
-axs2[0].plot(res2["years"], res2["states"][:, 1],label='r$\xi_p=\xi_g=0.050$')
+axs2[0].plot(res2["years"], res2["states"][:, 1],label=r'$\xi_p=\xi_g=0.050$')
 axs2[0].plot(res3["years"], res3["states"][:, 1],label='baseline')
 axs2[0].set_xlabel('Years')
 axs2[0].set_ylabel("Temperature anomaly")
@@ -590,7 +590,7 @@ axs2[0].grid(linestyle=':')
 axs2[0].legend(loc='upper left')
 
 axs2[1].plot(res1["years"], np.exp(res1["states"][:, 2]),label=r'$\xi_p=\xi_g=0.025$')
-axs2[1].plot(res2["years"], np.exp(res2["states"][:, 2]),label='r$\xi_p=\xi_g=0.050$')
+axs2[1].plot(res2["years"], np.exp(res2["states"][:, 2]),label=r'$\xi_p=\xi_g=0.050$')
 axs2[1].plot(res3["years"], np.exp(res3["states"][:, 2]),label='baseline')
 axs2[1].set_xlabel('Years')
 axs2[1].set_ylabel("Technology jump intensity")
@@ -607,7 +607,7 @@ fig3, axs3 = plt.subplots(2, 1, sharex=True, figsize=(2  * figwidth, 2 *figwidth
 
 
 axs3[0].plot(res1["years"], res1["distorted_tech_prob"],label=r'$\xi_p=\xi_g=0.025$')
-axs3[0].plot(res2["years"], res2["distorted_tech_prob"],label='r$\xi_p=\xi_g=0.050$')
+axs3[0].plot(res2["years"], res2["distorted_tech_prob"],label=r'$\xi_p=\xi_g=0.050$')
 axs3[0].plot(res3["years"], res3["distorted_tech_prob"],label='baseline')
 axs3[0].set_xlabel('Years')
 axs3[0].set_ylabel("Distorted probability of first technology jump")
@@ -616,7 +616,7 @@ axs3[0].grid(linestyle=':')
 axs3[0].legend(loc='upper left')
 
 axs3[1].plot(res1["years"], res1["distorted_damage_prob"],label=r'$\xi_p=\xi_g=0.025$')
-axs3[1].plot(res2["years"], res2["distorted_damage_prob"],label='r$\xi_p=\xi_g=0.050$')
+axs3[1].plot(res2["years"], res2["distorted_damage_prob"],label=r'$\xi_p=\xi_g=0.050$')
 axs3[1].plot(res3["years"], res3["distorted_damage_prob"],label='baseline')
 axs3[1].set_xlabel('Years')
 axs3[1].set_ylabel("Distorted probability of damage changes")
@@ -624,6 +624,31 @@ axs3[1].set_title("Distorted probability of damage changes")
 axs3[1].grid(linestyle=':')
 axs3[1].legend(loc='upper left')
 
+
+fig4, axs4 = plt.subplots(2, 1, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
+
+
+axs4[0].plot(res1["years"], res1["distorted_tech_prob"],label=r'$\xi_p=\xi_g=0.025$')
+axs4[0].plot(res2["years"], res2["distorted_tech_prob"],label=r'$\xi_p=\xi_g=0.050$')
+axs4[0].plot(res3["years"], res3["distorted_tech_prob"],label='baseline')
+axs4[0].set_xlabel('Years')
+axs4[0].set_ylabel("Distorted probability of first technology jump")
+axs4[0].set_title("Distorted probability of first technology jump")
+axs4[0].grid(linestyle=':')
+axs4[0].legend(loc='upper left')
+
+axs4[1].plot(res1["years"], res1["distorted_damage_prob"],label=r'$\xi_p=\xi_g=0.025$')
+axs4[1].plot(res2["years"], res2["distorted_damage_prob"],label=r'$\xi_p=\xi_g=0.050$')
+axs4[1].plot(res3["years"], res3["distorted_damage_prob"],label='baseline')
+axs4[1].set_xlabel('Years')
+axs4[1].set_ylabel("Distorted probability of damage changes")
+axs4[1].set_title("Distorted probability of damage changes")
+axs4[1].grid(linestyle=':')
+axs4[1].legend(loc='upper left')
+
+
+pdf_pages.savefig(fig3)
+plt.close()
 
 pdf_pages.savefig(fig3)
 plt.close()
