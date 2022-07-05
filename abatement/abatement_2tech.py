@@ -40,16 +40,16 @@ args = parser.parse_args()
 
 start_time = time.time()
 # Parameters as defined in the paper
-xi_a = 2/10000.  # Smooth ambiguity
-xi_p = 0.025 # Damage poisson
+# xi_a = 2/10000.  # Smooth ambiguity
+# xi_p = 0.025 # Damage poisson
 xi_b = 1000. # Brownian misspecification
-xi_g = 0.025  # Technology jump
+# xi_g = 0.025  # Technology jump
 
 def model(xi_a,xi_g,xi_p):
 
     # DataDir = "./res_data/xi_p_" + str(xi_p) + "_xi_g_" + str(xi_g) +  "/"
 # DataDir = "./abatement/data/"+"xi_a_"+str(xi_a*10000.) +"_xi_p_" + str(xi_p) + "_xi_g_" + str(xi_g)+"_"
-    DataDir = "./abatement/data_2tech/xi_a_{}_xi_g_{}_".format(xi_a,xi_g)
+    DataDir = "./abatement/data_2tech/attemp_newpsi0_xi_a_{}_xi_g_{}_" .format(xi_a,xi_g)
 
     if not os.path.exists(DataDir):
         os.mkdir(DataDir)
@@ -68,7 +68,7 @@ def model(xi_a,xi_g,xi_p):
     gamma_1 = 1.7675/10000
     gamma_2 = 0.0022 * 2
     # gamma_3 = 0.3853 * 2
-    gamma_3_list = np.linspace(0., 1./3., 3)
+    gamma_3_list = np.linspace(0., 1./3., 20)
     # gamma_3_list = np.array([0.])
     y_bar = 2.
     y_bar_lower = 1.5
@@ -80,7 +80,7 @@ def model(xi_a,xi_g,xi_p):
     beta_f    = 1.86 / 1000
     # Jump intensity
     zeta      = 0.00
-    psi_0     = 0.005
+    psi_0     = 0.00025
     psi_1     = 1/2
     sigma_g   = 0.016
     # Tech jump

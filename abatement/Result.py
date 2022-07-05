@@ -181,7 +181,7 @@ def simulate_post(grid = (), model_args = (), controls = (), initial=(np.log(85/
     )
 
 def simulate_pre(
-    grid = (), model_args = (), controls = (), initial=(np.log(85/0.115), 1.1, -3.7), 
+    grid = (), model_args = (), controls = (), initial=(np.log(85/0.115), 1.1, np.log(1/120)), 
     T0=0, T=40, dt=1/12
                 ):
 
@@ -192,7 +192,6 @@ def simulate_pre(
 
     delta, mu_k, kappa, sigma_k, beta_f, zeta, psi_0, psi_1, sigma_g, theta, lambda_bar, vartheta_bar, = model_args
     ii, ee, xx, g_tech, g_damage, pi_c = controls
-    
     n_climate = len(pi_c)
 
     method = 'linear'
@@ -222,6 +221,7 @@ def simulate_pre(
 #     v, ME_base, diff = decompose(v0, stateSpace, (K_mat, Y_mat, L_mat), (ii, ee, xx), args=args)
 
     gridpoints = (K, Y, L)
+
     i_func = RegularGridInterpolator(gridpoints, ii)
     e_func = RegularGridInterpolator(gridpoints, ee)
     x_func = RegularGridInterpolator(gridpoints, xx)
@@ -306,6 +306,7 @@ def simulate_pre(
 
         else:
             # other periods
+            # print(hist[tm-1,:])
             i_hist[tm] = get_i(hist[tm-1,:])
             e_hist[tm] = get_e(hist[tm-1,:])
             x_hist[tm] = get_x(hist[tm-1,:])
@@ -343,17 +344,24 @@ def simulate_pre(
     
     distorted_tech_intensity = np.exp(hist[:, 2]) * gt_tech
     distorted_tech_prob = 1 - np.exp(- np.cumsum(np.insert(distorted_tech_intensity * dt, 0, 0) ))[:-1]
-    
+
+    true_tech_intensity = np.exp(hist[:, 2]) 
+    true_tech_prob = 1 - np.exp(- np.cumsum(np.insert(true_tech_intensity * dt, 0, 0) ))[:-1]
+        
 #     if pre_damage:
     damage_intensity = Damage_Intensity(hist[:, 1])
     distorted_damage_intensity = np.mean(gt_dmg, axis=0) * damage_intensity
     distorted_damage_prob = 1 - np.exp(- np.cumsum(np.insert(distorted_damage_intensity * dt, 0, 0) ))[:-1]
+    
+    true_damage_intensity =  damage_intensity
+    true_damage_prob = 1 - np.exp(- np.cumsum(np.insert(true_damage_intensity * dt, 0, 0) ))[:-1]
 
     
     res = dict(
         states= hist, 
         i = i_hist * np.exp(hist[:, 0]), 
         e = e_hist,
+        # x = x_hist * np.exp(hist[:, 0]),
         x = x_hist * np.exp(hist[:, 0]),
         scc = scc_hist,
 #         scc0 = scc_0,
@@ -365,7 +373,9 @@ def simulate_pre(
 #         ME_base = ME_base_t,
         jt = jt,
         LHS = LHS,
-        years=years
+        years=years,
+        true_tech_prob = true_tech_prob,
+        true_damage_prob = true_damage_prob
     )
     
 #     if pre_damage:
@@ -379,7 +389,9 @@ def Damage_Intensity(Yt, y_bar_lower=1.5):
     Intensity = r_1 * (np.exp(r_2 / 2 * (Yt - y_bar_lower)**2) -1) * (Yt > y_bar_lower)
     return Intensity
 
-   
+
+
+
 delta = 0.01
 alpha = 0.115
 kappa = 6.667
@@ -388,7 +400,7 @@ sigma_k = 0.0095
 beta_f = 1.86/1000
 sigma_y = 1.2 * 1.86 / 1000
 zeta = 0.0
-psi_0 = 0.005
+psi_0 = 0.00025
 psi_1 = 1/2
 sigma_g = 0.016
 gamma_1 = 1.7675 / 1000
@@ -430,19 +442,18 @@ Y_min_short = 0.
 Y_max_short = 3.
 Y_short     = np.arange(Y_min_short, Y_max_short + hY, hY)
 nY_short    = len(Y_short)
-
+# print("bY_short={:d}".format(nY_short))
 (K_mat, Y_mat, L_mat) = np.meshgrid(K, Y_short, L, indexing="ij")
 
 stateSpace = np.hstack([K_mat.reshape(-1,1,order = 'F'), Y_mat.reshape(-1,1,order = 'F'), L_mat.reshape(-1, 1, order='F')])
 
 
 
-PDF_Dir = "./abatement/pdf_2tech/"
+PDF_Dir = "./abatement/pdf_2tech/attemp_newpsi0_"
 
 if not os.path.exists(PDF_Dir):
     os.mkdir(PDF_Dir)
 
-pdf_pages = PdfPages(PDF_Dir+'Mitigation_1.pdf')
 
 
 # Parameters as defined in the paper
@@ -451,9 +462,10 @@ xi_p = 0.025 # Damage poisson
 xi_b = 1000. # Brownian misspecification
 xi_g = 0.025  # Technology jump
 
-Data_Dir = "./abatement/data_2tech/xi_a_{}_xi_g_{}_" .format(xi_a,xi_g)
+Data_Dir = "./abatement/data_2tech/attemp_newpsi0_xi_a_{}_xi_g_{}_" .format(xi_a,xi_g)
 
-
+IntPeriod = 70
+timespan = 1/12
 
 # Tech I, pre damage, 25 years technlogy jump
 with open(Data_Dir + "model_tech1_pre_damage", "rb") as f:
@@ -474,7 +486,8 @@ g_damage =  tech1["g_damage"]
 # g_damage = np.ones((1, nK, nY, nL))
 res1 = simulate_pre(grid = (K, Y_short, L), model_args = model_args, 
                              controls = (i,e,x, g_tech, g_damage, pi_c), 
-                             T0=0, T=40, dt=1/30)
+                             T0=0, T=IntPeriod, dt=timespan)
+
 # print("where am i: finish simulate_pre")
 
 # Parameters as defined in the paper
@@ -483,7 +496,7 @@ xi_p = 0.050 # Damage poisson
 xi_b = 1000. # Brownian misspecification
 xi_g = 0.050  # Technology jump
 
-Data_Dir = "./data_2tech/xi_a_{}_xi_g_{}_" .format(xi_a,xi_g)
+Data_Dir = "./abatement/data_2tech/attemp_newpsi0_xi_a_{}_xi_g_{}_" .format(xi_a,xi_g)
 
 
 
@@ -505,7 +518,7 @@ g_damage =  tech1["g_damage"]
 # g_damage = np.ones((1, nK, nY, nL))
 res2 = simulate_pre(grid = (K, Y_short, L), model_args = model_args, 
                              controls = (i,e,x, g_tech, g_damage, pi_c), 
-                             T0=0, T=40, dt=1/30)
+                             T0=0, T=IntPeriod, dt=timespan)
 
 # Parameters as defined in the paper
 xi_a = 1000.  # Smooth ambiguity
@@ -513,7 +526,7 @@ xi_p = 1000. # Damage poisson
 xi_b = 1000. # Brownian misspecification
 xi_g = 1000.  # Technology jump
 
-Data_Dir = "./data_2tech/xi_a_{}_xi_g_{}_" .format(xi_a,xi_g)
+Data_Dir = "./abatement/data_2tech/attemp_newpsi0_xi_a_{}_xi_g_{}_" .format(xi_a,xi_g)
 
 
 
@@ -535,28 +548,54 @@ g_damage =  tech1["g_damage"]
 # g_damage = np.ones((1, nK, nY, nL))
 res3 = simulate_pre(grid = (K, Y_short, L), model_args = model_args, 
                              controls = (i,e,x, g_tech, g_damage, pi_c), 
-                             T0=0, T=40, dt=1/30)
+                             T0=0, T=IntPeriod, dt=timespan)
 
             
+pdf_pages2 = PdfPages(PDF_Dir+'Mitigation_RD_Investment.pdf')
+
+figwidth = 10
+
+fig, axs = plt.subplots(1, 1, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
+
+vec1 = (res1["x"]/(alpha*np.exp(res1["states"][:,0])))
+vec2 =(res2["x"]/(alpha*np.exp(res2["states"][:,0])))
+vec3 = (res3["x"]/(alpha*np.exp(res3["states"][:,0])))
+
+axs.plot(res1["years"][res1["states"][:, 1]<1.5], vec1[res1["states"][:, 1]<1.5],label=r'$\xi_p=\xi_g=0.025$')
+axs.plot(res2["years"][res2["states"][:, 1]<1.5], vec2[res2["states"][:, 1]<1.5],label=r'$\xi_p=\xi_g=0.050$')
+axs.plot(res3["years"][res3["states"][:, 1]<1.5], vec3[res3["states"][:, 1]<1.5],label='baseline')
+axs.set_xlabel('Years')
+axs.set_ylabel("R&D investment (as a ratio of total GDP)")
+axs.set_title("R&D investment (as a ratio of total GDP)")
+axs.grid(linestyle=':')
+axs.legend(loc='upper left')
+
+pdf_pages2.savefig(fig)
+plt.close()
+
+pdf_pages2.close()          
+
+pdf_pages = PdfPages(PDF_Dir+'Mitigation_2_Years_'+str(IntPeriod)+'.pdf')
 
 figwidth = 10
 
 fig1, axs1 = plt.subplots(3, 1, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
 
 
-axs1[0].plot(res1["years"], res1["x"],label=r'$\xi_p=\xi_g=0.025$')
-axs1[0].plot(res2["years"], res2["x"],label=r'$\xi_p=\xi_g=0.050$')
-axs1[0].plot(res3["years"], res3["x"],label='baseline')
+
+axs1[0].plot(res1["years"][res1["states"][:, 1]<1.5], vec1[res1["states"][:, 1]<1.5],label=r'$\xi_p=\xi_g=0.025$')
+axs1[0].plot(res2["years"][res2["states"][:, 1]<1.5], vec2[res2["states"][:, 1]<1.5],label=r'$\xi_p=\xi_g=0.050$')
+axs1[0].plot(res3["years"][res3["states"][:, 1]<1.5], vec3[res3["states"][:, 1]<1.5],label='baseline')
 axs1[0].set_xlabel('Years')
-axs1[0].set_ylabel("R&D investment")
-axs1[0].set_title("R&D investment")
+axs1[0].set_ylabel("R&D investment (as a ratio of total GDP)")
+axs1[0].set_title("R&D investment (as a ratio of total GDP)")
 axs1[0].grid(linestyle=':')
 axs1[0].legend(loc='upper left')
 
 
-axs1[1].plot(res1["years"], res1["i"],label=r'$\xi_p=\xi_g=0.025$')
-axs1[1].plot(res2["years"], res2["i"],label=r'$\xi_p=\xi_g=0.050$')
-axs1[1].plot(res3["years"], res3["i"],label='baseline')
+axs1[1].plot(res1["years"][res1["states"][:, 1]<1.5], res1["i"][res1["states"][:, 1]<1.5],label=r'$\xi_p=\xi_g=0.025$')
+axs1[1].plot(res2["years"][res2["states"][:, 1]<1.5], res2["i"][res2["states"][:, 1]<1.5],label=r'$\xi_p=\xi_g=0.050$')
+axs1[1].plot(res3["years"][res3["states"][:, 1]<1.5], res3["i"][res3["states"][:, 1]<1.5],label='baseline')
 axs1[1].set_xlabel('Years')
 axs1[1].set_ylabel("Capital investment")
 axs1[1].set_title("Capital investment")
@@ -564,9 +603,9 @@ axs1[1].grid(linestyle=':')
 axs1[1].legend(loc='upper left')
 
 
-axs1[2].plot(res1["years"], res1["e"],label=r'$\xi_p=\xi_g=0.025$')
-axs1[2].plot(res2["years"], res2["e"],label=r'$\xi_p=\xi_g=0.050$')
-axs1[2].plot(res3["years"], res3["e"],label='baseline')
+axs1[2].plot(res1["years"][res1["states"][:, 1]<1.5], res1["e"][res1["states"][:, 1]<1.5],label=r'$\xi_p=\xi_g=0.025$')
+axs1[2].plot(res2["years"][res2["states"][:, 1]<1.5], res2["e"][res2["states"][:, 1]<1.5],label=r'$\xi_p=\xi_g=0.050$')
+axs1[2].plot(res3["years"][res3["states"][:, 1]<1.5], res3["e"][res3["states"][:, 1]<1.5],label='baseline')
 axs1[2].set_xlabel('Years')
 axs1[2].set_ylabel("Emission")
 axs1[2].set_title("Emission")
@@ -580,18 +619,18 @@ plt.close()
 fig2, axs2 = plt.subplots(2, 1, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
 
 
-axs2[0].plot(res1["years"], res1["states"][:, 1],label=r'$\xi_p=\xi_g=0.025$')
-axs2[0].plot(res2["years"], res2["states"][:, 1],label=r'$\xi_p=\xi_g=0.050$')
-axs2[0].plot(res3["years"], res3["states"][:, 1],label='baseline')
+axs2[0].plot(res1["years"][res1["states"][:, 1]<1.5], res1["states"][:, 1][res1["states"][:, 1]<1.5],label=r'$\xi_p=\xi_g=0.025$')
+axs2[0].plot(res2["years"][res2["states"][:, 1]<1.5], res2["states"][:, 1][res2["states"][:, 1]<1.5],label=r'$\xi_p=\xi_g=0.050$')
+axs2[0].plot(res3["years"][res3["states"][:, 1]<1.5], res3["states"][:, 1][res3["states"][:, 1]<1.5],label='baseline')
 axs2[0].set_xlabel('Years')
 axs2[0].set_ylabel("Temperature anomaly")
 axs2[0].set_title("Temperature anomaly")
 axs2[0].grid(linestyle=':')
 axs2[0].legend(loc='upper left')
 
-axs2[1].plot(res1["years"], np.exp(res1["states"][:, 2]),label=r'$\xi_p=\xi_g=0.025$')
-axs2[1].plot(res2["years"], np.exp(res2["states"][:, 2]),label=r'$\xi_p=\xi_g=0.050$')
-axs2[1].plot(res3["years"], np.exp(res3["states"][:, 2]),label='baseline')
+axs2[1].plot(res1["years"][res1["states"][:, 1]<1.5], np.exp(res1["states"][:, 2])[res1["states"][:, 1]<1.5],label=r'$\xi_p=\xi_g=0.025$')
+axs2[1].plot(res2["years"][res2["states"][:, 1]<1.5], np.exp(res2["states"][:, 2])[res2["states"][:, 1]<1.5],label=r'$\xi_p=\xi_g=0.050$')
+axs2[1].plot(res3["years"][res3["states"][:, 1]<1.5], np.exp(res3["states"][:, 2])[res3["states"][:, 1]<1.5],label='baseline')
 axs2[1].set_xlabel('Years')
 axs2[1].set_ylabel("Technology jump intensity")
 axs2[1].set_title("Technology jump intensity")
@@ -624,33 +663,67 @@ axs3[1].set_title("Distorted probability of damage changes")
 axs3[1].grid(linestyle=':')
 axs3[1].legend(loc='upper left')
 
-
-fig4, axs4 = plt.subplots(2, 1, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
-
-
-axs4[0].plot(res1["years"], res1["distorted_tech_prob"],label=r'$\xi_p=\xi_g=0.025$')
-axs4[0].plot(res2["years"], res2["distorted_tech_prob"],label=r'$\xi_p=\xi_g=0.050$')
-axs4[0].plot(res3["years"], res3["distorted_tech_prob"],label='baseline')
-axs4[0].set_xlabel('Years')
-axs4[0].set_ylabel("Distorted probability of first technology jump")
-axs4[0].set_title("Distorted probability of first technology jump")
-axs4[0].grid(linestyle=':')
-axs4[0].legend(loc='upper left')
-
-axs4[1].plot(res1["years"], res1["distorted_damage_prob"],label=r'$\xi_p=\xi_g=0.025$')
-axs4[1].plot(res2["years"], res2["distorted_damage_prob"],label=r'$\xi_p=\xi_g=0.050$')
-axs4[1].plot(res3["years"], res3["distorted_damage_prob"],label='baseline')
-axs4[1].set_xlabel('Years')
-axs4[1].set_ylabel("Distorted probability of damage changes")
-axs4[1].set_title("Distorted probability of damage changes")
-axs4[1].grid(linestyle=':')
-axs4[1].legend(loc='upper left')
-
-
 pdf_pages.savefig(fig3)
 plt.close()
 
-pdf_pages.savefig(fig3)
+fig4, axs4 = plt.subplots(2, 1, sharex=False, figsize=(2  * figwidth, 2 *figwidth))  
+
+pi_d_o = np.ones(len(gamma_3_list)) / len(gamma_3_list)
+pi_d_distorted = pi_d_o*res2["gt_dmg"][:,-1]
+
+axs4[0].hist(gamma_3_list, weights=pi_d_o,label='baseline',alpha=0.5,bins=20)
+axs4[0].hist(gamma_3_list, weights=pi_d_distorted,label=r'$\xi_p=\xi_g=0.050$',alpha=0.5,bins=20)
+axs4[0].set_xlabel(r'$\gamma$')
+axs4[0].set_ylabel("Probability distortion for damage function")
+axs4[0].set_title("Probability distortion for damage function")
+axs4[0].grid(linestyle=':')
+axs4[0].legend(loc='upper left')
+
+
+theta_ell = pd.read_csv('./data/model144.csv', header=None).to_numpy()[:, 0]
+# pi_c_o    = np.ones_like(theta_ell)/len(theta_ell)
+# pi_c_distorted = pi_c_o*res2["gt_tech"][:,-1]
+theta_ell_dist = theta_ell*res2["pic_t"][:,-1]
+
+axs4[1].hist(theta_ell,bins=10,density=True,label='baseline',alpha=0.5)
+axs4[1].hist(theta_ell,bins=10,density=True,weights=res2["pic_t"][:,-1],stacked=True,label=r'$\xi_p=\xi_g=0.050$',alpha=0.5)
+axs4[1].set_xlabel(r'$\theta_\ell,$ Climate Sensitivity')
+axs4[1].set_ylabel("Probability distortion for climate sensitivity models")
+axs4[1].set_title("Probability distortion for climate sensitivity models")
+axs4[1].grid(linestyle=':')
+axs4[1].set_xlim(1, 3)
+axs4[1].legend(loc='upper left')
+
+
+pdf_pages.savefig(fig4)
+plt.close()
+
+# 
+
+fig5, axs5 = plt.subplots(2, 1, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
+
+
+axs5[0].plot(res1["years"], res1["true_tech_prob"],label=r'$\xi_p=\xi_g=0.025$')
+axs5[0].plot(res2["years"], res2["true_tech_prob"],label=r'$\xi_p=\xi_g=0.050$')
+axs5[0].plot(res3["years"], res3["true_tech_prob"],label='baseline')
+axs5[0].set_xlabel("Years")
+axs5[0].set_ylabel("True probability of first technology jump")
+axs5[0].set_title("True probability of first technology jump")
+axs5[0].grid(linestyle=':')
+axs5[0].legend(loc='upper left')
+
+
+axs5[1].plot(res1["years"], res1["true_damage_prob"],label=r'$\xi_p=\xi_g=0.025$')
+axs5[1].plot(res2["years"], res2["true_damage_prob"],label=r'$\xi_p=\xi_g=0.050$')
+axs5[1].plot(res3["years"], res3["true_damage_prob"],label='baseline')
+axs5[1].set_xlabel("Years")
+axs5[1].set_ylabel("True probability of damage changes")
+axs5[1].set_title("True probability of damage changes")
+axs5[1].grid(linestyle=':')
+axs5[1].legend(loc='upper left')
+
+
+pdf_pages.savefig(fig5)
 plt.close()
 
 pdf_pages.close()          
