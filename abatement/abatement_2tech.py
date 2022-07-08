@@ -2,6 +2,8 @@
 #Required packages
 import os
 import sys
+
+from numpy import meshgrid
 sys.path.append('./src')
 print(sys.path)
 import csv
@@ -45,14 +47,26 @@ start_time = time.time()
 xi_b = 1000. # Brownian misspecification
 # xi_g = 0.025  # Technology jump
 
-def model(xi_a,xi_g,xi_p):
+# psi_0_grid = np.array([0.003,0.006,0.009])
+psi_0_grid = np.array([0.009])
+# psi_1_grid = np.array([.5,.7,.9])
+psi_1_grid = np.array([.6,.8,.9])
 
-    # DataDir = "./res_data/xi_p_" + str(xi_p) + "_xi_g_" + str(xi_g) +  "/"
-# DataDir = "./abatement/data/"+"xi_a_"+str(xi_a*10000.) +"_xi_p_" + str(xi_p) + "_xi_g_" + str(xi_g)+"_"
-    DataDir = "./abatement/data_2tech/attemp_newpsi0_xi_a_{}_xi_g_{}_" .format(xi_a,xi_g)
+psi_0_meshgrid,psi_1_meshgrid = np.meshgrid(psi_0_grid,psi_1_grid)
 
-    if not os.path.exists(DataDir):
-        os.mkdir(DataDir)
+psi_0_meshgrid_1d =psi_0_meshgrid.ravel(order='F')
+psi_1_meshgrid_1d = psi_1_meshgrid.ravel(order='F')
+
+maxiter = 15000
+
+def model(xi_a,xi_g,xi_p,psi_0,psi_1):
+
+    # Data_Dir = "./res_data/xi_p_" + str(xi_p) + "_xi_g_" + str(xi_g) +  "/"
+# Data_Dir = "./abatement/data/"+"xi_a_"+str(xi_a*10000.) +"_xi_p_" + str(xi_p) + "_xi_g_" + str(xi_g)+"_"
+    Data_Dir = "./abatement/data_2tech/"
+
+    File_Name = "Compare_Psi0_Psi1_xi_a_{}_xi_g_{}_psi_0_{}_psi_1_{}_" .format(xi_a,xi_g,psi_0,psi_1)
+
 
     # Model parameters
     delta   = 0.010
@@ -68,7 +82,7 @@ def model(xi_a,xi_g,xi_p):
     gamma_1 = 1.7675/10000
     gamma_2 = 0.0022 * 2
     # gamma_3 = 0.3853 * 2
-    gamma_3_list = np.linspace(0., 1./3., 20)
+    gamma_3_list = np.linspace(0., 1./3., 6)
     # gamma_3_list = np.array([0.])
     y_bar = 2.
     y_bar_lower = 1.5
@@ -80,8 +94,8 @@ def model(xi_a,xi_g,xi_p):
     beta_f    = 1.86 / 1000
     # Jump intensity
     zeta      = 0.00
-    psi_0     = 0.00025
-    psi_1     = 1/2
+    # psi_0     = 0.00025
+    # psi_1     = 1/2
     sigma_g   = 0.016
     # Tech jump
     lambda_bar_first = lambda_bar / 2
@@ -152,7 +166,7 @@ def model(xi_a,xi_g,xi_p):
 
     model_tech3_post_damage = hjb_post_damage_post_tech(
             K, Y, model_args, v0=None,
-            epsilon=1., fraction=.2,tol=1e-8, max_iter=2000, print_iteration=False)
+            epsilon=1., fraction=.1,tol=1e-8, max_iter=maxiter, print_iteration=False)
 
 
 
@@ -162,10 +176,10 @@ def model(xi_a,xi_g,xi_p):
         V_post_3D[:,:,j] = v_post
 
     # model_tech3_post_damage.append(v_post_i)
-    with open(DataDir + "model_tech3_post_damage", "wb") as f:
+    with open(Data_Dir + File_Name+ "model_tech3_post_damage", "wb") as f:
         pickle.dump(model_tech3_post_damage, f)
 
-    model_tech3_post_damage = pickle.load(open(DataDir + "model_tech3_post_damage", "rb"))
+    model_tech3_post_damage = pickle.load(open(Data_Dir + File_Name+ "model_tech3_post_damage", "rb"))
 
 
     # Post damage, tech II
@@ -177,7 +191,7 @@ def model(xi_a,xi_g,xi_p):
     pi_c = np.array([temp * np.ones(K_mat.shape) for temp in pi_c_o])
     pi_c_o = pi_c.copy()
     theta_ell = np.array([temp * np.ones(K_mat.shape) for temp in theta_ell])
-    # Guess = pickle.load(open(DataDir + "model_tech2_post_damage", "rb"))
+    # Guess = pickle.load(open(Data_Dir + File_Name+ "model_tech2_post_damage", "rb"))
     model_tech1_post_damage = []
 
     for i in range(len(gamma_3_list)):
@@ -190,15 +204,16 @@ def model(xi_a,xi_g,xi_p):
                 V_post_damage=None,
                 # v0=Guess[i]["v0"],
                 v0=None,
-                tol=1e-7, epsilon=0.1, fraction=0.01, smart_guess=None,
+                tol=1e-7, epsilon=0.1, fraction=0.1, smart_guess=None,
+                max_iter=maxiter
                 )
 
         model_tech1_post_damage.append(res)
 
-    with open(DataDir + "model_tech1_post_damage", "wb") as f:
+    with open(Data_Dir + File_Name+ "model_tech1_post_damage", "wb") as f:
         pickle.dump(model_tech1_post_damage, f)
 
-    model_tech1_post_damage = pickle.load(open(DataDir + "model_tech1_post_damage", "rb"))
+    model_tech1_post_damage = pickle.load(open(Data_Dir + File_Name+ "model_tech1_post_damage", "rb"))
 
 
     # PRE DAMAGE
@@ -233,13 +248,13 @@ def model(xi_a,xi_g,xi_p):
             K, Y_short, 
             model_args=(delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi_a, xi_b, xi_p, pi_d_o, v_i, gamma_1, gamma_2, theta, lambda_bar_second, vartheta_bar_second, y_bar_lower),
             v0=np.mean(v_i, axis=0), epsilon=0.1, fraction=0.1,
-            tol=1e-8, max_iter=15000, print_iteration=True
+            tol=1e-8, max_iter=maxiter, print_iteration=True
             )
 
-    with open(DataDir + "model_tech3_pre_damage", "wb") as f:
+    with open(Data_Dir + File_Name+ "model_tech3_pre_damage", "wb") as f:
         pickle.dump(model_tech3_pre_damage, f)
 
-    # model_tech3_pre_damage = pickle.load(open(DataDir + "model_tech3_pre_damage", "rb"))
+    # model_tech3_pre_damage = pickle.load(open(Data_Dir + File_Name+ "model_tech3_pre_damage", "rb"))
 
     print("-------------------------------------------")
     print("---------Pre damage, Tech I---------------")
@@ -267,20 +282,27 @@ def model(xi_a,xi_g,xi_p):
 
     model_args =(delta, alpha, theta, vartheta_bar, lambda_bar, mu_k, kappa, sigma_k, theta_ell, pi_c_o, pi_c, sigma_y, zeta, psi_0, psi_1, sigma_g, v_tech3, gamma_1, gamma_2, gamma_3_list, y_bar, xi_a, xi_g, xi_p)
 
-    # Guess = pickle.load(open(DataDir + "model_tech2_pre_damage", "rb"))
+    # Guess = pickle.load(open(Data_Dir + File_Name+ "model_tech2_pre_damage", "rb"))
     model_tech1_pre_damage = hjb_pre_tech(
             state_grid=(K, Y_short, L), 
             model_args=model_args, V_post_damage=v_i, 
-            tol=1e-8, epsilon=0.01, fraction=0.5, max_iter=10000,
+            tol=1e-8, epsilon=0.01, fraction=0.1, max_iter=maxiter,
             v0=np.mean(v_i, axis=0),
             smart_guess=None,
             )
 
-    with open(DataDir + "model_tech1_pre_damage", "wb") as f:
+    with open(Data_Dir + File_Name+ "model_tech1_pre_damage", "wb") as f:
         pickle.dump(model_tech1_pre_damage, f)
 
 
 
-model(1000.,1000.,1000.)
-model(2/10000.,0.050,0.050)
-model(2/10000.,0.025,0.025)
+# model(1000.,1000.,1000.)
+# model(2/10000.,0.050,0.050)
+# model(2/10000.,0.025,0.025)
+
+for psi_0,psi_1 in zip(psi_0_meshgrid_1d,psi_1_meshgrid_1d):
+    # print(psi_0,psi_1)
+    model(1000.,1000.,1000.,psi_0,psi_1)
+    # model(2/10000.,0.050,0.050,psi_0,psi_1)
+    # model(2/10000.,0.025,0.025,psi_0,psi_1)
+
