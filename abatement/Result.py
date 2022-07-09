@@ -20,6 +20,7 @@ import os
 font = {'family' : 'monospace',
         'weight' : 'bold',
         'size'   : 18}
+
 plt.rc('font', **font)  # pass in the font dict as kwargs
 
 def PDESolver(stateSpace, A, B_r, B_f, B_k, C_rr, C_ff, C_kk, D, v0, ε = 1, tol = -10, smartguess = False, solverType = 'False Transient'):
@@ -410,7 +411,7 @@ def graph(psi_0,psi_1,Ig_initial = 1/120):
     
         Data_Dir = "./abatement/data_2tech/"
 
-        File_Dir = "attemp_newpsi0_xi_a_{}_xi_g_{}_psi_0_{}_psi_1_{}_" .format(xi_a,xi_g,psi_0,psi_1)
+        File_Dir = "Compare_Psi0_Psi1_xi_a_{}_xi_g_{}_psi_0_{}_psi_1_{}_" .format(xi_a,xi_g,psi_0,psi_1)
 
         # Tech I, pre damage, 25 years technlogy jump
         with open(Data_Dir + File_Dir+"model_tech1_pre_damage", "rb") as f:
@@ -648,7 +649,7 @@ def graph2(psi_0_meshgrid,psi_1_meshgrid,Ig_initial = 1/120):
     
         Data_Dir = "./abatement/data_2tech/"
 
-        File_Dir = "attemp_newpsi0_xi_a_{}_xi_g_{}_psi_0_{}_psi_1_{}_" .format(xi_a,xi_g,psi_0,psi_1)
+        File_Dir = "Compare_Psi0_Psi1_xi_a_{}_xi_g_{}_psi_0_{}_psi_1_{}_" .format(xi_a,xi_g,psi_0,psi_1)
 
         with open(Data_Dir + File_Dir+"model_tech1_pre_damage", "rb") as f:
             tech1 = pickle.load(f)
