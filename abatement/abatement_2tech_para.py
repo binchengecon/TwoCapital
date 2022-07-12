@@ -61,7 +61,7 @@ psi_0_meshgrid,psi_1_meshgrid = np.meshgrid(psi_0_grid,psi_1_grid)
 psi_0_meshgrid_1d =psi_0_meshgrid.ravel(order='F')
 psi_1_meshgrid_1d = psi_1_meshgrid.ravel(order='F')
 
-maxiter = 15000
+maxiter = 50000
 
 def model(xi_a,xi_g,xi_p,psi_0,psi_1):
 
