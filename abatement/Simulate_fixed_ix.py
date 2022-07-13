@@ -17,7 +17,9 @@ from matplotlib.backends.backend_pdf import PdfPages
 from src.supportfunctions import finiteDiff_3D
 import os
 
+from matplotlib.backends.backend_pdf import PdfPages
 from scipy import optimize
+
 def PDESolver(stateSpace, A, B_r, B_f, B_k, C_rr, C_ff, C_kk, D, v0, ε = 1, tol = -10, smartguess = False, solverType = 'False Transient'):
 
     if solverType == 'False Transient':
@@ -294,3 +296,5 @@ for i in range(len(Ig_Initial)):
     time2[i]=hitting995_psi0(initial=(np.log(85/0.115), 1.1, np.log(Ig_Initial[i])),T0=0, T=80, dt=1/12)
 
 print("time2 series = {:}".format(time2))
+
+

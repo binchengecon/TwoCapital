@@ -47,17 +47,17 @@ start_time = time.time()
 xi_b = 1000. # Brownian misspecification
 # xi_g = 0.025  # Technology jump
 
-# psi_0_grid = np.array([0.003,0.006,0.009])
-psi_0_grid = np.array([0.008, 0.010, 0.012])
-# psi_1_grid = np.array([.5,.7,.9])
-psi_1_grid = np.array([.8])
+psi_0_grid = np.array([0.006])
+# psi_0_grid = np.array([0.009])
+psi_1_grid = np.array([.5])
+# psi_1_grid = np.array([.6,.8,.9])
 
 psi_0_meshgrid,psi_1_meshgrid = np.meshgrid(psi_0_grid,psi_1_grid)
 
 psi_0_meshgrid_1d =psi_0_meshgrid.ravel(order='F')
 psi_1_meshgrid_1d = psi_1_meshgrid.ravel(order='F')
 
-maxiter = 15000
+maxiter = 50000
 
 def model(xi_a,xi_g,xi_p,psi_0,psi_1):
 
@@ -65,7 +65,7 @@ def model(xi_a,xi_g,xi_p,psi_0,psi_1):
 # Data_Dir = "./abatement/data/"+"xi_a_"+str(xi_a*10000.) +"_xi_p_" + str(xi_p) + "_xi_g_" + str(xi_g)+"_"
     Data_Dir = "./abatement/data_2tech/"
 
-    File_Name = "Compare_Psi0_Psi1_xi_a_{}_xi_g_{}_psi_0_{}_psi_1_{}_" .format(xi_a,xi_g,psi_0,psi_1)
+    File_Name = "attemp_newpsi0_xi_a_{}_xi_g_{}_psi_0_{}_psi_1_{}_" .format(xi_a,xi_g,psi_0,psi_1)
 
 
     # Model parameters
@@ -162,102 +162,102 @@ def model(xi_a,xi_g,xi_p,psi_0,psi_1):
     # model_tech3_post_damage =  []
     # # for gamma_3_i in gamma_3_list:
 
-    model_args = (delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi_a, xi_b, gamma_1, gamma_2, 0., y_bar, theta, lambda_bar_second, vartheta_bar_second)
+    # model_args = (delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi_a, xi_b, gamma_1, gamma_2, 0., y_bar, theta, lambda_bar_second, vartheta_bar_second)
 
-    model_tech3_post_damage = hjb_post_damage_post_tech(
-            K, Y, model_args, v0=None,
-            epsilon=.005, fraction=.005,tol=1e-8, max_iter=2000, print_iteration=False)
+    # model_tech3_post_damage = hjb_post_damage_post_tech(
+    #         K, Y, model_args, v0=None,
+    #         epsilon=1., fraction=.1,tol=1e-8, max_iter=2000, print_iteration=False)
 
 
+
+
+    # # model_tech3_post_damage.append(v_post_i)
+    # with open(Data_Dir + File_Name+ "model_tech3_post_damage", "wb") as f:
+    #     pickle.dump(model_tech3_post_damage, f)
+
+    model_tech3_post_damage = pickle.load(open(Data_Dir + File_Name+ "model_tech3_post_damage", "rb"))
 
     v_post = model_tech3_post_damage["v"]
     V_post_3D = np.zeros_like(K_mat)
     for j in range(nL):
         V_post_3D[:,:,j] = v_post
 
-    # model_tech3_post_damage.append(v_post_i)
-    with open(Data_Dir + File_Name+ "model_tech3_post_damage", "wb") as f:
-        pickle.dump(model_tech3_post_damage, f)
-
-    model_tech3_post_damage = pickle.load(open(Data_Dir + File_Name+ "model_tech3_post_damage", "rb"))
-
-
     # Post damage, tech II
 
-    print("-------------------------------------------")
-    print("------------Post damage, Tech I-----------")
-    print("-------------------------------------------")
+    # print("-------------------------------------------")
+    # print("------------Post damage, Tech I-----------")
+    # print("-------------------------------------------")
 
-    pi_c = np.array([temp * np.ones(K_mat.shape) for temp in pi_c_o])
-    pi_c_o = pi_c.copy()
-    theta_ell = np.array([temp * np.ones(K_mat.shape) for temp in theta_ell])
+    # pi_c = np.array([temp * np.ones(K_mat.shape) for temp in pi_c_o])
+    # pi_c_o = pi_c.copy()
+    # theta_ell = np.array([temp * np.ones(K_mat.shape) for temp in theta_ell])
 
     # Guess = pickle.load(open(Data_Dir + File_Name+ "model_tech1_post_damage", "rb"))
-    model_tech1_post_damage = []
+    # model_tech1_post_damage = []
 
-    for i in range(len(gamma_3_list)):
-        gamma_3_i = gamma_3_list[i]
-        V_post_tech1 = V_post_3D
+    # for i in range(len(gamma_3_list)):
+    #     gamma_3_i = gamma_3_list[i]
+    #     V_post_tech1 = V_post_3D
 
-        res = hjb_pre_tech(
-                state_grid=(K, Y, L), 
-                model_args=(delta, alpha, theta, vartheta_bar, lambda_bar, mu_k, kappa, sigma_k, theta_ell, pi_c_o, pi_c, sigma_y, zeta, psi_0, psi_1, sigma_g, V_post_tech1, gamma_1, gamma_2, gamma_3_i, y_bar, xi_a, xi_g, xi_p),
-                V_post_damage=None,
-                # v0=Guess[i]["v0"],
-                v0=None,
-                tol=1e-7, epsilon=.005, fraction=.005, 
-                smart_guess=None,
-                # smart_guess=Guess[i],
-                max_iter=maxiter
-                )
+    #     res = hjb_pre_tech(
+    #             state_grid=(K, Y, L), 
+    #             model_args=(delta, alpha, theta, vartheta_bar, lambda_bar, mu_k, kappa, sigma_k, theta_ell, pi_c_o, pi_c, sigma_y, zeta, psi_0, psi_1, sigma_g, V_post_tech1, gamma_1, gamma_2, gamma_3_i, y_bar, xi_a, xi_g, xi_p),
+    #             V_post_damage=None,
+    #             v0=Guess[i]["v0"],
+    #             # v0=None,
+    #             tol=1e-7, epsilon=0.1, fraction=0.1, 
+    #             # smart_guess=None,
+    #             smart_guess=Guess[i],
+    #             max_iter=maxiter
+    #             )
 
-        model_tech1_post_damage.append(res)
+    #     model_tech1_post_damage.append(res)
 
-    with open(Data_Dir + File_Name+ "model_tech1_post_damage", "wb") as f:
-        pickle.dump(model_tech1_post_damage, f)
+    # with open(Data_Dir + File_Name+ "model_tech1_post_damage", "wb") as f:
+    #     pickle.dump(model_tech1_post_damage, f)
 
     model_tech1_post_damage = pickle.load(open(Data_Dir + File_Name+ "model_tech1_post_damage", "rb"))
 
 
-    # PRE DAMAGE
-    print("-------------------------------------------")
-    print("---------Pre damage, Tech III--------------")
-    print("-------------------------------------------")
+    # # PRE DAMAGE
+    # print("-------------------------------------------")
+    # print("---------Pre damage, Tech III--------------")
+    # print("-------------------------------------------")
     id_2 = np.abs(Y - y_bar).argmin()
     Y_min_short = 0.
     Y_max_short = 3.
     Y_short     = np.arange(Y_min_short, Y_max_short + hY, hY)
     nY_short    = len(Y_short)
-    # Pre damage, tech III
-    # # Compile v_i
-    v_i = []
-    for i in range(len(gamma_3_list)):
-        v_post_damage_i = np.zeros((nK, nY_short))
-        for j in range(nY_short):
-            v_post_damage_i[:, j] = model_tech3_post_damage["v"][:, id_2]
+    # # Pre damage, tech III
+    # # # Compile v_i
+    # v_i = []
+    # for i in range(len(gamma_3_list)):
+    #     v_post_damage_i = np.zeros((nK, nY_short))
+    #     for j in range(nY_short):
+    #         v_post_damage_i[:, j] = model_tech3_post_damage["v"][:, id_2]
 
-        v_i.append(v_post_damage_i)
+    #     v_i.append(v_post_damage_i)
 
-    v_i = np.array(v_i)
-    pi_d_o = np.ones(len(gamma_3_list)) / len(gamma_3_list)
-    pi_d_o = np.array([temp * np.ones((nK, nY_short)) for temp in pi_d_o])
+    # v_i = np.array(v_i)
+    # pi_d_o = np.ones(len(gamma_3_list)) / len(gamma_3_list)
+    # pi_d_o = np.array([temp * np.ones((nK, nY_short)) for temp in pi_d_o])
 
-    theta_ell = pd.read_csv('./data/model144.csv', header=None).to_numpy()[:, 0]/1000.
-    pi_c_o = np.ones(len(theta_ell)) / len(theta_ell)
-    pi_c_o = np.array([temp * np.ones((nK, nY_short)) for temp in pi_c_o])
-    theta_ell = np.array([temp * np.ones((nK, nY_short)) for temp in theta_ell])
+    # theta_ell = pd.read_csv('./data/model144.csv', header=None).to_numpy()[:, 0]/1000.
+    # pi_c_o = np.ones(len(theta_ell)) / len(theta_ell)
+    # pi_c_o = np.array([temp * np.ones((nK, nY_short)) for temp in pi_c_o])
+    # theta_ell = np.array([temp * np.ones((nK, nY_short)) for temp in theta_ell])
 
-    model_tech3_pre_damage = hjb_pre_damage_post_tech(
-            K, Y_short, 
-            model_args=(delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi_a, xi_b, xi_p, pi_d_o, v_i, gamma_1, gamma_2, theta, lambda_bar_second, vartheta_bar_second, y_bar_lower),
-            v0=np.mean(v_i, axis=0), epsilon=.005, fraction=.005,
-            tol=1e-8, max_iter=maxiter, print_iteration=True
-            )
+    # model_tech3_pre_damage = hjb_pre_damage_post_tech(
+    #         K, Y_short, 
+    #         model_args=(delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi_a, xi_b, xi_p, pi_d_o, v_i, gamma_1, gamma_2, theta, lambda_bar_second, vartheta_bar_second, y_bar_lower),
+    #         v0=np.mean(v_i, axis=0), epsilon=0.1, fraction=0.1,
+    #         tol=1e-8, max_iter=maxiter, print_iteration=True
+    #         )
 
-    with open(Data_Dir + File_Name+ "model_tech3_pre_damage", "wb") as f:
-        pickle.dump(model_tech3_pre_damage, f)
+    # with open(Data_Dir + File_Name+ "model_tech3_pre_damage", "wb") as f:
+    #     pickle.dump(model_tech3_pre_damage, f)
 
-    # model_tech3_pre_damage = pickle.load(open(Data_Dir + File_Name+ "model_tech3_pre_damage", "rb"))
+    model_tech3_pre_damage = pickle.load(open(Data_Dir + File_Name+ "model_tech3_pre_damage", "rb"))
 
     print("-------------------------------------------")
     print("---------Pre damage, Tech I---------------")
@@ -285,13 +285,13 @@ def model(xi_a,xi_g,xi_p,psi_0,psi_1):
 
     model_args =(delta, alpha, theta, vartheta_bar, lambda_bar, mu_k, kappa, sigma_k, theta_ell, pi_c_o, pi_c, sigma_y, zeta, psi_0, psi_1, sigma_g, v_tech3, gamma_1, gamma_2, gamma_3_list, y_bar, xi_a, xi_g, xi_p)
 
-    # Guess = pickle.load(open(Data_Dir + File_Name+ "model_tech2_pre_damage", "rb"))
+    Guess = pickle.load(open(Data_Dir + File_Name+ "model_tech1_pre_damage", "rb"))
     model_tech1_pre_damage = hjb_pre_tech(
             state_grid=(K, Y_short, L), 
             model_args=model_args, V_post_damage=v_i, 
-            tol=1e-8, epsilon=.005, fraction=.005, max_iter=maxiter,
+            tol=1e-8, epsilon=0.01, fraction=0.1, max_iter=maxiter,
             v0=np.mean(v_i, axis=0),
-            smart_guess=None,
+            smart_guess=Guess,
             )
 
     with open(Data_Dir + File_Name+ "model_tech1_pre_damage", "wb") as f:
@@ -299,9 +299,7 @@ def model(xi_a,xi_g,xi_p,psi_0,psi_1):
 
 
 
-# model(1000.,1000.,1000.)
-# model(2/10000.,0.050,0.050)
-# model(2/10000.,0.025,0.025)
+
 
 for psi_0,psi_1 in zip(psi_0_meshgrid_1d,psi_1_meshgrid_1d):
     # print(psi_0,psi_1)
