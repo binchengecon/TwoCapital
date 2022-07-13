@@ -82,7 +82,7 @@ y_bar = 2.
 y_bar_lower = 1.5
 
 
-theta_ell = pd.read_csv('./model144.csv', header=None).to_numpy()[:, 0]/1000.
+theta_ell = pd.read_csv('./data/model144.csv', header=None).to_numpy()[:, 0]/1000.
 pi_c_o    = np.ones_like(theta_ell)/len(theta_ell)
 sigma_y   = 1.2 * np.mean(theta_ell)
 beta_f    = np.mean(theta_ell)
