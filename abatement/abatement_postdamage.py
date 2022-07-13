@@ -170,15 +170,15 @@ model_tech3_post_damage = hjb_post_damage_post_tech(
        epsilon=0.005, fraction=0.005,tol=1e-7, max_iter=30000, print_iteration=False)
 
 
-model_tech3_post_damage = pickle.load(open(Data_Dir+ File_Name + "model_tech3_post_damage_gamma_{:.4f}".format(gamma_3_i), "rb"))
+# model_tech3_post_damage = pickle.load(open(Data_Dir+ File_Name + "model_tech3_post_damage_gamma_{:.4f}".format(gamma_3_i), "rb"))
 
 v_post = model_tech3_post_damage["v"]
 V_post_3D = np.zeros_like(K_mat)
 for j in range(nL):
     V_post_3D[:,:,j] = v_post
 
-# with open(DataDir + "model_tech3_post_damage_gamma_{:.4f}".format(gamma_3_i), "wb") as f:
-   # pickle.dump(model_tech3_post_damage, f)
+with open(Data_Dir+ File_Name + "model_tech3_post_damage_gamma_{:.4f}".format(gamma_3_i), "wb") as f:
+   pickle.dump(model_tech3_post_damage, f)
 
 # model_tech3_post_damage = pickle.load(open(DataDir + "model_tech3_post_damage_gamma_{:.4f}".format(gamma_3_i), "rb"))
 
