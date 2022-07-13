@@ -13,7 +13,7 @@ module load gcc/6.1
 
 # python /home/bincheng/hello.py
 
-NAME = "ReplicateSuri"
+name = "ReplicateSuri"
 
 for psi_1 in 0.8
 do 
@@ -21,7 +21,7 @@ do
    do
         for id in 0 1 2 3 4 5 
         do
-           python /home/bincheng/TwoCapital_Bin/abatement/postdamage_spe_psi_gamma_name.py --psi_0 $psi_0 --psi_1 $psi_1 --id $id --name $NAME &
+           python /home/bincheng/TwoCapital_Bin/abatement/postdamage_spe_psi_gamma_name.py --psi_0 $psi_0 --psi_1 $psi_1 --id $id --name $name &
         done
    done
 done
@@ -32,13 +32,13 @@ for psi_1 in 0.8
 do
    for psi_0 in 0.008 0.010 0.012
    do 
-       python /home/bincheng/TwoCapital_Bin/abatement/predamage_spe_psi_name.py --psi_0 $psi_0 --psi_1 $psi_1 --name $NAME &
+       python /home/bincheng/TwoCapital_Bin/abatement/predamage_spe_psi_name.py --psi_0 $psi_0 --psi_1 $psi_1 --name $name &
    done
 done
 
 wait 
 
-python /home/bincheng/TwoCapital_Bin/abatement/Result_spe_name.py --name $NAME
+python /home/bincheng/TwoCapital_Bin/abatement/Result_spe_name.py --name $name
 
 wait
 
