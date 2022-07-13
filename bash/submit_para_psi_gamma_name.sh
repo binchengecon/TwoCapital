@@ -13,7 +13,7 @@ module load gcc/6.1
 
 # python /home/bincheng/hello.py
 
-name = "ReplicateSuri"
+name="ReplicateSuri"
 
 for psi_1 in 0.8
 do 
