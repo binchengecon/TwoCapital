@@ -14,6 +14,7 @@ module load gcc/6.1
 # python /home/bincheng/hello.py
 
 NAME = "ReplicateSuri"
+
 for psi_1 in 0.8
 do 
    for psi_0 in 0.008 0.010 0.012

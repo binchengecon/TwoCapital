@@ -43,7 +43,7 @@ parser.add_argument("--xi_p", type=float, default=1000.)
 parser.add_argument("--xi_g", type=float, default=1000.)
 parser.add_argument("--psi_0", type=float, default=0.3)
 parser.add_argument("--psi_1", type=float, default=0.5)
-parser.add_argument("--name",type=str,default="MoreStep")
+parser.add_argument("--name",type=str,default="ReplicateSuri")
 args = parser.parse_args()
 
 
@@ -99,13 +99,13 @@ vartheta_bar_second = 0.
 # Grids Specification
 # Coarse Grids
 K_min = 4.00
-K_max = 9.00
+K_max = 9.50
 hK    = 0.20
 K     = np.arange(K_min, K_max + hK, hK)
 nK    = len(K)
 Y_min = 0.
-Y_max = 5.
-hY    = 0.10 # make sure it is float instead of int
+Y_max = 4.
+hY    = 0.20 # make sure it is float instead of int
 Y     = np.arange(Y_min, Y_max + hY, hY)
 nY    = len(Y)
 L_min = - 5.5
@@ -113,6 +113,7 @@ L_max = - 0.
 hL    = 0.20
 L     = np.arange(L_min, L_max,  hL)
 nL    = len(L)
+
 
 X1     = K
 nX1    = len(X1)
