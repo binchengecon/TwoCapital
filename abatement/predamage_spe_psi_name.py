@@ -99,13 +99,13 @@ vartheta_bar_second = 0.
 # Grids Specification
 # Coarse Grids
 K_min = 4.00
-K_max = 9.50
+K_max = 9.00
 hK    = 0.20
 K     = np.arange(K_min, K_max + hK, hK)
 nK    = len(K)
 Y_min = 0.
 Y_max = 4.
-hY    = 0.20 # make sure it is float instead of int
+hY    = 0.10 # make sure it is float instead of int
 Y     = np.arange(Y_min, Y_max + hY, hY)
 nY    = len(Y)
 L_min = - 5.5
@@ -264,8 +264,8 @@ theta_ell = np.array([temp * np.ones((nK, nY_short)) for temp in theta_ell])
 model_tech3_pre_damage = hjb_pre_damage_post_tech(
         K, Y_short, 
         model_args=(delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi_a, xi_b, xi_p, pi_d_o, v_i, gamma_1, gamma_2, theta, lambda_bar_second, vartheta_bar_second, y_bar_lower),
-        v0=np.mean(v_i, axis=0), epsilon=0.005, fraction=0.005,
-        tol=1e-7, max_iter=80000, print_iteration=True
+        v0=np.mean(v_i, axis=0), epsilon=0.01, fraction=0.1,
+        tol=1e-8, max_iter=20000, print_iteration=True
         )
 
 with open(Data_Dir+ File_Name + "model_tech3_pre_damage", "wb") as f:
@@ -311,7 +311,7 @@ Guess = None
 model_tech2_pre_damage = hjb_pre_tech(
         state_grid=(K, Y_short, L), 
         model_args=model_args, V_post_damage=v_i, 
-        tol=1e-7, epsilon=0.005, fraction=0.005, max_iter=80000,
+        tol=1e-7, epsilon=0.005, fraction=0.005, max_iter=10000,
         v0=np.mean(v_i, axis=0),
         smart_guess=Guess,
         )
