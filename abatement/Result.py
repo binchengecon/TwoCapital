@@ -877,7 +877,7 @@ stateSpace = np.hstack([K_mat.reshape(-1,1,order = 'F'), Y_mat.reshape(-1,1,orde
 
 
 
-IntPeriod = 50
+IntPeriod = 1
 timespan = 1/12
 
 # psi_0_grid = np.array([0.006,0.009])
