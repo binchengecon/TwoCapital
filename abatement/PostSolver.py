@@ -159,6 +159,7 @@ def hjb_post_damage_post_tech(
         'i': i,
         'pi_c': pi_c,
         'h': h,
+        'error': error,
         }
 
     return res
@@ -230,6 +231,8 @@ def hjb_pre_damage_post_tech(
            'i': i,
            'g': g,
            'pi_c': pi_c,
-           'h': h}
+           'h': h,
+           'error': error,
+           }
 
     return res

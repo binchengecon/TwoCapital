@@ -651,7 +651,7 @@ def graph2(psi_0_meshgrid,psi_1_meshgrid,Ig_initial = 1/120):
 
         File_Dir = "Compare_Psi0_Psi1_xi_a_{}_xi_g_{}_psi_0_{}_psi_1_{}_" .format(xi_a,xi_g,psi_0,psi_1)
 
-        with open(Data_Dir + File_Dir+"model_tech1_pre_damage", "rb") as f:
+        with open(Data_Dir + File_Dir+"model_tech2_pre_damage", "rb") as f:
             tech1 = pickle.load(f)
             
 
@@ -676,7 +676,7 @@ def graph2(psi_0_meshgrid,psi_1_meshgrid,Ig_initial = 1/120):
 
 
         PDF_Dir = "./abatement/pdf_2tech/"
-        File_Dir = "Compare_Psi0_8_Psi1_81012_" .format(psi_0,psi_1)
+        File_Dir = "MoreStep_Compare_Psi0_8_Psi1_81012_" .format(psi_0,psi_1)
         
         pdf_pages = PdfPages(PDF_Dir+File_Dir+'Years_'+str(IntPeriod)+'.pdf')
 
@@ -853,12 +853,12 @@ K     = np.arange(K_min, K_max + hK, hK)
 nK    = len(K)
 Y_min = 0.
 Y_max = 5.
-hY    = 0.20 # make sure it is float instead of int
+hY    = 0.10 # make sure it is float instead of int
 Y     = np.arange(Y_min, Y_max + hY, hY)
 nY    = len(Y)
-L_min = - 5.
+L_min = - 5.5
 L_max = - 0.
-hL    = 0.2
+hL    = 0.20
 L     = np.arange(L_min, L_max,  hL)
 nL    = len(L)
 
@@ -886,7 +886,6 @@ timespan = 1/12
 # psi_1_grid = np.array([.3,.4])
 
 psi_0_grid = np.array([0.008, 0.010, 0.012])
-# psi_1_grid = np.array([.5,.7,.9])
 psi_1_grid = np.array([.8])
 
 psi_0_meshgrid,psi_1_meshgrid = np.meshgrid(psi_0_grid,psi_1_grid)
