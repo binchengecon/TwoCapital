@@ -252,7 +252,7 @@ v_i = np.array(v_i)
 pi_d_o = np.ones(len(gamma_3_list)) / len(gamma_3_list)
 pi_d_o = np.array([temp * np.ones((nK, nY_short)) for temp in pi_d_o])
 
-theta_ell = pd.read_csv('./model144.csv', header=None).to_numpy()[:, 0]/1000.
+theta_ell = pd.read_csv('./data/model144.csv', header=None).to_numpy()[:, 0]/1000.
 pi_c_o = np.ones(len(theta_ell)) / len(theta_ell)
 pi_c_o = np.array([temp * np.ones((nK, nY_short)) for temp in pi_c_o])
 theta_ell = np.array([temp * np.ones((nK, nY_short)) for temp in theta_ell])
