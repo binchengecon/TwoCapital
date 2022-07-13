@@ -333,6 +333,7 @@ def hjb_pre_tech(
             "x_star": x_star,
             "pi_c"  : pi_c,
             "g_tech": g_tech,
+            "FC_Err": FC_Err,
             }
     if model == "Pre damage":
         res = {
@@ -343,6 +344,7 @@ def hjb_pre_tech(
                 "pi_c"  : pi_c,
                 "g_tech": g_tech,
                 "g_damage": g_damage,
+                "FC_Err": FC_Err,
                 }
     return res
 
