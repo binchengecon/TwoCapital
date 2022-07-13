@@ -133,7 +133,7 @@ X3_max = X3.max()
 
 Data_Dir = "./abatement/data_2tech/"
 
-File_Name = "Compare_Psi0_Psi1_xi_a_{}_xi_g_{}_psi_0_{}_psi_1_{}_" .format(xi_a,xi_g,psi_0,psi_1)
+File_Name = "MoreStep_Psi0_Psi1_xi_a_{}_xi_g_{}_psi_0_{}_psi_1_{}_" .format(xi_a,xi_g,psi_0,psi_1)
 
 #if not os.path.exists(DataDir):
 #    os.mkdir(DataDir)
