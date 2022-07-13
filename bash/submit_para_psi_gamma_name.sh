@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --job-name=example_sbatch
-#SBATCH --output=name_spe.out
-#SBATCH --error=name_spe.err
+#SBATCH --output=name_spe_new.out
+#SBATCH --error=name_spe_new.err
 #SBATCH --time=36:00:00
 #SBATCH --partition=broadwl
-#SBATCH --nodes=28
-#SBATCH --ntasks-per-node=4
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=16
 #SBATCH --mem-per-cpu=2000
 
 module load python/anaconda-2020.02
@@ -13,7 +13,7 @@ module load gcc/6.1
 
 # python /home/bincheng/hello.py
 
-name="ReplicateSuri"
+name="ReplicateSuri_moretask_lessnodes"
 
 for psi_1 in 0.8
 do 
