@@ -48,8 +48,8 @@ do
 module load python/anaconda-2020.02
 module load gcc/6.1
 
-name="midwaynew"
-python3 /home/bincheng/TwoCapital_Bin/abatement/postdamage_spe_psi_gamma_name.py --xi_a 1000.0 --xi_g 1000.0 --id $i --psi_0 $PSI_0 --psi_1 $PSI_1 --name $name
+
+python /home/bincheng/TwoCapital_Bin/abatement/postdamage_spe_psi_gamma_name.py --xi_a 1000.0 --xi_g 1000.0 --id $i --psi_0 $PSI_0 --psi_1 $PSI_1 --name "midwaynew"
 
 echo "Program ends \$(date)"
 
