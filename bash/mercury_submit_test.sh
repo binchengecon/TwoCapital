@@ -43,13 +43,12 @@ do
 #SBATCH --time=10:00:00
 
 ####### load modules
-module purge
-module load python/booth/3.6/3.6.12  gcc/9.2.0
+module load python/booth/3.8/3.8.5  gcc/9.2.0
 
-
+name2="mercurynew"
 echo "\$SLURM_JOB_NAME"
 
-python3 post_damage.py --xi_a 1000.0 --xi_g 1000.0 --id $i --psi_0 $PSI_0 --psi_1 $PSI_1
+python3 /home/bcheng4/TwoCapital_Bin/abatement/postdamage_spe_psi_gamma_name.py --xi_a 1000.0 --xi_g 1000.0 --id $i --psi_0 $PSI_0 --psi_1 $PSI_1 --name $name2
 
 echo "Program ends \$(date)"
 
