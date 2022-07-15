@@ -1,41 +1,40 @@
 #! /bin/bash
 
+
 NUM_DAMAGE=6
 ID_MAX_DAMAGE=$((NUM_DAMAGE-1))
 
-while getopts 0:1: option;
-do
-	case $option in
-		0) PSI_0=$OPTARG;;
-		1) PSI_1=$OPTARG;;
-	esac
-done
+action_name="moreiteration"
 
-echo "The parameter psi_0 = ${PSI_0}"
-
-echo "The parameter psi_1 = ${PSI_1}"
-			
-
-mkdir -p ./job-outs/${PSI_0}_${PSI_1}/
-
+count=0
 
 for i in $(seq 0 $ID_MAX_DAMAGE)
 do
-		if [ -f job-$i.sh ]
+	for PSI_0 in 0.008 0.010 0.012
+	do
+		for PSI_1 in 0.8
+		do 
+
+		mkdir -p ./job-outs/${action_name}/${PSI_0}_${PSI_1}/
+
+		if [ -f ./bash/${action_name}/mercury_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh ]
 		then
-				rm job-$i.sh
+				rm ./bash/${action_name}/mercury_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh
 		fi
 
-		touch job-$i.sh
+        mkdir -p ./bash/${action_name}/
+
+		touch ./bash/${action_name}/mercury_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_${i}.sh
 		
-		tee -a job-$i.sh << EOF
+		tee -a ./bash/${action_name}/mercury_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_${i}.sh << EOF
 #! /bin/bash
 
 
 ######## login 
-#SBATCH --job-name=test_$i
-#SBATCH --output=./job-outs/${PSI_0}_${PSI_1}/test_$i.out
-#SBATCH --error=./job-outs/${PSI_0}_${PSI_1}/test_$i.err
+#SBATCH --job-name=post_$count
+#SBATCH --output=./job-outs/${action_name}/${PSI_0}_${PSI_1}/mercury_post_$i.out
+#SBATCH --error=./job-outs/${action_name}/${PSI_0}_${PSI_1}/mercury_post_$i.err
+
 
 #SBATCH --account=pi-lhansen
 #SBATCH --partition=highmem
@@ -45,18 +44,31 @@ do
 ####### load modules
 module load python/booth/3.8/3.8.5  gcc/9.2.0
 
-name2="mercurynew"
 echo "\$SLURM_JOB_NAME"
 
-python3 /home/bcheng4/TwoCapital_Bin/abatement/postdamage_spe_psi_gamma_name.py --xi_a 1000.0 --xi_g 1000.0 --id $i --psi_0 $PSI_0 --psi_1 $PSI_1 --name $name2
+
+
+python3 /home/bincheng/TwoCapital_Bin/abatement/postdamage_spe_psi_gamma_name_moreiteration.py --xi_a 1000.0 --xi_g 1000.0 --id $i --psi_0 $PSI_0 --psi_1 $PSI_1 --name ${action_name}
 
 echo "Program ends \$(date)"
 
 EOF
+count=$(($count+1))
+		done
+	done
 done
+
+
+
 
 for i in $(seq 0 $ID_MAX_DAMAGE)
 do
-		sbatch job-$i.sh
-done
+	for PSI_0 in 0.008 0.010 0.012
+	do
+		for PSI_1 in 0.8
+		do 
+		sbatch ./bash/${action_name}/mercury_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh 
 
+		done
+	done
+done
