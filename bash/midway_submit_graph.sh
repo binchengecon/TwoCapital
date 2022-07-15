@@ -1,21 +1,25 @@
 #! /bin/bash
 
+action_name="moreiteration"
 
+count=0
 
-if [ -f job_graph.sh ]
+if [ -f ./bash/${action_name}/job2_graph.sh ]
 then
-		rm job_graph.sh
+		rm ./bash/${action_name}/job2_graph.sh
 fi
 
-touch job_graph.sh
+mkdir -p ./bash/${action_name}/
 
-tee -a job_graph.sh << EOF
+touch ./bash/${action_name}/job2_graph.sh
+
+tee -a ./bash/${action_name}/job2_graph.sh << EOF
 #! /bin/bash
 
 ######## login 
 #SBATCH --job-name=graph
-#SBATCH --output=./job-outs/graph.out
-#SBATCH --error=./job-outs/graph.err
+#SBATCH --output=./bash/${action_name}/graph.out
+#SBATCH --error=./bash/${action_name}/graph.err
 #SBATCH --account=pi-lhansen
 #SBATCH --partition=broadwl
 #SBATCH --nodes=1
@@ -27,15 +31,14 @@ tee -a job_graph.sh << EOF
 module load python/anaconda-2020.02
 module load gcc/6.1
 
-name2="midwaynew"
 echo "\$SLURM_JOB_NAME"
 
-python /home/bincheng/TwoCapital_Bin/abatement/Result_spe_name.py --name "midwaynew"
+python /home/bincheng/TwoCapital_Bin/abatement/Result_spe_name.py --name ${action_name}
 
 echo "Program ends \$(date)"
 
 EOF
 
 
-sbatch job_graph.sh
+sbatch ./bash/${action_name}/job2_graph.sh
 
