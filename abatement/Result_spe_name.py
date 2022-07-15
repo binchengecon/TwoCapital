@@ -620,13 +620,13 @@ lambda_bar_second = 1e-3
 vartheta_bar_second = 0.
 
 K_min = 4.00
-K_max = 9.50
+K_max = 9.00
 hK    = 0.20
 K     = np.arange(K_min, K_max + hK, hK)
 nK    = len(K)
 Y_min = 0.
 Y_max = 4.
-hY    = 0.20 # make sure it is float instead of int
+hY    = 0.10 # make sure it is float instead of int
 Y     = np.arange(Y_min, Y_max + hY, hY)
 nY    = len(Y)
 L_min = - 5.5
@@ -634,7 +634,6 @@ L_max = - 0.
 hL    = 0.20
 L     = np.arange(L_min, L_max,  hL)
 nL    = len(L)
-
 
 id_2 = np.abs(Y - y_bar).argmin()
 Y_min_short = 0.

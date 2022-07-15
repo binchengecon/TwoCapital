@@ -1,9 +1,11 @@
 #! /bin/bash
 
+res1=$(date +%s.%N)
+
+
 NUM_DAMAGE=6
 ID_MAX_DAMAGE=$((NUM_DAMAGE-1))
 
-res1=$(date +%s.%N)
 
 
 
@@ -18,21 +20,21 @@ do
 
 		mkdir -p ./job-outs/${PSI_0}_${PSI_1}/
 
-		if [ -f job_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh ]
+		if [ -f job2_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh ]
 		then
-				rm job_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh
+				rm job2_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh
 		fi
 
-		touch job_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh
+		touch job2_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh
 		
-		tee -a job_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh << EOF
+		tee -a job2_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh << EOF
 #! /bin/bash
 
 
 ######## login 
 #SBATCH --job-name=test_$i
-#SBATCH --output=./job-outs/${PSI_0}_${PSI_1}/test_$i.out
-#SBATCH --error=./job-outs/${PSI_0}_${PSI_1}/test_$i.err
+#SBATCH --output=./job-outs2/${PSI_0}_${PSI_1}/test_$i.out
+#SBATCH --error=./job-outs2/${PSI_0}_${PSI_1}/test_$i.err
 
 #SBATCH --account=pi-lhansen
 #SBATCH --partition=broadwl
@@ -65,23 +67,22 @@ do
 	for PSI_1 in 0.8
 	do 
 
-	if [ -f job_PSI0_${PSI_0}_PSI1_${PSI_1}.sh ]
+	if [ -f job2_PSI0_${PSI_0}_PSI1_${PSI_1}.sh ]
 	then
-			rm job_PSI0_${PSI_0}_PSI1_${PSI_1}.sh
+			rm job2_PSI0_${PSI_0}_PSI1_${PSI_1}.sh
 	fi
 
-	touch job_PSI0_${PSI_0}_PSI1_${PSI_1}.sh
+	touch job2_PSI0_${PSI_0}_PSI1_${PSI_1}.sh
 	
-	tee -a job_PSI0_${PSI_0}_PSI1_${PSI_1}.sh << EOF
-
+	tee -a job2_PSI0_${PSI_0}_PSI1_${PSI_1}.sh << EOF
 #! /bin/bash
 
 
 
 ######## login 
 #SBATCH --job-name=test-${PSI_0}-${PSI_1}
-#SBATCH --output=./job-outs/${PSI_0}_${PSI_1}/test.out
-#SBATCH --error=./job-outs/${PSI_0}_${PSI_1}/test.err
+#SBATCH --output=./job-outs2/${PSI_0}_${PSI_1}/test.out
+#SBATCH --error=./job-outs2/${PSI_0}_${PSI_1}/test.err
 #SBATCH --account=pi-lhansen
 #SBATCH --partition=broadwl
 #SBATCH --nodes=1
@@ -107,22 +108,21 @@ done
 
 
 
-if [ -f job_graph.sh ]
+if [ -f job2_graph.sh ]
 then
-		rm job_graph.sh
+		rm job2_graph.sh
 fi
 
-touch job_graph.sh
+touch job2_graph.sh
 
-tee -a job_graph.sh << EOF
-
+tee -a job2_graph.sh << EOF
 #! /bin/bash
 
 
 ######## login 
 #SBATCH --job-name=test
-#SBATCH --output=./job-outs/test.out
-#SBATCH --error=./job-outs/test.err
+#SBATCH --output=./job-outs2/test.out
+#SBATCH --error=./job-outs2/test.err
 #SBATCH --account=pi-lhansen
 #SBATCH --partition=broadwl
 #SBATCH --nodes=1
@@ -153,34 +153,31 @@ EOF
 
 
 
+for i in $(seq 0 $ID_MAX_DAMAGE)
+do
+	for PSI_0 in 0.008 0.010 0.012
+	do
+		for PSI_1 in 0.8
+		do 
+		sbatch --wait job2_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh &
 
+		done
+	done
+done
 
+wait
 
-# for i in $(seq 0 $ID_MAX_DAMAGE)
-# do
-# 	for PSI_0 in 0.008 0.010 0.012
-# 	do
-# 		for PSI_1 in 0.8
-# 		do 
-# 		sbatch --wait job_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh &
+for PSI_0 in 0.008 0.010 0.012
+do
+	for PSI_1 in 0.8
+	do 
+	sbatch --wait job2_PSI0_${PSI_0}_PSI1_${PSI_1}.sh &
+	done
+done
 
-# 		done
-# 	done
-# done
+wait 
 
-# wait
-
-# for PSI_0 in 0.008 0.010 0.012
-# do
-# 	for PSI_1 in 0.8
-# 	do 
-# 	sbatch --wait job_PSI0_${PSI_0}_PSI1_${PSI_1}.sh &
-# 	done
-# done
-
-# wait 
-
-# sbatch job_graph.sh
+sbatch job2_graph.sh
 
 echo "All Done"
 
@@ -197,21 +194,21 @@ dm=$(echo "$dt3/60" | bc)
 ds=$(echo "$dt3-60*$dm" | bc)
 
 
-if [ -f job_time.sh ]
+if [ -f job2_time.sh ]
 then
-		rm job_time.sh
+		rm job2_time.sh
 fi
 
-touch job_time.sh
+touch job2_time.sh
 
-tee -a job_time.sh << EOF
+tee -a job2_time.sh << EOF
 #! /bin/bash
 
 
 ######## login 
 #SBATCH --job-name=time
-#SBATCH --output=./job-outs/time.out
-#SBATCH --error=./job-outs/time.err
+#SBATCH --output=./job-outs2/time.out
+#SBATCH --error=./job-outs2/time.err
 #SBATCH --account=pi-lhansen
 #SBATCH --partition=broadwl
 #SBATCH --nodes=1
@@ -224,11 +221,11 @@ module load python/anaconda-2020.02
 module load gcc/6.1
 
 name2="midwaytryname"
-echo "\$SLURM_JOB_NAME"
+echo "\$SLURM_job_NAME"
 
 
-echo "Program ends \$(dd) $(dh) $(dm) $(ds)"
+echo "Program ends time ${dd} day ${dh} hour ${dm} minute ${ds} second"
 
 EOF
 
-sbatch job_time.sh
+sbatch job2_time.sh
