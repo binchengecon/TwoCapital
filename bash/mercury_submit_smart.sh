@@ -15,16 +15,16 @@ do
 		for PSI_1 in 0.8
 		do 
 
-		mkdir -p ./job-outs/${PSI_0}_${PSI_1}/
+		mkdir -p ./job-outs/${action_name}/
 
-		if [ -f job_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh ]
+		if [ -f ./bash/${action_name}/job_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh ]
 		then
-				rm job_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh
+				./bash/${action_name}/rm job_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh
 		fi
 
-		touch job_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh
+		touch ./bash/${action_name}/job_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh
 		
-		tee -a job_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh << EOF
+		tee -a ./bash/${action_name}/job_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh << EOF
 #! /bin/bash
 
 

@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/home/bcheng4/TwoCapital_Bin/abatement/predamage_spe_psi_name_moreiteration.py", line 184, in <module>
+    model_i = pickle.load(open(Data_Dir+ File_Name + "model_tech2_post_damage_gamma_{:.4f}".format(gamma_3_i), "rb"))
+_pickle.UnpicklingError: pickle data was truncated

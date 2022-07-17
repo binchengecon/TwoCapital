@@ -36,7 +36,7 @@ do
 #SBATCH --account=pi-lhansen
 #SBATCH --partition=highmem
 #SBATCH --mem=80G
-#SBATCH --time=10:00:00
+#SBATCH --time=2-00:00:00
 
 ####### load modules
 module load python/booth/3.8/3.8.5  gcc/9.2.0

@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/bcheng4/TwoCapital_Bin/abatement/predamage_spe_psi_name_moreiteration.py", line 184, in <module>
+    model_i = pickle.load(open(Data_Dir+ File_Name + "model_tech2_post_damage_gamma_{:.4f}".format(gamma_3_i), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: './abatement/data_2tech/moreiteration/xi_a_1000.0_xi_g_1000.0_psi_0_0.012_psi_1_0.8_model_tech2_post_damage_gamma_0.2667'
+slurmstepd: error: *** JOB 9494979 ON mcn09 CANCELLED AT 2022-07-16T01:04:35 ***

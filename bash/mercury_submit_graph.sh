@@ -2,10 +2,10 @@
 
 action_name="name"
 
-# if [ -f ./TwoCapital_Bin/bash/job_graph.sh ]
-# then
-# 		rm ./TwoCapital_Bin/bash/job_graph.sh
-# fi
+if [ -f ./bash/${action_name}/job_graph.sh ]
+then
+		rm ./bash/${action_name}/job_graph.sh
+fi
 mkdir -p ./bash/${action_name}/
 
 touch ./bash/${action_name}/job_graph.sh
@@ -16,9 +16,9 @@ tee -a ./bash/${action_name}/job_graph.sh << EOF
 
 
 ######## login 
-#SBATCH --job-name=test-graph
-#SBATCH --output=./job-outs/graph.out
-#SBATCH --error=./job-outs/graph.err
+#SBATCH --job-name=graph
+#SBATCH --output=./job-outs/${action_name}/graph.out
+#SBATCH --error=./job-outs/${action_name}/graph.err
 
 #SBATCH --account=pi-lhansen
 #SBATCH --partition=highmem
@@ -38,5 +38,5 @@ echo "Program ends \$(date)"
 EOF
 
 
-sbatch job_graph.sh
+sbatch ./bash/${action_name}/job_graph.sh
 
