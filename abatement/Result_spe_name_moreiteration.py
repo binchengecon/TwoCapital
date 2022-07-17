@@ -420,9 +420,9 @@ def graph2(psi_0_meshgrid,psi_1_meshgrid,Ig_initial = 1/120):
 
     def model_solution_extraction(xi_a,xi_g,psi_0,psi_1):
     
-        Data_Dir = "./abatement/data_2tech/"
+        Data_Dir = "./abatement/data_2tech/"+args.name+"/"
 
-        File_Dir = args.name+"_Psi0_Psi1_xi_a_{}_xi_g_{}_psi_0_{}_psi_1_{}_" .format(xi_a,xi_g,psi_0,psi_1)
+        File_Dir = "xi_a_{}_xi_g_{}_psi_0_{}_psi_1_{}_" .format(xi_a,xi_g,psi_0,psi_1)
 
         with open(Data_Dir + File_Dir+"model_tech2_pre_damage", "rb") as f:
             tech1 = pickle.load(f)
@@ -448,8 +448,8 @@ def graph2(psi_0_meshgrid,psi_1_meshgrid,Ig_initial = 1/120):
 
 
 
-        PDF_Dir = "./abatement/pdf_2tech/"
-        File_Dir = args.name+"_Psi0_8_Psi1_81012_" .format(psi_0,psi_1)
+        PDF_Dir = "./abatement/pdf_2tech/"+args.name+"/"
+        File_Dir = "Psi0_8_Psi1_81012" 
         
         pdf_pages = PdfPages(PDF_Dir+File_Dir+'Years_'+str(IntPeriod)+'.pdf')
 
