@@ -4,6 +4,9 @@ action_name="moreiteration"
 
 count=0
 
+
+mkdir -p ./job-outs/${action_name}/
+
 if [ -f ./bash/${action_name}/job2_graph.sh ]
 then
 		rm ./bash/${action_name}/job2_graph.sh
@@ -18,8 +21,8 @@ tee -a ./bash/${action_name}/job2_graph.sh << EOF
 
 ######## login 
 #SBATCH --job-name=graph
-#SBATCH --output=./bash/${action_name}/graph.out
-#SBATCH --error=./bash/${action_name}/graph.err
+#SBATCH --output=./job-outs/${action_name}/graph.out
+#SBATCH --error=./job-outs/${action_name}/graph.err
 #SBATCH --account=pi-lhansen
 #SBATCH --partition=broadwl
 #SBATCH --nodes=1
@@ -33,7 +36,7 @@ module load gcc/6.1
 
 echo "\$SLURM_JOB_NAME"
 
-python /home/bincheng/TwoCapital_Bin/abatement/Result_spe_name.py --name ${action_name}
+python /home/bincheng/TwoCapital_Bin/abatement/Result_spe_name_moreiteration.py --name ${action_name}
 
 echo "Program ends \$(date)"
 
