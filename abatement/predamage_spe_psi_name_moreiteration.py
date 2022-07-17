@@ -263,7 +263,7 @@ model_tech3_pre_damage = hjb_pre_damage_post_tech(
         K, Y_short, 
         model_args=(delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi_a, xi_b, xi_p, pi_d_o, v_i, gamma_1, gamma_2, theta, lambda_bar_second, vartheta_bar_second, y_bar_lower),
         v0=np.mean(v_i, axis=0), epsilon=0.01, fraction=0.1,
-        tol=1e-8, max_iter=30000, print_iteration=True
+        tol=1e-7, max_iter=50000, print_iteration=True
         )
 
 with open(Data_Dir+ File_Name + "model_tech3_pre_damage", "wb") as f:
@@ -309,7 +309,7 @@ Guess = None
 model_tech2_pre_damage = hjb_pre_tech(
         state_grid=(K, Y_short, L), 
         model_args=model_args, V_post_damage=v_i, 
-        tol=1e-7, epsilon=0.005, fraction=0.005, max_iter=30000,
+        tol=1e-7, epsilon=0.005, fraction=0.005, max_iter=60000,
         v0=np.mean(v_i, axis=0),
         smart_guess=Guess,
         )
