@@ -22,12 +22,13 @@ import argparse
 parser = argparse.ArgumentParser(description="xi_r values")
 parser.add_argument("--dataname",type=str,default="ReplicateSuri")
 parser.add_argument("--pdfname",type=str,default="ReplicateSuri")
-parser.add_argument("--hk",type=float,default=0.2)
+parser.add_argument("--hK",type=float,default=0.2)
 parser.add_argument("--hY",type=float,default=0.2)
 parser.add_argument("--hL",type=float,default=0.2)
 parser.add_argument("--psi0arr",nargs='+',type=float)
 parser.add_argument("--psi1arr",nargs='+',type=float)
-
+# parser.add_argument("--year",type=int,default=60)
+# parser.add_argument("--time",type=float,default=1/12.)
 args = parser.parse_args()
 
 
@@ -64,7 +65,7 @@ vartheta_bar_second = 0.
 
 K_min = 4.00
 K_max = 9.00
-hK    = args.hk
+hK    = args.hK
 K     = np.arange(K_min, K_max + hK, hK)
 nK    = len(K)
 Y_min = 0.
@@ -280,7 +281,7 @@ def simulate_post(grid = (), model_args = (), controls = (), initial=(np.log(85/
     )
 
 def simulate_pre(
-    grid = (), model_args = (), controls = (), initial=(np.log(85/0.115), 1.1, np.log(1/120)), 
+    grid = (), model_args = (), controls = (), initial=(np.log(85/0.115), 1.1, -3.7), 
     T0=0, T=40, dt=1/12,
     printing=False):
 
@@ -550,9 +551,12 @@ def graph2(psi_0_meshgrid_1d,psi_1_meshgrid_1d,Ig_initial = 1/120):
 
         for k in range(len(psi_0_meshgrid_1d)):
             axs1[0].plot(res[k]["years"], (res[k]["x"]/(alpha*np.exp(res[k]["states"][:,0])))*100,label=r'$\psi_0=$'+str(psi_0_meshgrid_1d[k])+'$\psi_1=$'+str(psi_1_meshgrid_1d[k]),linewidth=7.0)
+            # axs1[0].plot(res[k]["years"], (res[k]["x"]),label=r'$\psi_0=$'+str(psi_0_meshgrid_1d[k])+'$\psi_1=$'+str(psi_1_meshgrid_1d[k]),linewidth=7.0)
             axs1[0].set_xlabel('Years')
             axs1[0].set_ylabel('$\%$ of GDP')
-            axs1[0].set_title('R&D investment as percentage of  GDP')
+            axs1[0].set_title('R&D investment as percentage of  GDP')            
+            # axs1[0].set_ylabel('unit of capital')
+            # axs1[0].set_title('R&D investment in unit of capital')
             axs1[0].grid(linestyle=':')
             axs1[0].legend(loc='upper right')
 

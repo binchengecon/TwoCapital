@@ -1,7 +1,7 @@
 #! /bin/bash
 
-action_name="comparisonwitholdpsi01"
-server_name="mercury"
+action_name="moreiteration"
+server_name="mercury_newtimespan"
 
 if [ -f ./bash/${action_name}/job_graph.sh ]
 then
@@ -10,6 +10,7 @@ fi
 mkdir -p ./bash/${action_name}/
 
 touch ./bash/${action_name}/job_graph.sh
+
 
 tee -a ./bash/${action_name}/job_graph.sh << EOF
 #! /bin/bash
@@ -33,7 +34,7 @@ module load python/booth/3.8/3.8.5  gcc/9.2.0
 echo "\$SLURM_JOB_NAME"
 echo "Program starts \$(date)"
 
-python3 /home/bcheng4/TwoCapital_Bin/abatement/Result_spe_name_moreiteration.py --dataname  $action_name --pdfname $server_name --psi0arr 0.005 --psi1arr 0.5
+python3 /home/bcheng4/TwoCapital_Bin/abatement/Result_spe_name_moreiteration.py --dataname  $action_name --pdfname $server_name --psi0arr 0.008 0.010 0.012 --psi1arr 0.8 --hK 0.1 --hY 0.1 --hL 0.1
 
 echo "Program ends \$(date)"
 
