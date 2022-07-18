@@ -2,8 +2,8 @@
 
 ######## login 
 #SBATCH --job-name=graph
-#SBATCH --output=./job-outs/moreiteration/graph.out
-#SBATCH --error=./job-outs/moreiteration/graph.err
+#SBATCH --output=./job-outs/moreiteration/graph_midway.out
+#SBATCH --error=./job-outs/moreiteration/graph_midway.err
 #SBATCH --account=pi-lhansen
 #SBATCH --partition=broadwl
 #SBATCH --nodes=1
@@ -17,7 +17,7 @@ module load gcc/6.1
 
 echo "$SLURM_JOB_NAME"
 
-python /home/bincheng/TwoCapital_Bin/abatement/Result_spe_name_moreiteration.py --name moreiteration
+python /home/bincheng/TwoCapital_Bin/abatement/Result_spe_name_moreiteration.py --name "moreiteration"
 
 echo "Program ends $(date)"
 

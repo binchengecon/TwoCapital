@@ -53,6 +53,7 @@ python /home/bincheng/TwoCapital_Bin/abatement/predamage_spe_psi_name_moreiterat
 echo "Program ends \$(date)"
 
 EOF
+count=$(($count+1))
 	done
 done
 

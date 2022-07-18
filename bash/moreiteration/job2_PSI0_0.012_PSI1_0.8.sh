@@ -19,6 +19,7 @@ module load python/anaconda-2020.02
 module load gcc/6.1
 
 echo "$SLURM_JOB_NAME"
+echo "Program starts $(date)"
 
 python /home/bincheng/TwoCapital_Bin/abatement/predamage_spe_psi_name_moreiteration.py --xi_a 1000.0 --xi_g 1000.0 --psi_0 0.012 --psi_1 0.8 --name moreiteration
 
