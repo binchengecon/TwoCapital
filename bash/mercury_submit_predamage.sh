@@ -3,7 +3,7 @@
 
 
 
-action_name="lessgridpoint"
+action_name="tightertolerance"
 
 count=0
 
@@ -30,8 +30,8 @@ do
 
 ######## login 
 #SBATCH --job-name=pre-${count}
-#SBATCH --output=./job-outs/${action_name}/${PSI_0}_${PSI_1}/mercury_pre_$i.out
-#SBATCH --error=./job-outs/${action_name}/${PSI_0}_${PSI_1}/mercury_pre_$i.err
+#SBATCH --output=./job-outs/${action_name}/${PSI_0}_${PSI_1}/mercury_pre_$count.out
+#SBATCH --error=./job-outs/${action_name}/${PSI_0}_${PSI_1}/mercury_pre_$count.err
 
 #SBATCH --account=pi-lhansen
 #SBATCH --partition=standard

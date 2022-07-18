@@ -4,7 +4,7 @@
 NUM_DAMAGE=6
 ID_MAX_DAMAGE=$((NUM_DAMAGE-1))
 
-action_name="lessgridpoint"
+action_name="tightertolerance"
 
 count=0
 

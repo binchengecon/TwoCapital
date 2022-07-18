@@ -168,7 +168,7 @@ model_args = (delta, alpha, kappa, mu_k, sigma_k, theta_ell, pi_c_o, sigma_y, xi
 
 model_tech3_post_damage = hjb_post_damage_post_tech(
         K, Y, model_args, v0=None,
-       epsilon=0.1, fraction=0.1 ,tol=1e-8, max_iter=10000, print_iteration=False)
+       epsilon=0.1, fraction=0.1 ,tol=1e-8, max_iter=40000, print_iteration=False)
 
 
 # model_tech3_post_damage = pickle.load(open(Data_Dir+ File_Name + "model_tech3_post_damage_gamma_{:.4f}".format(gamma_3_i), "rb"))
@@ -202,9 +202,9 @@ res = hjb_pre_tech(
         state_grid=(K, Y, L), 
         model_args=(delta, alpha, theta, vartheta_bar, lambda_bar, mu_k, kappa, sigma_k, theta_ell, pi_c_o, pi_c, sigma_y, zeta, psi_0, psi_1, sigma_g, V_post_tech2, gamma_1, gamma_2, gamma_3_i, y_bar, xi_a, xi_g, xi_p),
         V_post_damage=None,
-        tol=1e-7, epsilon=0.01, fraction=0.01, 
+        tol=1e-8, epsilon=0.01, fraction=0.01, 
         smart_guess=Guess, 
-        max_iter=30000,
+        max_iter=60000,
         )
 
 

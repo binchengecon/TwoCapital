@@ -1,0 +1,10 @@
+==========================================
+SLURM_JOB_ID = 9508209
+SLURM_SUBMIT_DIR = /home/bcheng4/TwoCapital_Bin
+SLURM_JOB_NODELIST = mcn05
+==========================================
+delay1
+Program starts Mon Jul 18 12:45:07 CDT 2022
+python file done
+Program ends Mon Jul 18 12:45:17 CDT 2022
+Program ends time 0 day 0 hour 0 minute 10.182321001 second

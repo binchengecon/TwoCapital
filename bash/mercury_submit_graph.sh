@@ -1,6 +1,6 @@
 #! /bin/bash
 
-action_name="lessgridpoint"
+action_name="tightertolerance"
 server_name="mercury"
 
 if [ -f ./bash/${action_name}/job_graph.sh ]
