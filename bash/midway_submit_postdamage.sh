@@ -4,7 +4,7 @@
 NUM_DAMAGE=6
 ID_MAX_DAMAGE=$((NUM_DAMAGE-1))
 
-action_name="moreiteration"
+action_name="lessgridpoint"
 
 count=0
 
@@ -17,16 +17,16 @@ do
 
 		mkdir -p ./job-outs/${action_name}/${PSI_0}_${PSI_1}/
 
-		if [ -f ./bash/${action_name}/job2_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh ]
+		if [ -f ./bash/${action_name}/midway_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh ]
 		then
-				rm ./bash/${action_name}/job2_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh
+				rm ./bash/${action_name}/midway_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh
 		fi
 
         mkdir -p ./bash/${action_name}/
 
-		touch ./bash/${action_name}/job2_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_${i}.sh
+		touch ./bash/${action_name}/midway_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_${i}.sh
 		
-		tee -a ./bash/${action_name}/job2_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_${i}.sh << EOF
+		tee -a ./bash/${action_name}/midway_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_${i}.sh << EOF
 #! /bin/bash
 
 
@@ -70,7 +70,7 @@ do
 	do
 		for PSI_1 in 0.8
 		do 
-		sbatch ./bash/${action_name}/job2_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh 
+		sbatch ./bash/${action_name}/midway_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh 
 
 		done
 	done
