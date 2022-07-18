@@ -19,7 +19,7 @@ module load python/booth/3.8/3.8.5  gcc/9.2.0
 echo "$SLURM_JOB_NAME"
 echo "Program starts $(date)"
 
-python3 /home/bcheng4/TwoCapital_Bin/abatement/Result_spe_name_moreiteration.py --name  "moreiteration"
+python3 /home/bcheng4/TwoCapital_Bin/abatement/Result_spe_name_moreiteration.py --dataname  moreiteration --pdfname mercury
 
 echo "Program ends $(date)"
 

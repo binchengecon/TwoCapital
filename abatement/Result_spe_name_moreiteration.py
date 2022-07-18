@@ -457,10 +457,10 @@ def graph2(psi_0_meshgrid,psi_1_meshgrid,Ig_initial = 1/120):
         
         pdf_pages = PdfPages(PDF_Dir+File_Dir+'Years_'+str(IntPeriod)+'.pdf')
 
-        figwidth = 5
+        figwidth = 10
 
         # fig1, axs1 = plt.subplots(3, 1, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
-        fig1, axs1 = plt.subplots(3, 1, sharex=False, figsize=(8, 3 *figwidth))  
+        fig1, axs1 = plt.subplots(3, 1, sharex=False, figsize=(12, 3 *figwidth))  
 
 
 
@@ -470,7 +470,7 @@ def graph2(psi_0_meshgrid,psi_1_meshgrid,Ig_initial = 1/120):
             axs1[0].set_ylabel('$\%$ of GDP')
             axs1[0].set_title('R&D investment as percentage of  GDP')
             axs1[0].grid(linestyle=':')
-            axs1[0].legend(loc='upper left')
+            axs1[0].legend(loc='upper right')
 
 
             axs1[1].plot(res[k]["years"], res[k]["i"],label=r'$\psi_0=$'+str(psi_0_meshgrid_1d[k])+'$\psi_1=$'+str(psi_1_meshgrid_1d[k]),linewidth=7.0)
@@ -495,7 +495,7 @@ def graph2(psi_0_meshgrid,psi_1_meshgrid,Ig_initial = 1/120):
         plt.close()
 
         # fig2, axs2 = plt.subplots(2, 1, sharex=True, figsize=(2  * figwidth, 2 *figwidth))  
-        fig2, axs2 = plt.subplots(2, 1, sharex=False, figsize=(8, 2 *figwidth))  
+        fig2, axs2 = plt.subplots(2, 1, sharex=False, figsize=(12, 2 *figwidth))  
 
         for k in range(len(psi_0_meshgrid_1d)):
 
@@ -525,7 +525,7 @@ def graph2(psi_0_meshgrid,psi_1_meshgrid,Ig_initial = 1/120):
         plt.close()
 
 
-        fig3, axs3 = plt.subplots(2, 1, sharex=False, figsize=(8, 2 *figwidth))  
+        fig3, axs3 = plt.subplots(2, 1, sharex=False, figsize=(12, 2 *figwidth))  
 
         for k in range(len(psi_0_meshgrid_1d)):
 
@@ -552,7 +552,7 @@ def graph2(psi_0_meshgrid,psi_1_meshgrid,Ig_initial = 1/120):
         pdf_pages.savefig(fig3)
         plt.close()
 
-        fig5, axs5 = plt.subplots(2, 1, sharex=False, figsize=(8, 2 *figwidth))  
+        fig5, axs5 = plt.subplots(2, 1, sharex=False, figsize=(12, 2 *figwidth))  
 
         for k in range(len(psi_0_meshgrid_1d)):
 
