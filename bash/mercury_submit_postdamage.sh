@@ -4,15 +4,15 @@
 NUM_DAMAGE=6
 ID_MAX_DAMAGE=$((NUM_DAMAGE-1))
 
-action_name="tightertolerance"
+action_name="comparisonwitholdpsi01"
 
 count=0
 
 for i in $(seq 0 $ID_MAX_DAMAGE)
 do
-	for PSI_0 in 0.008 0.010 0.012
+	for PSI_0 in 0.005
 	do
-		for PSI_1 in 0.8
+		for PSI_1 in 0.5
 		do 
 
 		mkdir -p ./job-outs/${action_name}/${PSI_0}_${PSI_1}/
@@ -64,9 +64,9 @@ done
 
 for i in $(seq 0 $ID_MAX_DAMAGE)
 do
-	for PSI_0 in 0.008 0.010 0.012
+	for PSI_0 in 0.005
 	do
-		for PSI_1 in 0.8
+		for PSI_1 in 0.5
 		do 
 		sbatch ./bash/${action_name}/mercury_PSI0_${PSI_0}_PSI1_${PSI_1}_ID_$i.sh 
 

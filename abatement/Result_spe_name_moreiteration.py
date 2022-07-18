@@ -22,8 +22,92 @@ import argparse
 parser = argparse.ArgumentParser(description="xi_r values")
 parser.add_argument("--dataname",type=str,default="ReplicateSuri")
 parser.add_argument("--pdfname",type=str,default="ReplicateSuri")
+parser.add_argument("--hk",type=float,default=0.2)
+parser.add_argument("--hY",type=float,default=0.2)
+parser.add_argument("--hL",type=float,default=0.2)
+parser.add_argument("--psi0arr",nargs='+',type=float)
+parser.add_argument("--psi1arr",nargs='+',type=float)
+
 args = parser.parse_args()
 
+
+delta = 0.01
+alpha = 0.115
+kappa = 6.667
+mu_k  = -0.043
+sigma_k = 0.0095
+beta_f = 1.86/1000
+sigma_y = 1.2 * 1.86 / 1000
+zeta = 0.0
+# psi_0 = 0.00025
+# psi_1 = 1/2
+sigma_g = 0.016
+gamma_1 = 1.7675 / 1000
+gamma_2 = 0.0022 * 2
+gamma_3_list = np.linspace(0., 1./3., 6)
+y_bar = 2.
+y_bar_lower = 1.5
+
+
+# Tech
+theta = 3
+lambda_bar = 0.1206
+vartheta_bar = 0.0453
+
+lambda_bar_first = lambda_bar / 2.
+vartheta_bar_first = vartheta_bar / 2.
+
+lambda_bar_second = 1e-3
+vartheta_bar_second = 0.
+
+
+
+K_min = 4.00
+K_max = 9.00
+hK    = args.hk
+K     = np.arange(K_min, K_max + hK, hK)
+nK    = len(K)
+Y_min = 0.
+Y_max = 4.
+hY    = args.hY # make sure it is float instead of int
+Y     = np.arange(Y_min, Y_max + hY, hY)
+nY    = len(Y)
+L_min = - 5.5
+L_max = - 0.10
+hL    = args.hL
+L     = np.arange(L_min, L_max,  hL)
+nL    = len(L)
+
+id_2 = np.abs(Y - y_bar).argmin()
+Y_min_short = 0.
+Y_max_short = 3.
+Y_short     = np.arange(Y_min_short, Y_max_short + hY, hY)
+nY_short    = len(Y_short)
+# print("bY_short={:d}".format(nY_short))
+(K_mat, Y_mat, L_mat) = np.meshgrid(K, Y_short, L, indexing="ij")
+
+stateSpace = np.hstack([K_mat.reshape(-1,1,order = 'F'), Y_mat.reshape(-1,1,order = 'F'), L_mat.reshape(-1, 1, order='F')])
+
+
+
+
+
+
+IntPeriod = 60
+timespan = 1/12
+
+# psi_0_grid = np.array([0.006,0.009])
+# # # psi_0_grid = np.array([0.009])
+# # # psi_1_grid = np.array([.5,.7,.9])
+# psi_1_grid = np.array([.3,.4])
+
+psi_0_grid = args.psi0arr
+psi_1_grid = args.psi1arr
+
+psi_0_meshgrid,psi_1_meshgrid = np.meshgrid(psi_0_grid,psi_1_grid)
+
+psi_0_meshgrid_1d =psi_0_meshgrid.ravel(order='F')
+psi_1_meshgrid_1d = psi_1_meshgrid.ravel(order='F')
 
 
 font = {'family' : 'monospace',
@@ -413,7 +497,7 @@ def Damage_Intensity(Yt, y_bar_lower=1.5):
     return Intensity
 
 
-def graph2(psi_0_meshgrid,psi_1_meshgrid,Ig_initial = 1/120):
+def graph2(psi_0_meshgrid_1d,psi_1_meshgrid_1d,Ig_initial = 1/120):
 
     "Only work for xi_a=1000"
 
@@ -595,86 +679,9 @@ def graph2(psi_0_meshgrid,psi_1_meshgrid,Ig_initial = 1/120):
 
 # psi_0_grid = np.array([0.003,0.006,0.009])
 
-delta = 0.01
-alpha = 0.115
-kappa = 6.667
-mu_k  = -0.043
-sigma_k = 0.0095
-beta_f = 1.86/1000
-sigma_y = 1.2 * 1.86 / 1000
-zeta = 0.0
-# psi_0 = 0.00025
-# psi_1 = 1/2
-sigma_g = 0.016
-gamma_1 = 1.7675 / 1000
-gamma_2 = 0.0022 * 2
-gamma_3_list = np.linspace(0., 1./3., 6)
-y_bar = 2.
-y_bar_lower = 1.5
-
-
-# Tech
-theta = 3
-lambda_bar = 0.1206
-vartheta_bar = 0.0453
-
-lambda_bar_first = lambda_bar / 2.
-vartheta_bar_first = vartheta_bar / 2.
-
-lambda_bar_second = 1e-3
-vartheta_bar_second = 0.
-
-K_min = 4.00
-K_max = 9.00
-hK    = 0.20
-K     = np.arange(K_min, K_max + hK, hK)
-nK    = len(K)
-Y_min = 0.
-Y_max = 4.
-hY    = 0.20 # make sure it is float instead of int
-Y     = np.arange(Y_min, Y_max + hY, hY)
-nY    = len(Y)
-L_min = - 5.5
-L_max = - 0.10
-hL    = 0.20
-L     = np.arange(L_min, L_max,  hL)
-nL    = len(L)
-
-id_2 = np.abs(Y - y_bar).argmin()
-Y_min_short = 0.
-Y_max_short = 3.
-Y_short     = np.arange(Y_min_short, Y_max_short + hY, hY)
-nY_short    = len(Y_short)
-# print("bY_short={:d}".format(nY_short))
-(K_mat, Y_mat, L_mat) = np.meshgrid(K, Y_short, L, indexing="ij")
-
-stateSpace = np.hstack([K_mat.reshape(-1,1,order = 'F'), Y_mat.reshape(-1,1,order = 'F'), L_mat.reshape(-1, 1, order='F')])
-
-
-
-
-
-
-IntPeriod = 60
-timespan = 1/12
-
-# psi_0_grid = np.array([0.006,0.009])
-# # # psi_0_grid = np.array([0.009])
-# # # psi_1_grid = np.array([.5,.7,.9])
-# psi_1_grid = np.array([.3,.4])
-
-psi_0_grid = np.array([0.008, 0.010, 0.012])
-psi_1_grid = np.array([.8])
-
-psi_0_meshgrid,psi_1_meshgrid = np.meshgrid(psi_0_grid,psi_1_grid)
-
-psi_0_meshgrid_1d =psi_0_meshgrid.ravel(order='F')
-psi_1_meshgrid_1d = psi_1_meshgrid.ravel(order='F')
-
-
 
 # for psi_0,psi_1 in zip(psi_0_meshgrid_1d,psi_1_meshgrid_1d):
 #     print(psi_0,psi_1)
 #     graph(psi_0,psi_1)
 
-graph2(psi_0_meshgrid,psi_1_meshgrid)
+graph2(psi_0_meshgrid_1d,psi_1_meshgrid_1d)
