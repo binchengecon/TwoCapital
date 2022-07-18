@@ -1,6 +1,6 @@
 #! /bin/bash
 
-action_name="moreiteration"
+action_name="lessgridpoint"
 server_name="mercury"
 
 if [ -f ./bash/${action_name}/job_graph.sh ]
