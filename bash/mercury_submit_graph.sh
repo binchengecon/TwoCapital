@@ -1,6 +1,6 @@
 #! /bin/bash
 
-action_name="tightertolerance"
+action_name="comparisonwitholdpsi01"
 server_name="mercury"
 
 if [ -f ./bash/${action_name}/job_graph.sh ]
@@ -33,7 +33,7 @@ module load python/booth/3.8/3.8.5  gcc/9.2.0
 echo "\$SLURM_JOB_NAME"
 echo "Program starts \$(date)"
 
-python3 /home/bcheng4/TwoCapital_Bin/abatement/Result_spe_name_moreiteration.py --dataname  $action_name --pdfname $server_name --psi0arr 0.008 0.010 0.012 --psi1arr 0.8
+python3 /home/bcheng4/TwoCapital_Bin/abatement/Result_spe_name_moreiteration.py --dataname  $action_name --pdfname $server_name --psi0arr 0.005 --psi1arr 0.5
 
 echo "Program ends \$(date)"
 
