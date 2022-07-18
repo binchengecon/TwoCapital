@@ -17,7 +17,7 @@ module load gcc/6.1
 
 echo "$SLURM_JOB_NAME"
 
-python /home/bincheng/TwoCapital_Bin/abatement/Result_spe_name_moreiteration.py --name "moreiteration"
+python /home/bincheng/TwoCapital_Bin/abatement/Result_spe_name_moreiteration.py --dataname  moreiteration --pdfname midway
 
 echo "Program ends $(date)"
 
