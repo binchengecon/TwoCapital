@@ -1,6 +1,7 @@
 #! /bin/bash
 
 action_name="moreiteration"
+server_name="midway"
 
 count=0
 
@@ -36,7 +37,7 @@ module load gcc/6.1
 
 echo "\$SLURM_JOB_NAME"
 
-python /home/bincheng/TwoCapital_Bin/abatement/Result_spe_name_moreiteration.py --name "moreiteration"
+python /home/bincheng/TwoCapital_Bin/abatement/Result_spe_name_moreiteration.py --dataname  $action_name --pdfname $server_name
 
 echo "Program ends \$(date)"
 

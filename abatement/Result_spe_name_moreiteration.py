@@ -20,7 +20,8 @@ import argparse
 
 
 parser = argparse.ArgumentParser(description="xi_r values")
-parser.add_argument("--name",type=str,default="ReplicateSuri")
+parser.add_argument("--dataname",type=str,default="ReplicateSuri")
+parser.add_argument("--pdfname",type=str,default="ReplicateSuri")
 args = parser.parse_args()
 
 
@@ -420,7 +421,7 @@ def graph2(psi_0_meshgrid,psi_1_meshgrid,Ig_initial = 1/120):
 
     def model_solution_extraction(xi_a,xi_g,psi_0,psi_1):
     
-        Data_Dir = "./abatement/data_2tech/"+args.name+"/"
+        Data_Dir = "./abatement/data_2tech/"+args.dataname+"/"
         
 
         File_Dir = "xi_a_{}_xi_g_{}_psi_0_{}_psi_1_{}_" .format(xi_a,xi_g,psi_0,psi_1)
@@ -447,12 +448,12 @@ def graph2(psi_0_meshgrid,psi_1_meshgrid,Ig_initial = 1/120):
 
     def graph_solution_extraction(res):
 
-        PDF_Dir = "./abatement/pdf_2tech/"+args.name+"/"
+        PDF_Dir = "./abatement/pdf_2tech/"+args.dataname+"/"
 
         if not os.path.exists(PDF_Dir):
             os.mkdir(PDF_Dir)
 
-        File_Dir = "Psi0_8_Psi1_81012" 
+        File_Dir = args.pdfname+"_Psi0_8_Psi1_81012" 
         
         pdf_pages = PdfPages(PDF_Dir+File_Dir+'Years_'+str(IntPeriod)+'.pdf')
 
